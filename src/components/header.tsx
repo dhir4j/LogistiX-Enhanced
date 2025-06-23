@@ -14,9 +14,9 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: 'Track' },
+    { href: '/booking', label: 'Booking' },
     { href: '/login', label: 'Login' },
     { href: '/signup', label: 'Sign Up' },
-    { href: '/admin/login', label: 'Admin' },
   ];
 
   return (

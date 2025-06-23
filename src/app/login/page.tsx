@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -29,6 +30,7 @@ type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -42,8 +44,9 @@ export default function LoginPage() {
     console.log(data);
     toast({
       title: "Login Successful",
-      description: "Welcome back!",
+      description: "Redirecting to your dashboard...",
     });
+    router.push('/dashboard');
   };
 
   return (
