@@ -25,6 +25,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
+import { LogIn } from "lucide-react";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
@@ -50,9 +51,12 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-14rem)] items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
+    <div className="flex min-h-[calc(100vh-14rem)] items-center justify-center bg-secondary p-4">
+      <Card className="w-full max-w-md shadow-2xl border-primary/20">
+        <CardHeader className="text-center">
+          <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
+            <LogIn className="h-8 w-8" />
+          </div>
           <CardTitle className="text-3xl font-headline">Welcome Back</CardTitle>
           <CardDescription>Enter your credentials to access your account.</CardDescription>
         </CardHeader>
@@ -85,16 +89,16 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-6">
                 Login
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col items-center text-sm">
-          <p>
+          <p className="text-muted-foreground">
             {"Don't have an account? "}
-            <Button variant="link" asChild className="p-0 h-auto">
+            <Button variant="link" asChild className="p-0 h-auto font-semibold">
               <Link href="/signup">Sign up</Link>
             </Button>
           </p>

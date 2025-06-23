@@ -24,6 +24,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { signupSchema } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
+import { UserPlus } from "lucide-react";
 
 type SignupFormValues = z.infer<typeof signupSchema>;
 
@@ -49,9 +50,12 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-14rem)] items-center justify-center p-4">
-      <Card className="w-full max-w-md shadow-lg">
-        <CardHeader>
+    <div className="flex min-h-[calc(100vh-14rem)] items-center justify-center bg-secondary p-4">
+      <Card className="w-full max-w-md shadow-2xl border-primary/20">
+        <CardHeader className="text-center">
+            <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
+                <UserPlus className="h-8 w-8" />
+            </div>
           <CardTitle className="text-3xl font-headline">Create an Account</CardTitle>
           <CardDescription>Join RS Swift Couriers today. It's free!</CardDescription>
         </CardHeader>
@@ -112,16 +116,16 @@ export default function SignupPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-6">
                 Sign Up
               </Button>
             </form>
           </Form>
         </CardContent>
         <CardFooter className="flex flex-col items-center text-sm">
-          <p>
+          <p className="text-muted-foreground">
             {"Already have an account? "}
-            <Button variant="link" asChild className="p-0 h-auto">
+            <Button variant="link" asChild className="p-0 h-auto font-semibold">
               <Link href="/login">Login</Link>
             </Button>
           </p>

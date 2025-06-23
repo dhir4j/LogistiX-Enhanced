@@ -47,8 +47,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-14rem)] items-center justify-center bg-secondary p-4">
-      <Card className="w-full max-w-md shadow-2xl">
+    <div className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-secondary p-4">
+      <Card className="w-full max-w-md shadow-2xl border-primary/20">
         <CardHeader className="text-center">
           <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
             <ShieldCheck className="h-8 w-8" />
@@ -85,7 +85,7 @@ export default function AdminLoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90">
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-6">
                 Secure Login
               </Button>
             </form>
