@@ -259,7 +259,7 @@ export default function Home() {
                       <Link href="/about-us">Learn More About Us</Link>
                   </Button>
               </div>
-               <div className="md:col-span-4 relative h-[270px] w-full mx-auto">
+               <div className="md:col-span-4 relative h-[320px] w-[180px] mx-auto">
                   <Image 
                     src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
