@@ -93,13 +93,13 @@ export default function Home() {
               <p className="mt-4 text-muted-foreground text-lg">We offer a wide range of transport options to meet your needs, including air, sea, and ground.</p>
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative h-64 w-full">
+            <div className="relative h-96 w-full">
               <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" />
             </div>
-            <div className="relative h-64 w-full">
+            <div className="relative h-96 w-full">
               <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" />
             </div>
-            <div className="relative h-64 w-full">
+            <div className="relative h-96 w-full">
               <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" />
             </div>
           </div>
