@@ -23,9 +23,9 @@ export default function Header() {
       <div className="bg-secondary text-secondary-foreground">
         <div className="container flex h-10 items-center justify-between text-xs">
           <div className="flex gap-4">
-             <a href="mailto:RSSWIFTCOURIERS@GMAIL.COM" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+             <a href="mailto:HKCOURIERS@GMAIL.COM" className="flex items-center gap-1.5 hover:text-primary transition-colors">
                 <Mail className="h-3.5 w-3.5" />
-                RSSWIFTCOURIERS@GMAIL.COM
+                HKCOURIERS@GMAIL.COM
              </a>
              <a href="tel:+919541195406" className="hidden sm:flex items-center gap-1.5 hover:text-primary transition-colors">
                 <Phone className="h-3.5 w-3.5" />
@@ -48,7 +48,7 @@ export default function Header() {
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Plane className="h-8 w-8 text-primary" />
             <span className="font-bold font-headline text-2xl sm:inline-block">
-              RS SWIFT COURIERS
+              HK SPEED COURIERS
             </span>
           </Link>
         </div>
@@ -95,12 +95,12 @@ export default function Header() {
                         <SheetClose asChild>
                             <Link href="/" className="flex items-center space-x-2">
                                 <Plane className="h-6 w-6 text-primary" />
-                                <span className="font-bold text-lg font-headline">RS SWIFT COURIERS</span>
+                                <span className="font-bold text-lg font-headline">HK SPEED COURIERS</span>
                             </Link>
                         </SheetClose>
                     </SheetTitle>
-                    <SheetDescription className="sr-only">
-                        Main menu for navigating the RS Swift Couriers website.
+                    <SheetDescription>
+                        Main menu for navigating the HK SPEED COURIERS website.
                     </SheetDescription>
                 </SheetHeader>
               <div className="flex flex-col h-full">

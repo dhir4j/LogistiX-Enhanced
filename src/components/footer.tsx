@@ -25,7 +25,7 @@ export default function Footer() {
             <Link href="/" className="flex items-center space-x-2">
               <Plane className="h-7 w-7 text-primary" />
               <span className="text-xl font-bold font-headline">
-                RS SWIFT COURIERS
+                HK SPEED COURIERS
               </span>
             </Link>
             <p className="text-muted-foreground text-sm">
@@ -72,15 +72,15 @@ export default function Footer() {
               <a href="tel:+919541195406" className="hover:text-primary transition-colors">+91-95411-95406</a>
             </p>
             <p className="text-sm text-muted-foreground">
-              <a href="mailto:RSSWIFTCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">
-                RSSWIFTCOURIERS@GMAIL.COM
+              <a href="mailto:HKCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">
+                HKCOURIERS@GMAIL.COM
               </a>
             </p>
           </div>
         </div>
         
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} RS SWIFT COURIERS. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} HK SPEED COURIERS. All Rights Reserved.</p>
         </div>
       </div>
     </footer>

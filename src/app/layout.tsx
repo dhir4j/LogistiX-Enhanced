@@ -5,7 +5,7 @@ import Footer from '@/components/footer';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'RS SWIFT COURIERS',
+  title: 'HK SPEED COURIERS',
   description: 'Reliable and fast courier services.',
 };
 

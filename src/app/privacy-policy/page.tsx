@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
                 </CardHeader>
                 <CardContent className="text-muted-foreground space-y-4 text-base leading-relaxed">
                 <p><strong>Last Updated: [Date]</strong></p>
-                <p>RS Swift Couriers ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services. By using our services, you agree to the collection and use of information in accordance with this policy.</p>
+                <p>HK SPEED COURIERS PRIVATE LIMITED ("we," "our," or "us") is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services. By using our services, you agree to the collection and use of information in accordance with this policy.</p>
                 
                 <h3 className="font-semibold text-foreground text-xl pt-4">Information Collection and Use</h3>
                 <p>We collect various types of information for various purposes to provide and improve our Service to you. This may include personal identification information (Name, email address, phone number, address) and tracking data.</p>

@@ -37,8 +37,8 @@ export default function ContactUsPage() {
                 </div>
                 <h3 className="font-semibold text-lg pt-2 uppercase tracking-wider">Email</h3>
                 <p className="text-muted-foreground">
-                  <a href="mailto:RSSWIFTCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">
-                    RSSWIFTCOURIERS@GMAIL.COM
+                  <a href="mailto:HKCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">
+                    HKCOURIERS@GMAIL.COM
                   </a>
                 </p>
               </div>

@@ -15,7 +15,7 @@ export default function TermsOfServicePage() {
                 </CardHeader>
                 <CardContent className="text-muted-foreground space-y-4 text-base leading-relaxed">
                 <p><strong>1. Acceptance of Terms</strong></p>
-                <p>By accessing or using the services of RS Swift Couriers, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, then you may not access the service.</p>
+                <p>By accessing or using the services of HK SPEED COURIERS PRIVATE LIMITED, you agree to be bound by these Terms of Service. If you disagree with any part of the terms, then you may not access the service.</p>
                 
                 <p><strong>2. Services</strong></p>
                 <p>We provide courier and logistics services as described on our website. We reserve the right to refuse service for any item that is prohibited by law or our company policy.</p>
@@ -24,7 +24,7 @@ export default function TermsOfServicePage() {
                 <p>You are responsible for safeguarding the password that you use to access the service and for any activities or actions under your password. You agree not to disclose your password to any third party.</p>
                 
                 <p><strong>4. Limitation of Liability</strong></p>
-                <p>In no event shall RS Swift Couriers, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service.</p>
+                <p>In no event shall HK SPEED COURIERS PRIVATE LIMITED, nor its directors, employees, partners, agents, suppliers, or affiliates, be liable for any indirect, incidental, special, consequential or punitive damages, including without limitation, loss of profits, data, use, goodwill, or other intangible losses, resulting from your access to or use of or inability to access or use the service.</p>
 
                 <p><strong>5. Governing Law</strong></p>
                 <p>These Terms shall be governed and construed in accordance with the laws of India, without regard to its conflict of law provisions.</p>

@@ -157,7 +157,7 @@ export default function Home() {
               <div>
                   <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Your Partner in Professional Logistics</h2>
                   <p className="mt-4 text-muted-foreground text-lg">
-                      With decades of experience, RS Swift Couriers is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
+                      With decades of experience, HK SPEED COURIERS is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
                   </p>
                   <Button asChild size="lg" className="mt-8">
                       <Link href="/about-us">Learn More About Us</Link>
