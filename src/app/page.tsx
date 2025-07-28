@@ -104,103 +104,8 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="bg-background py-16 sm:py-24">
-        <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Why Choose Us?</h2>
-            <p className="mt-4 text-muted-foreground text-lg">We provide reliable, secure, and timely delivery services to meet all your needs.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10 text-primary shrink-0">
-                  <feature.icon className="h-7 w-7" />
-                </div>
-                <div>
-                  <h3 className="font-headline text-xl font-semibold">{feature.title}</h3>
-                  <p className="text-muted-foreground mt-1">{feature.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-      
-      {/* Transport Modes Section */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
-        <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto">
-              <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Comprehensive Transport Solutions</h2>
-              <p className="mt-4 text-muted-foreground text-lg">We offer a wide range of transport options to meet your needs, including air, sea, and ground.</p>
-          </div>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative h-[450px] w-full">
-              <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" data-ai-hint="plane sky" />
-            </div>
-            <div className="relative h-[450px] w-full">
-              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" data-ai-hint="truck warehouse" />
-            </div>
-            <div className="relative h-[450px] w-full">
-              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" data-ai-hint="cargo ship" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Core Services Section */}
-      <section className="bg-background py-16 sm:py-24">
-        <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Our Core Services</h2>
-            <p className="mt-4 text-muted-foreground text-lg">Explore our range of expert courier services designed to cater to your every need, from local deliveries to global logistics.</p>
-          </div>
-          <div className="mt-12 grid md:grid-cols-2 gap-8">
-            {coreServices.map((service, index) => (
-              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm hover:shadow-md transition-shadow">
-                <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center w-16 h-16 rounded-sm bg-primary/10 text-primary">
-                      <service.icon className="w-8 h-8" />
-                  </div>
-                </div>
-                <div>
-                  <h3 className="text-xl font-headline font-semibold">{service.title}</h3>
-                  <p className="mt-2 text-muted-foreground leading-relaxed">{service.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className="text-center mt-12">
-            <Button asChild size="lg" variant="outline">
-              <Link href="/services">View All Services <ArrowRight className="ml-2 h-5 w-5" /></Link>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* How It Works Section */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
-        <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Simple Steps to Ship Your Package</h2>
-            <p className="mt-4 text-muted-foreground text-lg">Our process is designed for your convenience, ensuring a hassle-free experience from start to finish.</p>
-          </div>
-          <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {howItWorksSteps.map((step, index) => (
-              <div key={index} className="text-center p-6 border bg-background rounded-sm shadow-sm hover:shadow-md transition-shadow">
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
-                  <step.icon className="h-8 w-8" />
-                </div>
-                <h3 className="font-headline text-xl font-semibold">{step.title}</h3>
-                <p className="text-muted-foreground mt-2">{step.description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Tracking Section */}
-      <section id="track" className="py-16 sm:py-24 bg-background border-y">
+      <section id="track" className="py-16 sm:py-24 bg-background border-b">
         <div className="container mx-auto flex flex-col items-center">
             <div className="text-center max-w-2xl mx-auto">
                 <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Track Your Shipment</h2>
@@ -262,9 +167,104 @@ export default function Home() {
           )}
         </div>
       </section>
-
-      {/* Testimonials Section */}
+      
+      {/* Features Section */}
       <section className="bg-secondary py-16 sm:py-24">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto mb-12">
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Why Choose Us?</h2>
+            <p className="mt-4 text-muted-foreground text-lg">We provide reliable, secure, and timely delivery services to meet all your needs.</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10 text-primary shrink-0">
+                  <feature.icon className="h-7 w-7" />
+                </div>
+                <div>
+                  <h3 className="font-headline text-xl font-semibold">{feature.title}</h3>
+                  <p className="text-muted-foreground mt-1">{feature.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Core Services Section */}
+      <section className="bg-background py-16 sm:py-24 border-t">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Our Core Services</h2>
+            <p className="mt-4 text-muted-foreground text-lg">Explore our range of expert courier services designed to cater to your every need, from local deliveries to global logistics.</p>
+          </div>
+          <div className="mt-12 grid md:grid-cols-2 gap-8">
+            {coreServices.map((service, index) => (
+              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm hover:shadow-md transition-shadow">
+                <div className="flex-shrink-0">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-sm bg-primary/10 text-primary">
+                      <service.icon className="w-8 h-8" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-headline font-semibold">{service.title}</h3>
+                  <p className="mt-2 text-muted-foreground leading-relaxed">{service.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Button asChild size="lg" variant="outline">
+              <Link href="/services">View All Services <ArrowRight className="ml-2 h-5 w-5" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="bg-secondary py-16 sm:py-24 border-t">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Simple Steps to Ship Your Package</h2>
+            <p className="mt-4 text-muted-foreground text-lg">Our process is designed for your convenience, ensuring a hassle-free experience from start to finish.</p>
+          </div>
+          <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {howItWorksSteps.map((step, index) => (
+              <div key={index} className="text-center p-6 border bg-background rounded-sm shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
+                  <step.icon className="h-8 w-8" />
+                </div>
+                <h3 className="font-headline text-xl font-semibold">{step.title}</h3>
+                <p className="text-muted-foreground mt-2">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+      
+      {/* Transport Modes Section */}
+      <section className="bg-background py-16 sm:py-24 border-t">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Comprehensive Transport Solutions</h2>
+              <p className="mt-4 text-muted-foreground text-lg">We offer a wide range of transport options to meet your needs, including air, sea, and ground.</p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative h-[450px] w-full">
+              <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" data-ai-hint="plane sky" />
+            </div>
+            <div className="relative h-[450px] w-full">
+              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" data-ai-hint="truck warehouse" />
+            </div>
+            <div className="relative h-[450px] w-full">
+              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" data-ai-hint="cargo ship" />
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Testimonials Section */}
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">What Our Customers Say</h2>
@@ -302,7 +302,7 @@ export default function Home() {
                       <Link href="/about-us">Learn More About Us</Link>
                   </Button>
               </div>
-               <div className="relative h-80">
+               <div className="relative h-80 md:h-96">
                   <Image 
                     src="/images/shipment_load.jpg"
                     alt="Our team at work"
