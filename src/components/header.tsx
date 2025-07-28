@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Plane, Menu, UserCircle, Mail, Phone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -95,15 +95,20 @@ export default function Header() {
               </Button>
             </SheetTrigger>
             <SheetContent side="right" className="w-[300px] p-0">
+                <SheetHeader className="p-6 border-b">
+                    <SheetTitle>
+                        <SheetClose asChild>
+                            <Link href="/" className="flex items-center space-x-2">
+                                <Plane className="h-6 w-6 text-primary" />
+                                <span className="font-bold text-lg font-headline">RS SWIFT COURIERS</span>
+                            </Link>
+                        </SheetClose>
+                    </SheetTitle>
+                    <SheetDescription className="sr-only">
+                        Main menu for navigating the RS Swift Couriers website.
+                    </SheetDescription>
+                </SheetHeader>
               <div className="flex flex-col h-full">
-                <div className="p-6 border-b">
-                    <SheetClose asChild>
-                        <Link href="/" className="flex items-center space-x-2">
-                            <Plane className="h-6 w-6 text-primary" />
-                            <span className="font-bold text-lg font-headline">RS SWIFT COURIERS</span>
-                        </Link>
-                    </SheetClose>
-                </div>
                 <div className="flex-1 flex flex-col space-y-1 p-4">
                   {navLinks.map((link) => (
                     <SheetClose key={link.href} asChild>
@@ -117,7 +122,7 @@ export default function Header() {
                     </SheetClose>
                   ))}
                 </div>
-                <div className="border-t p-4">
+                <div className="border-t p-4 mt-auto">
                     <div className="flex flex-col space-y-2">
                          <SheetClose asChild>
                             <Button asChild variant="default" className="w-full"><Link href="/login">Login</Link></Button>
