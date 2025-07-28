@@ -37,21 +37,21 @@ export default function ContactUsPage() {
   };
 
   return (
-    <div className="bg-secondary py-16 sm:py-24">
+    <div className="bg-secondary py-12 sm:py-16">
       <div className="container">
         <div className="bg-background p-8 border shadow-sm">
-            <div className="text-center pb-12">
-              <h1 className="text-3xl font-headline font-bold">Get in Touch</h1>
-              <p className="text-lg text-muted-foreground mt-2">We're here to help with any questions you may have.</p>
+            <div className="text-center pb-8">
+              <h1 className="text-2xl font-headline font-bold">Get in Touch</h1>
+              <p className="text-md text-muted-foreground mt-2">We're here to help with any questions you may have.</p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
               {/* Contact Form Section */}
-              <div className="space-y-6">
-                <h2 className="text-2xl font-headline font-bold">Send us a Message</h2>
+              <div className="space-y-4">
+                <h2 className="text-xl font-headline font-bold">Send us a Message</h2>
                  <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                    <div className="grid grid-cols-2 gap-6">
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4">
                       <FormField control={form.control} name="name" render={({ field }) => (
                         <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input placeholder="John Doe" {...field} className="h-11" /></FormControl><FormMessage /></FormItem>
                       )} />
@@ -63,7 +63,7 @@ export default function ContactUsPage() {
                       <FormItem><FormLabel>Subject</FormLabel><FormControl><Input placeholder="Inquiry about shipping" {...field} className="h-11" /></FormControl><FormMessage /></FormItem>
                     )} />
                     <FormField control={form.control} name="message" render={({ field }) => (
-                      <FormItem><FormLabel>Message</FormLabel><FormControl><Textarea placeholder="Please type your message here..." {...field} rows={5} /></FormControl><FormMessage /></FormItem>
+                      <FormItem><FormLabel>Message</FormLabel><FormControl><Textarea placeholder="Please type your message here..." {...field} rows={4} /></FormControl><FormMessage /></FormItem>
                     )} />
                     <Button type="submit" size="lg" className="w-full text-lg py-6">
                       <Send className="mr-2 h-5 w-5" />
@@ -75,7 +75,7 @@ export default function ContactUsPage() {
 
               {/* Contact Information Section */}
               <div className="space-y-6">
-                <h2 className="text-2xl font-headline font-bold">Contact Information</h2>
+                <h2 className="text-xl font-headline font-bold">Contact Information</h2>
                 <p className="text-muted-foreground">You can also reach us through the following channels. We're available during standard business hours.</p>
                 
                 <div className="space-y-4">
