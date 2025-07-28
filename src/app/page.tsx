@@ -264,7 +264,7 @@ export default function Home() {
                     src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
                     fill
-                    className="object-cover rounded-md border shadow-sm"
+                    className="object-cover rounded-md shadow-sm"
                     data-ai-hint="team logistics"
                   />
               </div>
@@ -274,5 +274,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
