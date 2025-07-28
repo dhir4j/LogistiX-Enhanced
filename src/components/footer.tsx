@@ -6,7 +6,7 @@ export default function Footer() {
     { href: '/about-us', label: 'About Us' },
     { href: '/contact-us', label: 'Contact Us' },
     { href: '/customer-care', label: 'Customer Care' },
-    { href: '/booking', label: 'Book a Shipment' },
+    { href: '/services', label: 'Services' },
   ];
 
   const legalLinks = [

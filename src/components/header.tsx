@@ -2,17 +2,9 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Plane, Menu, UserCircle, Mail, Phone } from 'lucide-react';
+import { Plane, Menu, Mail, Phone, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
 import { cn } from '@/lib/utils';
 
 export default function Header() {
@@ -20,8 +12,8 @@ export default function Header() {
 
   const navLinks = [
     { href: '/', label: 'Home' },
-    { href: '/booking', label: 'Booking' },
-    { href: '/about-us', label: 'About' },
+    { href: '/about-us', label: 'About Us' },
+    { href: '/services', label: 'Services' },
     { href: '/contact-us', label: 'Contact' },
   ];
 
@@ -80,7 +72,10 @@ export default function Header() {
 
         <div className="hidden lg:flex items-center">
             <Button asChild size="lg">
-                <Link href="/booking">Get a Quote</Link>
+                <Link href="/#track">
+                  <Search className="mr-2 h-5 w-5"/>
+                  Track Order
+                </Link>
             </Button>
         </div>
 
@@ -121,6 +116,9 @@ export default function Header() {
                       </Button>
                     </SheetClose>
                   ))}
+                   <SheetClose asChild>
+                      <Button asChild variant="ghost" className="justify-start text-base font-semibold"><Link href="/#track">Track Order</Link></Button>
+                   </SheetClose>
                 </div>
                 <div className="border-t p-4 mt-auto">
                     <div className="flex flex-col space-y-2">
