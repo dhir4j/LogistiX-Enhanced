@@ -68,9 +68,9 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-secondary py-12 sm:py-16 border-b">
+      <section className="relative bg-secondary py-8 sm:py-12 border-b">
         <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          <div className="text-center lg:text-left">
+          <div className="text-center lg:text-left animate-slide-in-from-left">
             <h1 className="text-4xl sm:text-5xl font-bold font-headline tracking-tight text-foreground">
               Professional Courier &<br />Logistics Services
             </h1>
@@ -86,7 +86,7 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          <div className="relative h-80 lg:h-auto">
+          <div className="relative h-80 lg:h-auto animate-slide-in-from-right">
             <Image 
               src="/images/man_holding_box.jpg"
               alt="Courier holding a package" 
@@ -101,7 +101,7 @@ export default function Home() {
 
       {/* Tracking Section */}
       <section id="track" className="py-16 sm:py-24 bg-background border-b">
-        <div className="container mx-auto flex flex-col items-center">
+        <div className="container mx-auto flex flex-col items-center animate-fade-in-up">
             <div className="text-center max-w-2xl mx-auto">
                 <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Track Your Shipment</h2>
                 <p className="mt-4 text-muted-foreground text-lg">Enter your tracking number below to see the real-time status of your delivery.</p>
@@ -128,13 +128,13 @@ export default function Home() {
       {/* Features Section */}
       <section className="bg-secondary py-16 sm:py-24">
         <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto mb-12">
+          <div className="text-center max-w-2xl mx-auto mb-12 animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Why Choose Us?</h2>
             <p className="mt-4 text-muted-foreground text-lg">We provide reliable, secure, and timely delivery services to meet all your needs.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-4">
+              <div key={index} className="flex items-start gap-4 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10 text-primary shrink-0">
                   <feature.icon className="h-7 w-7" />
                 </div>
@@ -151,13 +151,13 @@ export default function Home() {
       {/* Core Services Section */}
       <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Our Core Services</h2>
             <p className="mt-4 text-muted-foreground text-lg">Explore our range of expert courier services designed to cater to your every need, from local deliveries to global logistics.</p>
           </div>
           <div className="mt-12 grid md:grid-cols-2 gap-8">
             {coreServices.map((service, index) => (
-              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm hover:shadow-md transition-shadow">
+              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm hover:shadow-md transition-shadow animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex-shrink-0">
                   <div className="flex items-center justify-center w-16 h-16 rounded-sm bg-primary/10 text-primary">
                       <service.icon className="w-8 h-8" />
@@ -170,7 +170,7 @@ export default function Home() {
               </div>
             ))}
           </div>
-          <div className="text-center mt-12">
+          <div className="text-center mt-12 animate-fade-in-up">
             <Button asChild size="lg" variant="outline">
               <Link href="/services">View All Services <ArrowRight className="ml-2 h-5 w-5" /></Link>
             </Button>
@@ -181,13 +181,13 @@ export default function Home() {
       {/* How It Works Section */}
       <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Simple Steps to Ship Your Package</h2>
             <p className="mt-4 text-muted-foreground text-lg">Our process is designed for your convenience, ensuring a hassle-free experience from start to finish.</p>
           </div>
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="text-center p-6 border bg-background rounded-sm shadow-sm hover:shadow-md transition-shadow">
+              <div key={index} className="text-center p-6 border bg-background rounded-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
                   <step.icon className="h-8 w-8" />
                 </div>
@@ -202,18 +202,18 @@ export default function Home() {
       {/* Transport Modes Section */}
       <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
               <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Comprehensive Transport Solutions</h2>
               <p className="mt-4 text-muted-foreground text-lg">We offer a wide range of transport options to meet your needs, including air, sea, and ground.</p>
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative h-[450px] w-full">
+            <div className="relative h-[450px] w-full animate-fade-in" style={{ animationDelay: '100ms' }}>
               <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" data-ai-hint="plane sky" />
             </div>
-            <div className="relative h-[450px] w-full">
+            <div className="relative h-[450px] w-full animate-fade-in" style={{ animationDelay: '300ms' }}>
               <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" data-ai-hint="truck warehouse" />
             </div>
-            <div className="relative h-[450px] w-full">
+            <div className="relative h-[450px] w-full animate-fade-in" style={{ animationDelay: '500ms' }}>
               <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" data-ai-hint="cargo ship" />
             </div>
           </div>
@@ -223,13 +223,13 @@ export default function Home() {
       {/* Testimonials Section */}
       <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container mx-auto">
-          <div className="text-center max-w-2xl mx-auto">
+          <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">What Our Customers Say</h2>
             <p className="mt-4 text-muted-foreground text-lg">We are proud to have the trust of our clients. Read what they say about our services.</p>
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="shadow-sm border bg-background">
+              <Card key={index} className="shadow-sm border bg-background animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <CardContent className="pt-6">
                   <div className="flex mb-2">
                     {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />)}
@@ -250,7 +250,7 @@ export default function Home() {
       <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container">
           <div className="grid md:grid-cols-10 gap-12 items-center">
-              <div className="md:col-span-6">
+              <div className="md:col-span-6 animate-slide-in-from-left">
                   <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Your Partner in Professional Logistics</h2>
                   <p className="mt-4 text-muted-foreground text-lg">
                       With decades of experience, HK SPEED COURIERS is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
@@ -259,7 +259,7 @@ export default function Home() {
                       <Link href="/about-us">Learn More About Us</Link>
                   </Button>
               </div>
-               <div className="md:col-span-4 relative h-[320px] w-[180px] mx-auto">
+               <div className="md:col-span-4 relative h-[320px] w-[180px] mx-auto animate-slide-in-from-right">
                   <Image 
                     src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
