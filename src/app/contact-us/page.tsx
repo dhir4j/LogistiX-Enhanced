@@ -39,13 +39,13 @@ export default function ContactUsPage() {
   return (
     <div className="bg-secondary py-16 sm:py-24">
       <div className="container">
-        <div className="max-w-6xl mx-auto bg-background p-8 border shadow-sm">
+        <div className="bg-background p-8 border shadow-sm">
             <div className="text-center pb-12">
               <h1 className="text-3xl font-headline font-bold">Get in Touch</h1>
               <p className="text-lg text-muted-foreground mt-2">We're here to help with any questions you may have.</p>
             </div>
 
-            <div className="grid md:grid-cols-2 gap-12">
+            <div className="grid md:grid-cols-2 gap-12 max-w-6xl mx-auto">
               {/* Contact Form Section */}
               <div className="space-y-6">
                 <h2 className="text-2xl font-headline font-bold">Send us a Message</h2>

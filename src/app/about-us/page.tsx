@@ -6,7 +6,7 @@ export default function AboutUsPage() {
   return (
     <div className="bg-secondary py-16 sm:py-24">
       <div className="container">
-        <div className="max-w-4xl mx-auto bg-background p-8 border shadow-sm">
+        <div className="bg-background p-8 border shadow-sm">
             <div className="text-center pb-8">
               <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
                 <Building2 className="h-8 w-8" />
@@ -14,7 +14,7 @@ export default function AboutUsPage() {
               <h1 className="text-3xl font-headline font-bold">About HK SPEED COURIERS</h1>
               <p className="text-lg text-muted-foreground mt-2">Your Partner in Professional Logistics</p>
             </div>
-            <div className="space-y-6 text-base">
+            <div className="space-y-6 text-base max-w-4xl mx-auto">
               <div className="relative w-full h-64 rounded-sm overflow-hidden border">
                   <Image src="/images/about_us.jpg" alt="About HK Speed Couriers" fill className="object-cover" />
               </div>
