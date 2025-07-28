@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowRight, Globe, ShieldCheck, BookOpenCheck, Box, MapPin, Star } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowRight, Globe, ShieldCheck, BookOpenCheck, Box, MapPin, Star, Briefcase, Ship } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -22,6 +22,30 @@ const features = [
   { title: "Secure Transport", description: "Ensuring your items are handled professionally and securely.", icon: ShieldCheck },
   { title: "Timely Delivery", description: "Committed to delivering your packages on schedule.", icon: Truck },
 ];
+
+const coreServices = [
+  {
+    title: "Domestic Express",
+    description: "Swift, time-definite delivery for your documents and small parcels across the country.",
+    icon: Truck
+  },
+  {
+    title: "International Shipping",
+    description: "Connect your business to the world with our seamless and reliable international courier services.",
+    icon: Globe
+  },
+  {
+    title: "E-commerce Logistics",
+    description: "Comprehensive solutions for online businesses, from warehousing to last-mile delivery.",
+    icon: PackageCheck
+  },
+  {
+    title: "Corporate Solutions",
+    description: "Customized services tailored to meet the specific needs of our corporate clients.",
+    icon: Briefcase
+  },
+];
+
 
 const howItWorksSteps = [
   { title: "Create a Booking", description: "Fill out our simple online form to schedule your shipment in minutes.", icon: BookOpenCheck },
@@ -124,8 +148,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* How It Works Section */}
+      {/* Core Services Section */}
       <section className="bg-background py-16 sm:py-24">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Our Core Services</h2>
+            <p className="mt-4 text-muted-foreground text-lg">Explore our range of expert courier services designed to cater to your every need, from local deliveries to global logistics.</p>
+          </div>
+          <div className="mt-12 grid md:grid-cols-2 gap-8">
+            {coreServices.map((service, index) => (
+              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm hover:shadow-md transition-shadow">
+                <div className="flex-shrink-0">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-sm bg-primary/10 text-primary">
+                      <service.icon className="w-8 h-8" />
+                  </div>
+                </div>
+                <div>
+                  <h3 className="text-xl font-headline font-semibold">{service.title}</h3>
+                  <p className="mt-2 text-muted-foreground leading-relaxed">{service.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="text-center mt-12">
+            <Button asChild size="lg" variant="outline">
+              <Link href="/services">View All Services <ArrowRight className="ml-2 h-5 w-5" /></Link>
+            </Button>
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Simple Steps to Ship Your Package</h2>
@@ -133,7 +187,7 @@ export default function Home() {
           </div>
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="text-center p-6 border rounded-sm shadow-sm hover:shadow-md transition-shadow">
+              <div key={index} className="text-center p-6 border bg-background rounded-sm shadow-sm hover:shadow-md transition-shadow">
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
                   <step.icon className="h-8 w-8" />
                 </div>
@@ -146,7 +200,7 @@ export default function Home() {
       </section>
 
       {/* Tracking Section */}
-      <section id="track" className="py-16 sm:py-24 bg-secondary border-y">
+      <section id="track" className="py-16 sm:py-24 bg-background border-y">
         <div className="container mx-auto flex flex-col items-center">
             <div className="text-center max-w-2xl mx-auto">
                 <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Track Your Shipment</h2>
@@ -210,7 +264,7 @@ export default function Home() {
       </section>
 
       {/* Testimonials Section */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-secondary py-16 sm:py-24">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">What Our Customers Say</h2>
@@ -218,7 +272,7 @@ export default function Home() {
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {testimonials.map((testimonial, index) => (
-              <Card key={index} className="shadow-sm border">
+              <Card key={index} className="shadow-sm border bg-background">
                 <CardContent className="pt-6">
                   <div className="flex mb-2">
                     {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />)}
@@ -236,7 +290,7 @@ export default function Home() {
       </section>
 
       {/* About Us CTA */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
+      <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
