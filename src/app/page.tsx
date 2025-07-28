@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, Package, MoveRight } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, Package, ArrowRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -18,9 +18,9 @@ const trackingSteps = [
 ];
 
 const features = [
-  { title: "Domestic & International", description: "Seamless shipping across the country and the globe.", icon: Truck },
-  { title: "Secure Packaging", description: "Ensuring your items are safe and sound.", icon: PackageCheck },
-  { title: "Real-Time Tracking", description: "Stay updated every step of the way.", icon: Search },
+  { title: "Global & Domestic Logistics", description: "Seamless shipping across the country and the globe.", icon: Truck },
+  { title: "Secure Handling", description: "Ensuring your items are safe and sound during transit.", icon: PackageCheck },
+  { title: "Real-Time Tracking", description: "Stay updated every step of the way with precise tracking.", icon: Search },
 ];
 
 export default function Home() {
@@ -36,18 +36,18 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-secondary py-20 sm:py-32">
+      <section className="relative bg-secondary py-20 sm:py-28">
         <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold font-headline tracking-tight text-primary">
-              Swift, Secure, Seamless
+            <h1 className="text-4xl sm:text-5xl font-bold font-headline tracking-tight text-foreground">
+              Excellence in Motion
             </h1>
-            <p className="mt-4 max-w-2xl mx-auto lg:mx-0 text-lg sm:text-xl text-muted-foreground">
-              Your one-stop solution for reliable and fast courier services. Track your package, book a new shipment, and manage your deliveries with ease.
+            <p className="mt-4 max-w-xl mx-auto lg:mx-0 text-lg sm:text-xl text-muted-foreground">
+              Your premier partner for reliable and efficient courier services. Track your package, book a new shipment, and manage your deliveries with confidence.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button asChild size="lg" className="bg-accent hover:bg-accent/90 text-accent-foreground">
-                <Link href="/booking">Book a Shipment <MoveRight className="ml-2 h-5 w-5" /></Link>
+              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
+                <Link href="/booking">Request a Shipment <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline">
                 <Link href="#track">Track a Package</Link>
@@ -57,11 +57,11 @@ export default function Home() {
           <div className="relative h-64 lg:h-auto">
             <Image 
               src="https://placehold.co/600x400.png"
-              alt="Courier delivery person" 
+              alt="Corporate logistics operation" 
               width={600}
               height={400}
-              className="rounded-lg shadow-2xl object-cover"
-              data-ai-hint="courier delivery"
+              className="rounded-md shadow-lg object-cover"
+              data-ai-hint="corporate logistics"
             />
           </div>
         </div>
@@ -70,7 +70,7 @@ export default function Home() {
       {/* Tracking Section */}
       <section id="track" className="py-16 sm:py-24 bg-background">
         <div className="container mx-auto flex flex-col items-center">
-          <Card className="w-full max-w-2xl shadow-xl border-2 border-primary/20">
+          <Card className="w-full max-w-2xl shadow-lg border">
             <CardHeader className="text-center">
               <CardTitle className="font-headline text-3xl flex items-center justify-center">
                 <Package className="mr-3 h-8 w-8 text-primary" /> Track Your Shipment
@@ -82,12 +82,12 @@ export default function Home() {
                 <Input
                   type="text"
                   placeholder="e.g., RS123456789IN"
-                  className="text-base h-12"
+                  className="text-base h-11"
                   value={trackingId}
                   onChange={(e) => setTrackingId(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
                 />
-                <Button type="submit" onClick={handleTrack} size="lg" className="h-12 bg-primary hover:bg-primary/90">
+                <Button type="submit" onClick={handleTrack} size="lg" className="h-11 bg-primary hover:bg-primary/90">
                   <Search className="mr-2 h-5 w-5" />
                   Track
                 </Button>
@@ -117,8 +117,8 @@ export default function Home() {
                         </div>
                         <div className="pt-1.5">
                           <p className={cn(
-                              "font-bold font-headline text-lg",
-                              step.current ? "text-primary" : ""
+                              "font-semibold text-lg",
+                              step.current ? "text-primary" : "text-foreground"
                           )}>
                             {step.status}
                           </p>
@@ -136,15 +136,15 @@ export default function Home() {
       </section>
 
       {/* Features Section */}
-      <section className="bg-secondary py-16 sm:py-24">
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container mx-auto">
           <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Why Choose Us?</h2>
-            <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">We provide top-tier courier services with a focus on speed, safety, and customer satisfaction.</p>
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Our Commitment to Service</h2>
+            <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">We provide top-tier courier services with a focus on reliability, security, and customer satisfaction.</p>
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <Card key={index} className="text-center shadow-md hover:shadow-xl transition-shadow duration-300">
+              <Card key={index} className="text-center shadow-md hover:shadow-lg transition-shadow duration-300">
                 <CardHeader>
                   <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
                     <feature.icon className="h-8 w-8" />

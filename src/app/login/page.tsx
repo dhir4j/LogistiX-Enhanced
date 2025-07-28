@@ -51,14 +51,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-14rem)] items-center justify-center bg-secondary p-4">
-      <Card className="w-full max-w-md shadow-2xl border-primary/20">
+    <div className="flex min-h-[calc(100vh-12rem)] items-center justify-center bg-secondary p-4">
+      <Card className="w-full max-w-md shadow-lg border">
         <CardHeader className="text-center">
           <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
-            <LogIn className="h-8 w-8" />
+            <LogIn className="h-7 w-7" />
           </div>
-          <CardTitle className="text-3xl font-headline">Welcome Back</CardTitle>
-          <CardDescription>Enter your credentials to access your account.</CardDescription>
+          <CardTitle className="text-2xl font-headline">Client Portal Login</CardTitle>
+          <CardDescription>Access your account to manage shipments.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -68,7 +68,7 @@ export default function LoginPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
                       <Input placeholder="your.email@example.com" {...field} />
                     </FormControl>
@@ -89,7 +89,7 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-6">
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-5">
                 Login
               </Button>
             </form>
@@ -99,7 +99,7 @@ export default function LoginPage() {
           <p className="text-muted-foreground">
             {"Don't have an account? "}
             <Button variant="link" asChild className="p-0 h-auto font-semibold">
-              <Link href="/signup">Sign up</Link>
+              <Link href="/signup">Register Here</Link>
             </Button>
           </p>
         </CardFooter>

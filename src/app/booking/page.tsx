@@ -28,25 +28,25 @@ const internationalBookingSchema = domesticBookingSchema.extend({
 export default function BookingPage() {
   return (
     <div className="bg-secondary">
-        <div className="container py-12">
-            <Card className="max-w-4xl mx-auto shadow-lg border-primary/20">
+        <div className="container py-16">
+            <Card className="max-w-4xl mx-auto shadow-lg border">
                 <CardHeader className="text-center">
                     <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
                         <PackagePlus className="h-8 w-8" />
                     </div>
                     <CardTitle className="text-3xl font-headline">Book a Shipment</CardTitle>
-                    <CardDescription>Select shipment type and fill the details to get a price quote.</CardDescription>
+                    <CardDescription>Select shipment type and fill in the details to get a price quote.</CardDescription>
                 </CardHeader>
                 <CardContent>
                 <Tabs defaultValue="domestic" className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 h-12">
-                        <TabsTrigger value="domestic" className="h-full text-base gap-2"><Ship className="h-5 w-5"/>Domestic</TabsTrigger>
-                        <TabsTrigger value="international" className="h-full text-base gap-2"><PlaneTakeoff className="h-5 w-5"/>International</TabsTrigger>
+                    <TabsList className="grid w-full grid-cols-2 h-11">
+                        <TabsTrigger value="domestic" className="h-full text-base gap-2 font-semibold"><Ship className="h-5 w-5"/>Domestic</TabsTrigger>
+                        <TabsTrigger value="international" className="h-full text-base gap-2 font-semibold"><PlaneTakeoff className="h-5 w-5"/>International</TabsTrigger>
                     </TabsList>
-                    <TabsContent value="domestic">
+                    <TabsContent value="domestic" className="border rounded-b-md p-6">
                         <BookingForm type="Domestic" />
                     </TabsContent>
-                    <TabsContent value="international">
+                    <TabsContent value="international" className="border rounded-b-md p-6">
                         <BookingForm type="International" />
                     </TabsContent>
                 </Tabs>
@@ -84,19 +84,19 @@ function BookingForm({ type }: { type: 'Domestic' | 'International' }) {
 
   return (
     <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-6">
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 mt-2">
         <div className="grid md:grid-cols-2 gap-6">
             <FormField control={form.control} name="fromPincode" render={({ field }) => (
                 <FormItem>
-                    <FormLabel>From (Pincode)</FormLabel>
-                    <FormControl><Input placeholder="Enter origin pincode" {...field} /></FormControl>
+                    <FormLabel>Origin Pincode</FormLabel>
+                    <FormControl><Input placeholder="e.g., 110001" {...field} /></FormControl>
                     <FormMessage />
                 </FormItem>
             )} />
             <FormField control={form.control} name="toPincode" render={({ field }) => (
                 <FormItem>
-                    <FormLabel>To (Pincode)</FormLabel>
-                    <FormControl><Input placeholder="Enter destination pincode" {...field} /></FormControl>
+                    <FormLabel>Destination Pincode</FormLabel>
+                    <FormControl><Input placeholder="e.g., 400001" {...field} /></FormControl>
                     <FormMessage />
                 </FormItem>
             )} />
@@ -112,7 +112,7 @@ function BookingForm({ type }: { type: 'Domestic' | 'International' }) {
             )} />
         )}
         
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid md:grid-cols-2 gap-6 items-end">
             <FormField control={form.control} name="weight" render={({ field }) => (
                 <FormItem>
                     <FormLabel>Weight (kg)</FormLabel>
@@ -121,7 +121,7 @@ function BookingForm({ type }: { type: 'Domestic' | 'International' }) {
                 </FormItem>
             )} />
             <div className="space-y-2">
-                <FormLabel>Dimensions (cm)</FormLabel>
+                <FormLabel>Dimensions (L x W x H in cm)</FormLabel>
                 <div className="grid grid-cols-3 gap-2">
                     <FormField control={form.control} name="length" render={({ field }) => (
                         <FormItem><FormControl><Input type="number" placeholder="L" {...field} /></FormControl><FormMessage /></FormItem>
@@ -136,7 +136,7 @@ function BookingForm({ type }: { type: 'Domestic' | 'International' }) {
             </div>
         </div>
         <Button type="submit" size="lg" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-6">
-            Check Price & Book
+            Get Quote & Book
         </Button>
         </form>
     </Form>

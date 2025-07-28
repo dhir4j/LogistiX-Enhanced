@@ -45,19 +45,19 @@ export default function SignupPage() {
     console.log(data);
     toast({
       title: "Account Created",
-      description: "You have successfully signed up.",
+      description: "You have successfully registered.",
     });
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-14rem)] items-center justify-center bg-secondary p-4">
-      <Card className="w-full max-w-md shadow-2xl border-primary/20">
+    <div className="flex min-h-[calc(100vh-12rem)] items-center justify-center bg-secondary p-4">
+      <Card className="w-full max-w-md shadow-lg border">
         <CardHeader className="text-center">
             <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
-                <UserPlus className="h-8 w-8" />
+                <UserPlus className="h-7 w-7" />
             </div>
-          <CardTitle className="text-3xl font-headline">Create an Account</CardTitle>
-          <CardDescription>Join RS Swift Couriers today. It's free!</CardDescription>
+          <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
+          <CardDescription>Register for an account to manage your shipments.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -95,7 +95,7 @@ export default function SignupPage() {
                 name="email"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Email</FormLabel>
+                    <FormLabel>Email Address</FormLabel>
                     <FormControl>
                       <Input placeholder="your.email@example.com" {...field} />
                     </FormControl>
@@ -110,14 +110,14 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input type="password" placeholder="••••••••" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground text-lg py-6">
-                Sign Up
+              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-5">
+                Register
               </Button>
             </form>
           </Form>
@@ -126,7 +126,7 @@ export default function SignupPage() {
           <p className="text-muted-foreground">
             {"Already have an account? "}
             <Button variant="link" asChild className="p-0 h-auto font-semibold">
-              <Link href="/login">Login</Link>
+              <Link href="/login">Login Here</Link>
             </Button>
           </p>
         </CardFooter>
