@@ -302,11 +302,12 @@ export default function Home() {
                       <Link href="/about-us">Learn More About Us</Link>
                   </Button>
               </div>
-               <div className="relative h-80 md:h-96">
+               <div className="relative h-[626px] w-[469px] mx-auto">
                   <Image 
-                    src="/images/shipment_load.jpg"
+                    src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
-                    fill
+                    width={469}
+                    height={626}
                     className="object-cover rounded-md border shadow-sm"
                     data-ai-hint="team logistics"
                   />
