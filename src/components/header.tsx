@@ -42,10 +42,10 @@ export default function Header() {
           </div>
            <div className="hidden md:flex items-center gap-2">
               <Button asChild size="sm" variant="ghost" className="text-xs h-8">
-                <Link href="/login">Client Login</Link>
+                <Link href="/login">Customer Login</Link>
               </Button>
               <Button asChild size="sm" variant="ghost" className="text-xs h-8">
-                <Link href="/admin/login">Admin Login</Link>
+                <Link href="/admin/login">Employee Login</Link>
               </Button>
             </div>
         </div>

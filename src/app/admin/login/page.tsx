@@ -53,8 +53,8 @@ export default function AdminLoginPage() {
           <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
             <ShieldCheck className="h-8 w-8" />
           </div>
-          <CardTitle className="text-3xl font-headline">Administrator Login</CardTitle>
-          <CardDescription>Enter your credentials to access the admin portal.</CardDescription>
+          <CardTitle className="text-3xl font-headline">Employee Login</CardTitle>
+          <CardDescription>Enter your credentials to access the employee portal.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>

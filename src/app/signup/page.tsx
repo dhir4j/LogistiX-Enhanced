@@ -56,7 +56,7 @@ export default function SignupPage() {
             <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
                 <UserPlus className="h-7 w-7" />
             </div>
-          <CardTitle className="text-2xl font-headline">Create a Client Account</CardTitle>
+          <CardTitle className="text-2xl font-headline">Create a Customer Account</CardTitle>
           <CardDescription>Register for an account to book and manage shipments.</CardDescription>
         </CardHeader>
         <CardContent>

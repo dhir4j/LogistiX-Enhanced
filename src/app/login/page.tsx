@@ -57,7 +57,7 @@ export default function LoginPage() {
           <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
             <LogIn className="h-7 w-7" />
           </div>
-          <CardTitle className="text-2xl font-headline">Client Login</CardTitle>
+          <CardTitle className="text-2xl font-headline">Customer Login</CardTitle>
           <CardDescription>Access your account to manage your shipments.</CardDescription>
         </CardHeader>
         <CardContent>
