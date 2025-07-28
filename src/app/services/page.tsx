@@ -60,18 +60,6 @@ export default function ServicesPage() {
               ))}
             </div>
         </div>
-        <div className="max-w-4xl mx-auto bg-background p-8 border shadow-sm mt-8">
-          <div className="relative h-80 w-full">
-            <Image 
-                src="/images/shipment_truck.jpg" 
-                alt="Shipment truck on road"
-                width={626}
-                height={333}
-                className="object-cover rounded-md w-full h-full" 
-                data-ai-hint="truck road"
-            />
-          </div>
-        </div>
       </div>
     </div>
   );

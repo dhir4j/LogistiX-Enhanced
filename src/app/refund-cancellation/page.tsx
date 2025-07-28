@@ -15,16 +15,6 @@ export default function RefundCancellationPage() {
                     <CardDescription className="text-lg">Our commitment to a fair process.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="relative h-64 w-full mb-8">
-                    <Image 
-                      src="/images/refund_page.jpg" 
-                      alt="Refund and cancellation"
-                      width={540}
-                      height={360}
-                      className="object-cover rounded-md border w-full h-full"
-                      data-ai-hint="refund money"
-                    />
-                  </div>
                   <div className="text-muted-foreground space-y-4 text-base leading-relaxed">
                     <p><strong>Cancellations:</strong> A shipment booking can be cancelled up to 2 hours before the scheduled pickup time for a full refund. Cancellations made after this period may be subject to a cancellation fee.</p>
                     
