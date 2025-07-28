@@ -13,6 +13,12 @@ export default {
       padding: '2rem',
     },
     extend: {
+      gridTemplateColumns: {
+        '20': 'repeat(20, minmax(0, 1fr))',
+      },
+      gridColumn: {
+        'span-13': 'span 13 / span 13',
+      },
       fontFamily: {
         body: ['Roboto', 'sans-serif'],
         headline: ['Oswald', 'sans-serif'],
@@ -90,3 +96,5 @@ export default {
   },
   plugins: [require('tailwindcss-animate')],
 } satisfies Config;
+
+    
