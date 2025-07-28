@@ -73,7 +73,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-secondary py-20 sm:py-28 border-b">
+      <section className="relative bg-secondary py-16 sm:py-20 border-b">
         <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl font-bold font-headline tracking-tight text-foreground">
