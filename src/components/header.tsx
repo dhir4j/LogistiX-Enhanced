@@ -72,7 +72,7 @@ export default function Header() {
 
         <div className="hidden lg:flex items-center">
             <Button asChild size="lg">
-                <Link href="/#track">
+                <Link href="/track">
                   <Search className="mr-2 h-5 w-5"/>
                   Track Order
                 </Link>
@@ -117,7 +117,7 @@ export default function Header() {
                     </SheetClose>
                   ))}
                    <SheetClose asChild>
-                      <Button asChild variant="ghost" className="justify-start text-base font-semibold"><Link href="/#track">Track Order</Link></Button>
+                      <Button asChild variant="ghost" className="justify-start text-base font-semibold"><Link href="/track">Track Order</Link></Button>
                    </SheetClose>
                 </div>
                 <div className="border-t p-4 mt-auto">
