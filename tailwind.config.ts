@@ -107,6 +107,12 @@ export default {
           'from': { transform: 'translateX(20px)', opacity: '0' },
           'to': { transform: 'translateX(0)', opacity: '1' },
         },
+        'wobble': {
+          '0%, 100%': { transform: 'rotate(0deg)' },
+          '25%': { transform: 'rotate(-5deg)' },
+          '50%': { transform: 'rotate(5deg)' },
+          '75%': { transform: 'rotate(-2.5deg)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -116,6 +122,7 @@ export default {
         'fade-in-up': 'fade-in-up 0.6s ease-out forwards',
         'slide-in-from-left': 'slide-in-from-left 0.6s ease-out forwards',
         'slide-in-from-right': 'slide-in-from-right 0.6s ease-out forwards',
+        'wobble': 'wobble 0.5s ease-in-out',
       },
     },
   },

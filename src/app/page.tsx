@@ -134,9 +134,9 @@ export default function Home() {
           </div>
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
-              <div key={index} className="flex items-start gap-4 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+              <div key={index} className="group flex items-start gap-4 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10 text-primary shrink-0">
-                  <feature.icon className="h-7 w-7" />
+                  <feature.icon className="h-7 w-7 group-hover:animate-wobble" />
                 </div>
                 <div>
                   <h3 className="font-headline text-xl font-semibold">{feature.title}</h3>
