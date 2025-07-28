@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, Package, ArrowRight, Globe, ShieldCheck } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, Package, ArrowRight, Globe, ShieldCheck, BookOpenCheck, Box, MapPin, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -22,6 +22,19 @@ const features = [
   { title: "Secure Transport", description: "Ensuring your items are handled professionally and securely.", icon: ShieldCheck },
   { title: "Timely Delivery", description: "Committed to delivering your packages on schedule.", icon: Truck },
 ];
+
+const howItWorksSteps = [
+  { title: "Create a Booking", description: "Fill out our simple online form to schedule your shipment in minutes.", icon: BookOpenCheck },
+  { title: "We Collect Your Parcel", description: "Our team will pick up your package right from your doorstep at the scheduled time.", icon: Box },
+  { title: "Real-Time Tracking", description: "Monitor your shipment's journey with our live tracking system from start to finish.", icon: MapPin },
+  { title: "Secure Delivery", description: "Your package is delivered safely and on time to its final destination.", icon: ShieldCheck },
+];
+
+const testimonials = [
+  { name: "Anjali Mehta", role: "E-commerce Store Owner", quote: "HK SPEED COURIERS has transformed our shipping process. Their reliability and professionalism are unmatched. Our customers are happier than ever with the speedy deliveries." },
+  { name: "Rahul Verma", role: "Corporate Client", quote: "We trust HK SPEED COURIERS with all our important documents and parcels. Their secure and timely service gives us complete peace of mind. Highly recommended for any business." },
+  { name: "Priya Singh", role: "Individual Shipper", quote: "Sending a package to my family was so easy and affordable. The customer service was excellent, and the real-time tracking was a great feature. I'll definitely use their service again." },
+]
 
 export default function Home() {
   const [trackingId, setTrackingId] = useState('');
@@ -94,21 +107,42 @@ export default function Home() {
               <p className="mt-4 text-muted-foreground text-lg">We offer a wide range of transport options to meet your needs, including air, sea, and ground.</p>
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative h-96 w-full">
+            <div className="relative h-[450px] w-full">
               <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" data-ai-hint="plane sky" />
             </div>
-            <div className="relative h-96 w-full">
+            <div className="relative h-[450px] w-full">
               <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" data-ai-hint="truck warehouse" />
             </div>
-            <div className="relative h-96 w-full">
+            <div className="relative h-[450px] w-full">
               <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" data-ai-hint="cargo ship" />
             </div>
           </div>
         </div>
       </section>
 
+      {/* How It Works Section */}
+      <section className="bg-background py-16 sm:py-24">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Simple Steps to Ship Your Package</h2>
+            <p className="mt-4 text-muted-foreground text-lg">Our process is designed for your convenience, ensuring a hassle-free experience from start to finish.</p>
+          </div>
+          <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            {howItWorksSteps.map((step, index) => (
+              <div key={index} className="text-center p-6 border rounded-sm shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
+                  <step.icon className="h-8 w-8" />
+                </div>
+                <h3 className="font-headline text-xl font-semibold">{step.title}</h3>
+                <p className="text-muted-foreground mt-2">{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Tracking Section */}
-      <section id="track" className="py-16 sm:py-24 bg-background border-y">
+      <section id="track" className="py-16 sm:py-24 bg-secondary border-y">
         <div className="container mx-auto flex flex-col items-center">
             <div className="text-center max-w-2xl mx-auto">
                 <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Track Your Shipment</h2>
@@ -171,8 +205,34 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Testimonials Section */}
+      <section className="bg-background py-16 sm:py-24">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">What Our Customers Say</h2>
+            <p className="mt-4 text-muted-foreground text-lg">We are proud to have the trust of our clients. Read what they say about our services.</p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {testimonials.map((testimonial, index) => (
+              <Card key={index} className="shadow-sm border">
+                <CardContent className="pt-6">
+                  <div className="flex mb-2">
+                    {[...Array(5)].map((_, i) => <Star key={i} className="h-5 w-5 text-yellow-400 fill-current" />)}
+                  </div>
+                  <p className="text-muted-foreground italic">"{testimonial.quote}"</p>
+                  <div className="mt-4">
+                    <p className="font-bold font-headline text-lg">{testimonial.name}</p>
+                    <p className="text-sm text-primary font-semibold">{testimonial.role}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* About Us CTA */}
-      <section className="bg-secondary py-16 sm:py-24">
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
@@ -196,7 +256,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
     </div>
   );
 }
