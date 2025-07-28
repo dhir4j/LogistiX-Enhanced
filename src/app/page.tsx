@@ -249,8 +249,8 @@ export default function Home() {
       {/* About Us CTA */}
       <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container">
-          <div className="grid md:grid-cols-20 gap-12 items-center">
-              <div className="md:col-span-13">
+          <div className="grid md:grid-cols-10 gap-12 items-center">
+              <div className="md:col-span-6">
                   <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Your Partner in Professional Logistics</h2>
                   <p className="mt-4 text-muted-foreground text-lg">
                       With decades of experience, HK SPEED COURIERS is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
@@ -259,7 +259,7 @@ export default function Home() {
                       <Link href="/about-us">Learn More About Us</Link>
                   </Button>
               </div>
-               <div className="md:col-span-7 relative h-[501px] w-full mx-auto">
+               <div className="md:col-span-4 relative h-[450px] w-full mx-auto">
                   <Image 
                     src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
