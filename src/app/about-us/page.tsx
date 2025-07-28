@@ -16,7 +16,7 @@ export default function AboutUsPage() {
             </div>
             <div className="space-y-6 text-base">
               <div className="relative w-full h-64 rounded-sm overflow-hidden border">
-                  <Image src="/images/shipment_unload.jpg" alt="Our team loading a truck" layout="fill" objectFit="cover" />
+                  <Image src="/images/shipment_unload.jpg" alt="Our team loading a truck" fill className="object-cover" />
               </div>
               <p className="text-muted-foreground leading-relaxed">
                 Welcome to HK SPEED COURIERS, your trusted partner for reliable and efficient courier services. Founded with a vision to bridge distances, we are committed to providing seamless delivery solutions for individuals and businesses alike. Our foundation is built on decades of experience in the logistics industry, ensuring a professional and dependable service.

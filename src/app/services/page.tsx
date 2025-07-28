@@ -62,7 +62,7 @@ export default function ServicesPage() {
         </div>
         <div className="max-w-4xl mx-auto bg-background p-8 border shadow-sm mt-8">
           <div className="relative h-80 w-full">
-            <Image src="/images/shipment_car.jpg" alt="Shipment car" layout="fill" objectFit="cover" className="rounded-md" />
+            <Image src="/images/shipment_car.jpg" alt="Shipment car" fill className="object-cover rounded-md" />
           </div>
         </div>
       </div>

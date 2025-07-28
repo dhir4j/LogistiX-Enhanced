@@ -94,13 +94,13 @@ export default function Home() {
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative h-64 w-full">
-              <Image src="/images/flying_plane.jpg" alt="Air freight" layout="fill" objectFit="cover" className="rounded-md border" />
+              <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" />
             </div>
             <div className="relative h-64 w-full">
-              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" layout="fill" objectFit="cover" className="rounded-md border" />
+              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" />
             </div>
             <div className="relative h-64 w-full">
-              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" layout="fill" objectFit="cover" className="rounded-md border" />
+              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" />
             </div>
           </div>
         </div>
@@ -187,9 +187,8 @@ export default function Home() {
                   <Image 
                     src="/images/shipment_load.jpg"
                     alt="Our team at work"
-                    layout="fill"
-                    objectFit="cover"
-                    className="rounded-md border shadow-sm"
+                    fill
+                    className="object-cover rounded-md border shadow-sm"
                   />
               </div>
           </div>
