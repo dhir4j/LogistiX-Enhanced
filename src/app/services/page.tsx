@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Briefcase, Globe, PackageCheck, ShieldCheck, Truck } from "lucide-react";
+import { Briefcase, Globe, PackageCheck, ShieldCheck, Truck, Ship, Plane } from "lucide-react";
+import Image from "next/image";
 
 const services = [
   {
@@ -26,6 +27,11 @@ const services = [
     title: "Secure & Insured",
     description: "High-security transport for valuable items with full insurance coverage for your peace of mind.",
     icon: ShieldCheck
+  },
+  {
+    title: "Freight Services",
+    description: "Specialized freight services for heavy or oversized shipments by air, sea, or land.",
+    icon: Ship,
   }
 ];
 
@@ -53,6 +59,11 @@ export default function ServicesPage() {
                 </div>
               ))}
             </div>
+        </div>
+        <div className="max-w-4xl mx-auto bg-background p-8 border shadow-sm mt-8">
+          <div className="relative h-80 w-full">
+            <Image src="/images/shipment_car.jpg" alt="Shipment car" layout="fill" objectFit="cover" className="rounded-md" />
+          </div>
         </div>
       </div>
     </div>

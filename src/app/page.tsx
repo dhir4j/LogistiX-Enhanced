@@ -56,12 +56,11 @@ export default function Home() {
           </div>
           <div className="relative h-80 lg:h-auto">
             <Image 
-              src="https://placehold.co/600x400.png"
+              src="/images/shipment_truck.jpg"
               alt="Logistics and transportation" 
               width={600}
               height={400}
               className="rounded-md border object-cover shadow-sm"
-              data-ai-hint="logistics transportation"
             />
           </div>
         </div>
@@ -85,9 +84,30 @@ export default function Home() {
           </div>
         </div>
       </section>
+      
+      {/* Transport Modes Section */}
+      <section className="bg-secondary py-16 sm:py-24 border-t">
+        <div className="container mx-auto">
+          <div className="text-center max-w-2xl mx-auto">
+              <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Comprehensive Transport Solutions</h2>
+              <p className="mt-4 text-muted-foreground text-lg">We offer a wide range of transport options to meet your needs, including air, sea, and ground.</p>
+          </div>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="relative h-64 w-full">
+              <Image src="/images/flying_plane.jpg" alt="Air freight" layout="fill" objectFit="cover" className="rounded-md border" />
+            </div>
+            <div className="relative h-64 w-full">
+              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" layout="fill" objectFit="cover" className="rounded-md border" />
+            </div>
+            <div className="relative h-64 w-full">
+              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" layout="fill" objectFit="cover" className="rounded-md border" />
+            </div>
+          </div>
+        </div>
+      </section>
 
       {/* Tracking Section */}
-      <section id="track" className="py-16 sm:py-24 bg-secondary border-y">
+      <section id="track" className="py-16 sm:py-24 bg-background border-y">
         <div className="container mx-auto flex flex-col items-center">
             <div className="text-center max-w-2xl mx-auto">
                 <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Track Your Shipment</h2>
@@ -151,7 +171,7 @@ export default function Home() {
       </section>
 
       {/* About Us CTA */}
-      <section className="bg-background py-16 sm:py-24">
+      <section className="bg-secondary py-16 sm:py-24">
         <div className="container">
           <div className="grid md:grid-cols-2 gap-12 items-center">
               <div>
@@ -165,12 +185,11 @@ export default function Home() {
               </div>
                <div className="relative h-80">
                   <Image 
-                    src="https://placehold.co/500x320.png"
+                    src="/images/shipment_load.jpg"
                     alt="Our team at work"
                     layout="fill"
                     objectFit="cover"
                     className="rounded-md border shadow-sm"
-                    data-ai-hint="business team"
                   />
               </div>
           </div>
