@@ -68,7 +68,7 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-secondary py-16 sm:py-20 border-b">
+      <section className="relative bg-secondary py-12 sm:py-16 border-b">
         <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl font-bold font-headline tracking-tight text-foreground">
@@ -259,7 +259,7 @@ export default function Home() {
                       <Link href="/about-us">Learn More About Us</Link>
                   </Button>
               </div>
-               <div className="md:col-span-4 relative h-[400px] w-full mx-auto">
+               <div className="md:col-span-4 relative h-[270px] w-full mx-auto">
                   <Image 
                     src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
