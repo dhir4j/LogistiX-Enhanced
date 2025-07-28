@@ -56,11 +56,12 @@ export default function Home() {
           </div>
           <div className="relative h-80 lg:h-auto">
             <Image 
-              src="/images/shipment_truck.jpg"
-              alt="Logistics and transportation" 
-              width={600}
-              height={400}
-              className="rounded-md border object-cover shadow-sm"
+              src="/images/man_holding_box.jpg"
+              alt="Courier holding a package" 
+              width={1200}
+              height={800}
+              className="rounded-md border object-cover shadow-sm w-full h-full"
+              data-ai-hint="courier package"
             />
           </div>
         </div>
@@ -94,13 +95,13 @@ export default function Home() {
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="relative h-96 w-full">
-              <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" />
+              <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" data-ai-hint="plane sky" />
             </div>
             <div className="relative h-96 w-full">
-              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" />
+              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" data-ai-hint="truck warehouse" />
             </div>
             <div className="relative h-96 w-full">
-              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" />
+              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" data-ai-hint="cargo ship" />
             </div>
           </div>
         </div>
@@ -189,6 +190,7 @@ export default function Home() {
                     alt="Our team at work"
                     fill
                     className="object-cover rounded-md border shadow-sm"
+                    data-ai-hint="team logistics"
                   />
               </div>
           </div>
