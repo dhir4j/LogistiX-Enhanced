@@ -50,14 +50,14 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-12rem)] items-center justify-center bg-secondary p-4">
-      <Card className="w-full max-w-md shadow-lg border">
+    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-secondary p-4">
+      <Card className="w-full max-w-md shadow-md border">
         <CardHeader className="text-center">
-            <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
+            <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
                 <UserPlus className="h-7 w-7" />
             </div>
-          <CardTitle className="text-2xl font-headline">Create an Account</CardTitle>
-          <CardDescription>Register for an account to manage your shipments.</CardDescription>
+          <CardTitle className="text-2xl font-headline">Create a Client Account</CardTitle>
+          <CardDescription>Register for an account to book and manage shipments.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -70,7 +70,7 @@ export default function SignupPage() {
                     <FormItem>
                       <FormLabel>First Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="John" {...field} />
+                        <Input placeholder="John" {...field} className="h-11" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -83,7 +83,7 @@ export default function SignupPage() {
                     <FormItem>
                       <FormLabel>Last Name</FormLabel>
                       <FormControl>
-                        <Input placeholder="Doe" {...field} />
+                        <Input placeholder="Doe" {...field} className="h-11" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -97,7 +97,7 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} />
+                      <Input placeholder="your.email@example.com" {...field} className="h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -110,13 +110,13 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" />
+                      <Input type="password" placeholder="••••••••" className="h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-5">
+              <Button type="submit" className="w-full text-lg py-6">
                 Register
               </Button>
             </form>

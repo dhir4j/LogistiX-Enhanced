@@ -51,14 +51,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex min-h-[calc(100vh-12rem)] items-center justify-center bg-secondary p-4">
-      <Card className="w-full max-w-md shadow-lg border">
+    <div className="flex min-h-[calc(100vh-10rem)] items-center justify-center bg-secondary p-4">
+      <Card className="w-full max-w-md shadow-md border">
         <CardHeader className="text-center">
-          <div className="mx-auto bg-primary text-primary-foreground rounded-full p-3 w-fit mb-4">
+          <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
             <LogIn className="h-7 w-7" />
           </div>
-          <CardTitle className="text-2xl font-headline">Client Portal Login</CardTitle>
-          <CardDescription>Access your account to manage shipments.</CardDescription>
+          <CardTitle className="text-2xl font-headline">Client Login</CardTitle>
+          <CardDescription>Access your account to manage your shipments.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -70,7 +70,7 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Email Address</FormLabel>
                     <FormControl>
-                      <Input placeholder="your.email@example.com" {...field} />
+                      <Input placeholder="your.email@example.com" {...field} className="h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -83,13 +83,13 @@ export default function LoginPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" {...field} />
+                      <Input type="password" placeholder="••••••••" {...field} className="h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-primary hover:bg-primary/90 text-lg py-5">
+              <Button type="submit" className="w-full text-lg py-6">
                 Login
               </Button>
             </form>

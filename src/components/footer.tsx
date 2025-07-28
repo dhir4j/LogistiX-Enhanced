@@ -19,7 +19,7 @@ export default function Footer() {
   return (
     <footer className="bg-secondary text-foreground border-t">
       <div className="container py-12 px-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
           {/* Brand */}
           <div className="flex flex-col space-y-4">
             <Link href="/" className="flex items-center space-x-2">
@@ -35,7 +35,7 @@ export default function Footer() {
           
           {/* Information Links */}
           <div className="flex flex-col space-y-4">
-            <h3 className="font-headline text-base font-semibold">Information</h3>
+            <h3 className="font-headline text-base font-semibold uppercase tracking-wider">Information</h3>
             <ul className="space-y-2">
               {infoLinks.map(link => (
                   <li key={link.href}>
@@ -49,7 +49,7 @@ export default function Footer() {
 
           {/* Legal Links */}
           <div className="flex flex-col space-y-4">
-            <h3 className="font-headline text-base font-semibold">Legal</h3>
+            <h3 className="font-headline text-base font-semibold uppercase tracking-wider">Legal</h3>
             <ul className="space-y-2">
               {legalLinks.map(link => (
                   <li key={link.href}>
@@ -63,7 +63,7 @@ export default function Footer() {
           
           {/* Contact Info */}
           <div className="flex flex-col space-y-4">
-            <h3 className="font-headline text-base font-semibold">Head Office</h3>
+            <h3 className="font-headline text-base font-semibold uppercase tracking-wider">Head Office</h3>
             <p className="text-sm text-muted-foreground">
                 18AX MODEL TOWN EXTENSION<br />
                 LUDHIANA, NEAR PUNJAB & SIND BANK

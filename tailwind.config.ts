@@ -12,14 +12,13 @@ export default {
       center: true,
       padding: '2rem',
       screens: {
-        '2xl': '1400px',
+        '2xl': '1200px',
       },
     },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Poppins', 'sans-serif'],
-        code: ['Source Code Pro', 'monospace'],
+        body: ['Roboto', 'sans-serif'],
+        headline: ['Oswald', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

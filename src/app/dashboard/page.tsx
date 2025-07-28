@@ -15,17 +15,17 @@ const recentShipments = [
 
 export default function DashboardPage() {
   return (
-    <div className="bg-secondary min-h-[calc(100vh-4rem)]">
+    <div className="bg-secondary min-h-[calc(100vh-10rem)]">
         <div className="container py-10">
             <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
                 <div>
-                    <CardTitle className="text-3xl font-headline flex items-center mb-1">
+                    <h1 className="text-3xl font-headline font-bold flex items-center mb-1">
                         <LayoutDashboard className="mr-3 h-8 w-8 text-primary" />
                         Client Dashboard
-                    </CardTitle>
-                    <CardDescription>Welcome back! Here's an overview of your shipping activity.</CardDescription>
+                    </h1>
+                    <p className="text-muted-foreground">Welcome back! Here's an overview of your shipping activity.</p>
                 </div>
-                <Button asChild className="mt-4 md:mt-0 bg-accent hover:bg-accent/90 text-accent-foreground">
+                <Button asChild className="mt-4 md:mt-0">
                     <Link href="/booking">
                         <PlusCircle className="mr-2 h-5 w-5"/>
                         New Shipment
@@ -34,9 +34,9 @@ export default function DashboardPage() {
             </div>
             
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card className="shadow-md">
+                <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Total Shipments</CardTitle>
+                        <CardTitle className="text-sm font-medium uppercase">Total Shipments</CardTitle>
                         <Package className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -44,9 +44,9 @@ export default function DashboardPage() {
                         <p className="text-xs text-muted-foreground">+2 from last month</p>
                     </CardContent>
                 </Card>
-                <Card className="shadow-md">
+                <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">In Transit</CardTitle>
+                        <CardTitle className="text-sm font-medium uppercase">In Transit</CardTitle>
                         <Truck className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -54,9 +54,9 @@ export default function DashboardPage() {
                         <p className="text-xs text-muted-foreground">1 arriving today</p>
                     </CardContent>
                 </Card>
-                <Card className="shadow-md">
+                <Card className="shadow-sm">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
-                        <CardTitle className="text-sm font-medium">Delivered</CardTitle>
+                        <CardTitle className="text-sm font-medium uppercase">Delivered</CardTitle>
                         <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
@@ -65,10 +65,9 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="md:col-span-2 lg:col-span-3 shadow-lg">
+                <Card className="md:col-span-2 lg:col-span-3 shadow-sm">
                     <CardHeader>
                         <CardTitle>Recent Shipments</CardTitle>
-                        <CardDescription>A summary of your most recent shipments.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <Table>
@@ -94,8 +93,8 @@ export default function DashboardPage() {
                                             shipment.status === 'In Transit' ? 'secondary' : 'outline'
                                         }
                                         className={
-                                            shipment.status === 'Delivered' ? 'bg-green-600/20 text-green-800' :
-                                            shipment.status === 'In Transit' ? 'bg-blue-600/20 text-blue-800' : ''
+                                            shipment.status === 'Delivered' ? 'bg-green-100 text-green-800' :
+                                            shipment.status === 'In Transit' ? 'bg-blue-100 text-blue-800' : ''
                                         }
                                     >
                                         {shipment.status}

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, Package, ArrowRight } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, Package, ArrowRight, Globe, ShieldCheck } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -18,9 +18,9 @@ const trackingSteps = [
 ];
 
 const features = [
-  { title: "Global & Domestic Logistics", description: "Seamless shipping across the country and the globe.", icon: Truck },
-  { title: "Secure Handling", description: "Ensuring your items are safe and sound during transit.", icon: PackageCheck },
-  { title: "Real-Time Tracking", description: "Stay updated every step of the way with precise tracking.", icon: Search },
+  { title: "Domestic & International", description: "Reliable shipping across the country and the globe.", icon: Globe },
+  { title: "Secure Transport", description: "Ensuring your items are handled professionally and securely.", icon: ShieldCheck },
+  { title: "Timely Delivery", description: "Committed to delivering your packages on schedule.", icon: Truck },
 ];
 
 export default function Home() {
@@ -36,70 +36,85 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-secondary py-20 sm:py-28">
+      <section className="relative bg-secondary py-20 sm:py-28 border-b">
         <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
             <h1 className="text-4xl sm:text-5xl font-bold font-headline tracking-tight text-foreground">
-              Excellence in Motion
+              Professional Courier &<br />Logistics Services
             </h1>
             <p className="mt-4 max-w-xl mx-auto lg:mx-0 text-lg sm:text-xl text-muted-foreground">
-              Your premier partner for reliable and efficient courier services. Track your package, book a new shipment, and manage your deliveries with confidence.
+              Your trusted partner for dependable and efficient delivery solutions. We handle your shipments with professionalism and care.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button asChild size="lg" className="bg-primary hover:bg-primary/90 text-primary-foreground">
-                <Link href="/booking">Request a Shipment <ArrowRight className="ml-2 h-5 w-5" /></Link>
+              <Button asChild size="lg">
+                <Link href="/booking">Book a Shipment <ArrowRight className="ml-2 h-5 w-5" /></Link>
               </Button>
               <Button asChild size="lg" variant="outline">
-                <Link href="#track">Track a Package</Link>
+                <Link href="#track">Track Your Package</Link>
               </Button>
             </div>
           </div>
-          <div className="relative h-64 lg:h-auto">
+          <div className="relative h-80 lg:h-auto">
             <Image 
               src="https://placehold.co/600x400.png"
-              alt="Corporate logistics operation" 
+              alt="Logistics and transportation" 
               width={600}
               height={400}
-              className="rounded-md shadow-lg object-cover"
-              data-ai-hint="corporate logistics"
+              className="rounded-md border object-cover shadow-sm"
+              data-ai-hint="logistics transportation"
             />
           </div>
         </div>
       </section>
 
+      {/* Features Section */}
+      <section className="bg-background py-16 sm:py-24">
+        <div className="container mx-auto">
+          <div className="grid md:grid-cols-3 gap-8">
+            {features.map((feature, index) => (
+              <div key={index} className="flex items-start gap-4">
+                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10 text-primary shrink-0">
+                  <feature.icon className="h-7 w-7" />
+                </div>
+                <div>
+                  <h3 className="font-headline text-xl font-semibold">{feature.title}</h3>
+                  <p className="text-muted-foreground mt-1">{feature.description}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Tracking Section */}
-      <section id="track" className="py-16 sm:py-24 bg-background">
+      <section id="track" className="py-16 sm:py-24 bg-secondary border-y">
         <div className="container mx-auto flex flex-col items-center">
-          <Card className="w-full max-w-2xl shadow-lg border">
-            <CardHeader className="text-center">
-              <CardTitle className="font-headline text-3xl flex items-center justify-center">
-                <Package className="mr-3 h-8 w-8 text-primary" /> Track Your Shipment
-              </CardTitle>
-              <CardDescription>Enter your tracking number below for real-time updates.</CardDescription>
-            </CardHeader>
-            <CardContent>
+            <div className="text-center max-w-2xl mx-auto">
+                <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Track Your Shipment</h2>
+                <p className="mt-4 text-muted-foreground text-lg">Enter your tracking number below to see the real-time status of your delivery.</p>
+            </div>
+            <div className="mt-8 w-full max-w-2xl">
               <div className="flex w-full items-center space-x-2">
                 <Input
                   type="text"
-                  placeholder="e.g., RS123456789IN"
-                  className="text-base h-11"
+                  placeholder="Enter your Tracking ID, e.g., RS123456789IN"
+                  className="text-base h-12"
                   value={trackingId}
                   onChange={(e) => setTrackingId(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
                 />
-                <Button type="submit" onClick={handleTrack} size="lg" className="h-11 bg-primary hover:bg-primary/90">
+                <Button type="submit" onClick={handleTrack} size="lg" className="h-12">
                   <Search className="mr-2 h-5 w-5" />
                   Track
                 </Button>
               </div>
-            </CardContent>
-          </Card>
+            </div>
 
           {showResult && (
             <div className="w-full max-w-4xl mt-12">
-              <Card className="shadow-lg">
+              <Card className="shadow-md border">
                 <CardHeader>
-                  <CardTitle className="font-headline text-2xl">Shipment Details</CardTitle>
+                  <CardTitle className="font-headline text-2xl">Shipment Progress</CardTitle>
                   <CardDescription>Tracking ID: <span className="font-bold text-primary">{trackingId}</span></CardDescription>
                 </CardHeader>
                 <CardContent>
@@ -110,7 +125,7 @@ export default function Home() {
                     {trackingSteps.map((step, index) => (
                       <div key={index} className="flex items-start gap-6 mb-8 last:mb-0">
                         <div className={cn(
-                            "z-10 flex h-10 w-10 items-center justify-center rounded-full ring-8 ring-background",
+                            "z-10 flex h-10 w-10 items-center justify-center rounded-full ring-8 ring-secondary",
                             step.complete ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
                         )}>
                           <step.icon className="h-5 w-5" />
@@ -135,30 +150,33 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
-        <div className="container mx-auto">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Our Commitment to Service</h2>
-            <p className="mt-4 max-w-2xl mx-auto text-muted-foreground">We provide top-tier courier services with a focus on reliability, security, and customer satisfaction.</p>
-          </div>
-          <div className="grid md:grid-cols-3 gap-8">
-            {features.map((feature, index) => (
-              <Card key={index} className="text-center shadow-md hover:shadow-lg transition-shadow duration-300">
-                <CardHeader>
-                  <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4">
-                    <feature.icon className="h-8 w-8" />
-                  </div>
-                  <CardTitle className="font-headline text-xl">{feature.title}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground">{feature.description}</p>
-                </CardContent>
-              </Card>
-            ))}
+      {/* About Us CTA */}
+      <section className="bg-background py-16 sm:py-24">
+        <div className="container">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div>
+                  <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Your Partner in Professional Logistics</h2>
+                  <p className="mt-4 text-muted-foreground text-lg">
+                      With decades of experience, RS Swift Couriers is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
+                  </p>
+                  <Button asChild size="lg" className="mt-8">
+                      <Link href="/about-us">Learn More About Us</Link>
+                  </Button>
+              </div>
+               <div className="relative h-80">
+                  <Image 
+                    src="https://placehold.co/500x320.png"
+                    alt="Our team at work"
+                    layout="fill"
+                    objectFit="cover"
+                    className="rounded-md border shadow-sm"
+                    data-ai-hint="business team"
+                  />
+              </div>
           </div>
         </div>
       </section>
+
     </div>
   );
 }
