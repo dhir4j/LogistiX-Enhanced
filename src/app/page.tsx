@@ -131,7 +131,7 @@ export default function Home() {
               src="/images/man_holding_box.jpg"
               alt="Courier holding a package" 
               fill
-              className="rounded-md object-cover shadow-sm"
+              className="rounded-lg object-cover shadow-sm"
               data-ai-hint="courier package"
             />
           </div>
@@ -173,7 +173,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {deliveryItems.map((item, index) => (
-                <div key={item.title} className="relative aspect-square rounded-sm overflow-hidden group animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                <div key={item.title} className="relative aspect-square rounded-lg overflow-hidden group animate-fade-in-up w-[90%] mx-auto" style={{ animationDelay: `${index * 100}ms` }}>
                     <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-300 group-hover:scale-110" data-ai-hint={item.hint} />
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-2">
                         <h3 className="text-white text-lg font-bold text-center font-headline">{item.title}</h3>
@@ -194,7 +194,7 @@ export default function Home() {
           <div className="grid md:grid-cols-3 gap-8">
             {features.map((feature, index) => (
               <div key={index} className="group flex items-start gap-4 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
-                <div className="flex h-12 w-12 items-center justify-center rounded-sm bg-primary/10 text-primary shrink-0">
+                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary shrink-0">
                   <feature.icon className="h-7 w-7 group-hover:animate-wobble" />
                 </div>
                 <div>
@@ -216,9 +216,9 @@ export default function Home() {
           </div>
           <div className="mt-12 grid md:grid-cols-2 gap-8">
             {coreServices.map((service, index) => (
-              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm bg-background hover:shadow-md transition-shadow animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+              <div key={index} className="flex gap-6 items-start p-6 border rounded-lg bg-background hover:shadow-md transition-shadow animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex-shrink-0">
-                  <div className="flex items-center justify-center w-16 h-16 rounded-sm bg-primary/10 text-primary">
+                  <div className="flex items-center justify-center w-16 h-16 rounded-lg bg-primary/10 text-primary">
                       <service.icon className="w-8 h-8" />
                   </div>
                 </div>
@@ -246,7 +246,7 @@ export default function Home() {
           </div>
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="text-center p-6 border bg-secondary rounded-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+              <div key={index} className="text-center p-6 border bg-secondary rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
                   <step.icon className="h-8 w-8" />
                 </div>
@@ -267,8 +267,8 @@ export default function Home() {
           </div>
           <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
             {transportSolutions.map((solution, index) => (
-                <div key={index} className="relative group h-[450px] w-full animate-fade-in overflow-hidden rounded-md" style={{ animationDelay: `${index * 200}ms` }}>
-                    <Image src={solution.image} alt={solution.alt} fill className="object-cover rounded-md border transition-all duration-500 group-hover:scale-110 group-hover:blur-sm" data-ai-hint={solution.hint} />
+                <div key={index} className="relative group h-[450px] w-full animate-fade-in overflow-hidden rounded-lg" style={{ animationDelay: `${index * 200}ms` }}>
+                    <Image src={solution.image} alt={solution.alt} fill className="object-cover rounded-lg border transition-all duration-500 group-hover:scale-110 group-hover:blur-sm" data-ai-hint={solution.hint} />
                     <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center text-center p-4">
                         <solution.icon className="h-12 w-12 text-white mb-4" />
                         <h3 className="text-2xl font-headline font-bold text-white">{solution.title}</h3>
@@ -307,7 +307,7 @@ export default function Home() {
       </section>
 
       {/* About Us CTA */}
-      <section className="bg-background py-16 sm:py-24 border-t">
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container">
           <div className="grid md:grid-cols-10 gap-12 items-center">
               <div className="md:col-span-6 animate-slide-in-from-left">
@@ -324,7 +324,7 @@ export default function Home() {
                     src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
                     fill
-                    className="object-cover rounded-md shadow-sm"
+                    className="object-cover rounded-lg shadow-sm"
                     data-ai-hint="team logistics"
                   />
               </div>
