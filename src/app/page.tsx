@@ -108,33 +108,33 @@ export default function Home() {
   return (
     <div className="flex flex-col">
       {/* Hero Section */}
-      <section className="relative bg-secondary py-8 sm:py-12 border-b">
-        <div className="container mx-auto grid lg:grid-cols-2 gap-12 items-center">
-          <div className="text-center lg:text-left animate-slide-in-from-left">
-            <h1 className="text-4xl sm:text-5xl font-bold font-headline tracking-tight text-foreground">
-              Professional Courier &<br />Logistics Services
-            </h1>
-            <p className="mt-4 max-w-xl mx-auto lg:mx-0 text-lg sm:text-xl text-muted-foreground">
-              Your trusted partner for dependable and efficient delivery solutions. We handle your shipments with professionalism and care.
-            </p>
-            <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-              <Button asChild size="lg">
-                <Link href="/booking">Book a Shipment <ArrowRight className="ml-2 h-5 w-5" /></Link>
-              </Button>
-              <Button asChild size="lg" variant="outline">
-                <Link href="/track">Track Your Package</Link>
-              </Button>
+      <section className="relative bg-secondary overflow-hidden">
+        <div className="container relative grid lg:grid-cols-2 gap-12 items-center py-20 sm:py-28">
+            <div className="text-center lg:text-left animate-slide-in-from-left z-10">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-headline tracking-tight text-foreground">
+                Professional Courier &<br />Logistics Services
+              </h1>
+              <p className="mt-4 max-w-xl mx-auto lg:mx-0 text-lg sm:text-xl text-muted-foreground">
+                Your trusted partner for dependable and efficient delivery solutions. We handle your shipments with professionalism and care.
+              </p>
+              <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                <Button asChild size="lg">
+                  <Link href="/booking">Book a Shipment <ArrowRight className="ml-2 h-5 w-5" /></Link>
+                </Button>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/track">Track Your Package</Link>
+                </Button>
+              </div>
             </div>
-          </div>
-          <div className="relative h-96 w-[27rem] mx-auto lg:mx-0 animate-slide-in-from-right">
-            <Image 
-              src="/images/man_holding_box.jpg"
-              alt="Courier holding a package" 
-              fill
-              className="rounded-lg object-cover shadow-sm"
-              data-ai-hint="courier package"
-            />
-          </div>
+            <div className="relative h-[28rem] w-full animate-slide-in-from-right hidden lg:block">
+              <Image 
+                src="/images/man_holding_box.jpg"
+                alt="Courier holding a package" 
+                fill
+                className="rounded-lg object-cover shadow-sm"
+                data-ai-hint="courier package"
+              />
+            </div>
         </div>
       </section>
 
