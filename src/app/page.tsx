@@ -109,7 +109,7 @@ export default function Home() {
     <div className="flex flex-col">
       {/* Hero Section */}
       <section className="relative bg-secondary overflow-hidden">
-        <div className="container relative grid lg:grid-cols-2 gap-12 items-center py-20 sm:py-28">
+        <div className="container relative grid lg:grid-cols-2 gap-12 items-center py-16 sm:py-24">
             <div className="text-center lg:text-left animate-slide-in-from-left z-10">
               <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold font-headline tracking-tight text-foreground">
                 Professional Courier &<br />Logistics Services
