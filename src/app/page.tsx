@@ -307,7 +307,7 @@ export default function Home() {
       </section>
 
       {/* About Us CTA */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
+      <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container">
           <div className="grid md:grid-cols-10 gap-12 items-center">
               <div className="md:col-span-6 animate-slide-in-from-left">
