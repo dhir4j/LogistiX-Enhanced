@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowRight, Globe, ShieldCheck, BookOpenCheck, Box, MapPin, Star, Briefcase, Ship } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowRight, Globe, ShieldCheck, BookOpenCheck, Box, MapPin, Star, Briefcase, Ship, Plane, Airplay } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -57,13 +57,40 @@ const deliveryItems = [
     { title: "Medical Equipment", image: "/images/services/Medical-Equipment.jpg", hint: "medical equipment" },
     { title: "Medical STAT", image: "/images/services/Medical-STAT-1024x683.jpg", hint: "medical documents" },
     { title: "Pharmaceuticals", image: "/images/services/Pharmaceuticals.jpg", hint: "pharmaceuticals production" },
-    { title: "Legal Documents", image: "https://placehold.co/400x400.png", hint: "legal documents" },
+    { title: "Legal Documents", image: "/images/services/Legal-Documents.jpg", hint: "legal documents" },
     { title: "Machine & Auto Parts", image: "/images/services/Machine-auto-parts.jpg", hint: "auto parts" },
     { title: "Payroll", image: "/images/services/Payroll.jpg", hint: "payroll check" },
     { title: "Office Supplies", image: "/images/services/Office-Supplies.jpg", hint: "office supplies" },
     { title: "Postal Mail & Packages", image: "/images/services/Postal-Mail.jpg", hint: "postal mail" },
     { title: "Business to Business Delivery", image: "/images/services/b2b-Delivery.jpg", hint: "business delivery" },
     { title: "Business to Consumer Delivery", image: "/images/services/Consumer-Delivery.jpg", hint: "consumer delivery" },
+]
+
+const transportSolutions = [
+    { 
+        image: "/images/flying_plane.jpg", 
+        alt: "Air freight", 
+        hint: "plane sky",
+        title: "Air Freight", 
+        description: "Fast and reliable air cargo services for urgent and long-distance shipments.", 
+        icon: Plane 
+    },
+    { 
+        image: "/images/truck_in_go_down.jpg", 
+        alt: "Ground transport", 
+        hint: "truck warehouse", 
+        title: "Ground Transport", 
+        description: "Cost-effective and flexible ground shipping for domestic deliveries of all sizes.", 
+        icon: Truck 
+    },
+    { 
+        image: "/images/ship_in_ocean.jpg", 
+        alt: "Sea freight", 
+        hint: "cargo ship", 
+        title: "Sea Freight", 
+        description: "Economical solutions for large, heavy, or non-urgent international shipments.", 
+        icon: Ship 
+    },
 ]
 
 export default function Home() {
@@ -99,13 +126,12 @@ export default function Home() {
               </Button>
             </div>
           </div>
-          <div className="relative h-80 lg:h-auto animate-slide-in-from-right">
+          <div className="relative h-96 w-[27rem] mx-auto lg:mx-0 animate-slide-in-from-right">
             <Image 
               src="/images/man_holding_box.jpg"
               alt="Courier holding a package" 
-              width={1200}
-              height={800}
-              className="rounded-md border object-cover shadow-sm w-full h-full"
+              fill
+              className="rounded-md object-cover shadow-sm"
               data-ai-hint="courier package"
             />
           </div>
@@ -137,9 +163,29 @@ export default function Home() {
             </div>
         </div>
       </section>
+
+      {/* What We Deliver Section */}
+      <section className="bg-secondary py-16 sm:py-24 border-t">
+        <div className="container">
+            <div className="text-center pb-8 animate-fade-in-down">
+              <h2 className="text-3xl font-headline font-bold">WHAT CAN WE DELIVER FOR YOU?</h2>
+              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our Account Managers will answer any questions regarding services offered to the industries noted below, as well as other businesses.</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {deliveryItems.map((item, index) => (
+                <div key={item.title} className="relative aspect-square rounded-sm overflow-hidden group animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                    <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-300 group-hover:scale-110" data-ai-hint={item.hint} />
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-2">
+                        <h3 className="text-white text-lg font-bold text-center font-headline">{item.title}</h3>
+                    </div>
+                </div>
+              ))}
+            </div>
+        </div>
+      </section>
       
       {/* Features Section */}
-      <section className="bg-secondary py-16 sm:py-24">
+      <section className="bg-background py-16 sm:py-24 border-b">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto mb-12 animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Why Choose Us?</h2>
@@ -162,7 +208,7 @@ export default function Home() {
       </section>
 
       {/* Core Services Section */}
-      <section className="bg-background py-16 sm:py-24 border-t">
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Our Core Services</h2>
@@ -170,7 +216,7 @@ export default function Home() {
           </div>
           <div className="mt-12 grid md:grid-cols-2 gap-8">
             {coreServices.map((service, index) => (
-              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm hover:shadow-md transition-shadow animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+              <div key={index} className="flex gap-6 items-start p-6 border rounded-sm bg-background hover:shadow-md transition-shadow animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex-shrink-0">
                   <div className="flex items-center justify-center w-16 h-16 rounded-sm bg-primary/10 text-primary">
                       <service.icon className="w-8 h-8" />
@@ -192,7 +238,7 @@ export default function Home() {
       </section>
 
       {/* How It Works Section */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
+      <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Simple Steps to Ship Your Package</h2>
@@ -200,7 +246,7 @@ export default function Home() {
           </div>
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="text-center p-6 border bg-background rounded-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+              <div key={index} className="text-center p-6 border bg-secondary rounded-sm shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
                 <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
                   <step.icon className="h-8 w-8" />
                 </div>
@@ -213,46 +259,27 @@ export default function Home() {
       </section>
       
       {/* Transport Modes Section */}
-      <section className="bg-background py-16 sm:py-24 border-t">
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
               <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Comprehensive Transport Solutions</h2>
               <p className="mt-4 text-muted-foreground text-lg">We offer a wide range of transport options to meet your needs, including air, sea, and ground.</p>
           </div>
-          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="relative h-[450px] w-full animate-fade-in" style={{ animationDelay: '100ms' }}>
-              <Image src="/images/flying_plane.jpg" alt="Air freight" fill className="object-cover rounded-md border" data-ai-hint="plane sky" />
-            </div>
-            <div className="relative h-[450px] w-full animate-fade-in" style={{ animationDelay: '300ms' }}>
-              <Image src="/images/truck_in_go_down.jpg" alt="Ground transport" fill className="object-cover rounded-md border" data-ai-hint="truck warehouse" />
-            </div>
-            <div className="relative h-[450px] w-full animate-fade-in" style={{ animationDelay: '500ms' }}>
-              <Image src="/images/ship_in_ocean.jpg" alt="Sea freight" fill className="object-cover rounded-md border" data-ai-hint="cargo ship" />
-            </div>
+          <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+            {transportSolutions.map((solution, index) => (
+                <div key={index} className="relative group h-[450px] w-full animate-fade-in overflow-hidden rounded-md" style={{ animationDelay: `${index * 200}ms` }}>
+                    <Image src={solution.image} alt={solution.alt} fill className="object-cover rounded-md border transition-all duration-500 group-hover:scale-110 group-hover:blur-sm" data-ai-hint={solution.hint} />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity duration-500 flex flex-col items-center justify-center text-center p-4">
+                        <solution.icon className="h-12 w-12 text-white mb-4" />
+                        <h3 className="text-2xl font-headline font-bold text-white">{solution.title}</h3>
+                        <p className="text-white/90 mt-2">{solution.description}</p>
+                    </div>
+                </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* What We Deliver Section */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
-        <div className="container">
-            <div className="text-center pb-8 animate-fade-in-down">
-              <h2 className="text-3xl font-headline font-bold">WHAT CAN WE DELIVER FOR YOU?</h2>
-              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our Account Managers will answer any questions regarding services offered to the industries noted below, as well as other businesses.</p>
-            </div>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-              {deliveryItems.map((item, index) => (
-                <div key={item.title} className="relative aspect-square rounded-sm overflow-hidden group animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
-                    <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-300 group-hover:scale-110" data-ai-hint={item.hint} />
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-2">
-                        <h3 className="text-white text-lg font-bold text-center font-headline">{item.title}</h3>
-                    </div>
-                </div>
-              ))}
-            </div>
-        </div>
-      </section>
-      
       {/* Testimonials Section */}
       <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container mx-auto">
@@ -280,7 +307,7 @@ export default function Home() {
       </section>
 
       {/* About Us CTA */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
+      <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container">
           <div className="grid md:grid-cols-10 gap-12 items-center">
               <div className="md:col-span-6 animate-slide-in-from-left">
