@@ -26,7 +26,6 @@ const internationalBookingSchema = domesticBookingSchema.extend({
 
 type DomesticBookingFormValues = z.infer<typeof domesticBookingSchema>;
 type InternationalBookingFormValues = z.infer<typeof internationalBookingSchema>;
-type BookingFormValues = DomesticBookingFormValues | InternationalBookingFormValues;
 
 
 export default function BookingPage() {
@@ -65,7 +64,7 @@ function BookingForm({ type }: { type: 'Domestic' | 'International' }) {
     const { toast } = useToast();
     const isInternational = type === 'International';
     
-    const form = useForm<BookingFormValues>({
+    const form = useForm<DomesticBookingFormValues | InternationalBookingFormValues>({
         resolver: zodResolver(isInternational ? internationalBookingSchema : domesticBookingSchema),
         defaultValues: {
             fromPincode: "",
