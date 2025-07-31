@@ -53,6 +53,19 @@ const testimonials = [
   { name: "Priya Singh", role: "Individual Shipper", quote: "Sending a package to my family was so easy and affordable. The customer service was excellent, and the real-time tracking was a great feature. I'll definitely use their service again." },
 ]
 
+const deliveryItems = [
+    { title: "Medical Equipment", image: "/images/services/Medical-Equipment.jpg", hint: "medical equipment" },
+    { title: "Medical STAT", image: "/images/services/Medical-STAT-1024x683.jpg", hint: "medical documents" },
+    { title: "Pharmaceuticals", image: "/images/services/Pharmaceuticals.jpg", hint: "pharmaceuticals production" },
+    { title: "Legal Documents", image: "https://placehold.co/400x400.png", hint: "legal documents" },
+    { title: "Machine & Auto Parts", image: "/images/services/Machine-auto-parts.jpg", hint: "auto parts" },
+    { title: "Payroll", image: "/images/services/Payroll.jpg", hint: "payroll check" },
+    { title: "Office Supplies", image: "/images/services/Office-Supplies.jpg", hint: "office supplies" },
+    { title: "Postal Mail & Packages", image: "/images/services/Postal-Mail.jpg", hint: "postal mail" },
+    { title: "Business to Business Delivery", image: "/images/services/b2b-Delivery.jpg", hint: "business delivery" },
+    { title: "Business to Consumer Delivery", image: "/images/services/Consumer-Delivery.jpg", hint: "consumer delivery" },
+]
+
 export default function Home() {
   const [trackingId, setTrackingId] = useState('');
   const router = useRouter();
@@ -219,9 +232,29 @@ export default function Home() {
           </div>
         </div>
       </section>
+
+      {/* What We Deliver Section */}
+      <section className="bg-secondary py-16 sm:py-24 border-t">
+        <div className="container">
+            <div className="text-center pb-8 animate-fade-in-down">
+              <h2 className="text-3xl font-headline font-bold">WHAT CAN WE DELIVER FOR YOU?</h2>
+              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our Account Managers will answer any questions regarding services offered to the industries noted below, as well as other businesses.</p>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+              {deliveryItems.map((item, index) => (
+                <div key={item.title} className="relative aspect-square rounded-sm overflow-hidden group animate-fade-in-up" style={{ animationDelay: `${index * 100}ms` }}>
+                    <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-300 group-hover:scale-110" data-ai-hint={item.hint} />
+                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-2">
+                        <h3 className="text-white text-lg font-bold text-center font-headline">{item.title}</h3>
+                    </div>
+                </div>
+              ))}
+            </div>
+        </div>
+      </section>
       
       {/* Testimonials Section */}
-      <section className="bg-secondary py-16 sm:py-24 border-t">
+      <section className="bg-background py-16 sm:py-24 border-t">
         <div className="container mx-auto">
           <div className="text-center max-w-2xl mx-auto animate-fade-in-down">
             <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">What Our Customers Say</h2>
@@ -247,7 +280,7 @@ export default function Home() {
       </section>
 
       {/* About Us CTA */}
-      <section className="bg-background py-16 sm:py-24 border-t">
+      <section className="bg-secondary py-16 sm:py-24 border-t">
         <div className="container">
           <div className="grid md:grid-cols-10 gap-12 items-center">
               <div className="md:col-span-6 animate-slide-in-from-left">
@@ -259,7 +292,7 @@ export default function Home() {
                       <Link href="/about-us">Learn More About Us</Link>
                   </Button>
               </div>
-               <div className="md:col-span-4 relative h-[320px] w-[180px] mx-auto animate-slide-in-from-right">
+               <div className="md:col-span-4 relative h-[426px] w-[240px] mx-auto animate-slide-in-from-right">
                   <Image 
                     src="/images/shipment_single_person_standing.jpg"
                     alt="Our team at work"
