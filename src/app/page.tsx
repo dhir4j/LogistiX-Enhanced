@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -128,11 +129,11 @@ export default function Home() {
             </div>
             <div className="relative h-[28rem] w-full animate-slide-in-from-right hidden lg:block">
               <Image 
-                src="/images/man_holding_box.jpg"
+                src="/images/HK SPEED COURIERS.jpg"
                 alt="Courier holding a package" 
                 fill
                 className="rounded-lg object-cover shadow-sm"
-                data-ai-hint="courier package"
+                data-ai-hint="courier delivery"
               />
             </div>
         </div>
@@ -334,3 +335,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
