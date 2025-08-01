@@ -252,7 +252,7 @@ export default function Home() {
                   <step.icon className="h-8 w-8" />
                 </div>
                 <h3 className="font-headline text-xl font-semibold">{step.title}</h3>
-                <p className="text-muted-foreground mt-2">{step.description}</p>
+                <p className="text-muted-foreground mt-2 text-justify">{step.description}</p>
               </div>
             ))}
           </div>
