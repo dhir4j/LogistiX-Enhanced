@@ -24,11 +24,13 @@ import { ShieldCheck } from "lucide-react";
 import { adminLoginSchema } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useRouter } from "next/navigation";
 
 type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 
 export default function AdminLoginPage() {
   const { toast } = useToast();
+  const router = useRouter();
   
   const form = useForm<AdminLoginFormValues>({
     resolver: zodResolver(adminLoginSchema),
@@ -40,11 +42,14 @@ export default function AdminLoginPage() {
   });
 
   const onSubmit = (data: AdminLoginFormValues) => {
-    console.log(data);
     toast({
         title: `${data.role.charAt(0).toUpperCase() + data.role.slice(1)} Login Successful`,
-        description: "Redirecting to dashboard...",
+        description: data.role === 'admin' ? "Redirecting to dashboard..." : "Employee dashboard is under construction.",
     });
+
+    if (data.role === 'admin') {
+        router.push('/admin/dashboard');
+    }
   };
 
   return (
