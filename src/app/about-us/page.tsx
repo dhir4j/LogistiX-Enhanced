@@ -18,7 +18,7 @@ export default function AboutUsPage() {
               <div className="relative w-full h-64 rounded-sm overflow-hidden border">
                   <Image src="/images/about_us.jpg" alt="About HK Speed Couriers" fill className="object-cover" />
               </div>
-              <p className="text-muted-foreground leading-relaxed text-lg text-center">
+              <p className="text-muted-foreground leading-relaxed text-lg text-justify">
                 Welcome to HK SPEED COURIERS, where we redefine logistics with a commitment to speed, reliability, and unparalleled customer service. Founded on the principle of bridging distances, we provide seamless and efficient delivery solutions tailored to meet the diverse needs of individuals and businesses.
               </p>
 
@@ -31,7 +31,7 @@ export default function AboutUsPage() {
                     </div>
                     <div className="text-center md:text-left">
                         <h2 className="text-2xl font-headline font-bold">Our Mission</h2>
-                        <p className="text-muted-foreground mt-2">
+                        <p className="text-muted-foreground mt-2 text-justify">
                             Our mission is to deliver more than just packages; we deliver peace of mind. By integrating state-of-the-art technology with a dedicated network of logistics professionals, we ensure that every shipment is tracked, secure, and delivered on time. We are devoted to a customer-centric approach, making your satisfaction our top priority.
                         </p>
                     </div>
@@ -47,21 +47,21 @@ export default function AboutUsPage() {
                               <ShieldCheck className="w-8 h-8" />
                            </div>
                           <h3 className="font-semibold text-xl">Integrity</h3>
-                          <p className="text-muted-foreground mt-2">We handle every parcel with the utmost care, recognizing its value. Our processes are transparent, ensuring you're informed every step of the way.</p>
+                          <p className="text-muted-foreground mt-2 text-justify">We handle every parcel with the utmost care, recognizing its value. Our processes are transparent, ensuring you're informed every step of the way.</p>
                       </div>
                       <div className="flex flex-col items-center">
                           <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
                               <Lightbulb className="w-8 h-8" />
                           </div>
                           <h3 className="font-semibold text-xl">Innovation</h3>
-                          <p className="text-muted-foreground mt-2">We continuously adapt and enhance our services by leveraging modern technology to meet the dynamic needs of the market and our clients.</p>
+                          <p className="text-muted-foreground mt-2 text-justify">We continuously adapt and enhance our services by leveraging modern technology to meet the dynamic needs of the market and our clients.</p>
                       </div>
                        <div className="flex flex-col items-center">
                            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-primary/10 text-primary mb-4">
                               <ThumbsUp className="w-8 h-8" />
                            </div>
                           <h3 className="font-semibold text-xl">Reliability</h3>
-                          <p className="text-muted-foreground mt-2">Our commitment is to consistently exceed customer expectations through dependable and timely delivery, making us a logistics partner you can trust.</p>
+                          <p className="text-muted-foreground mt-2 text-justify">Our commitment is to consistently exceed customer expectations through dependable and timely delivery, making us a logistics partner you can trust.</p>
                       </div>
                   </div>
               </div>
