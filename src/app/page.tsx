@@ -247,12 +247,12 @@ export default function Home() {
           </div>
           <div className="mt-12 grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {howItWorksSteps.map((step, index) => (
-              <div key={index} className="text-center p-6 border bg-secondary rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mx-auto mb-4 ring-8 ring-primary/5">
+              <div key={index} className="text-left p-6 border bg-secondary rounded-lg shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${index * 150}ms` }}>
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-primary mb-4 ring-8 ring-primary/5">
                   <step.icon className="h-8 w-8" />
                 </div>
                 <h3 className="font-headline text-xl font-semibold">{step.title}</h3>
-                <p className="text-muted-foreground mt-2 text-justify">{step.description}</p>
+                <p className="text-muted-foreground mt-2">{step.description}</p>
               </div>
             ))}
           </div>
@@ -335,5 +335,7 @@ export default function Home() {
     </div>
   );
 }
+
+    
 
     
