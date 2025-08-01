@@ -1,4 +1,4 @@
-import { Plane } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 export default function Footer() {
@@ -23,7 +23,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="flex flex-col space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Plane className="h-7 w-7 text-primary" />
+              <Image src="/images/logo.png" alt="HK SPEED COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
               <span className="text-xl font-bold font-headline">
                 HK SPEED COURIERS
               </span>
@@ -72,8 +72,8 @@ export default function Footer() {
               <a href="tel:+919541195406" className="hover:text-primary transition-colors">+91-95411-95406</a>
             </p>
             <p className="text-sm text-muted-foreground">
-              <a href="mailto:HKCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">
-                HKCOURIERS@GMAIL.COM
+              <a href="mailto:RSSWIFTCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">
+                RSSWIFTCOURIERS@GMAIL.COM
               </a>
             </p>
           </div>

@@ -19,16 +19,16 @@ export default function AboutUsPage() {
                   <Image src="/images/about_us.jpg" alt="About HK Speed Couriers" fill className="object-cover" />
               </div>
               <p className="text-muted-foreground leading-relaxed">
-                Welcome to HK SPEED COURIERS, your trusted partner for reliable and efficient courier services. Founded with a vision to bridge distances, we are committed to providing seamless delivery solutions for individuals and businesses alike. Our foundation is built on decades of experience in the logistics industry, ensuring a professional and dependable service.
+                Welcome to HK SPEED COURIERS, where we redefine logistics with a commitment to speed, reliability, and unparalleled customer service. Founded on the principle of bridging distances, we provide seamless and efficient delivery solutions tailored to meet the diverse needs of individuals and businesses. Our extensive experience in the logistics industry forms the bedrock of our professional and dependable services.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                Our mission is to offer a courier service that is not only swift but also secure and customer-centric. We leverage state-of-the-art technology and a dedicated network of professionals to ensure your packages reach their destination safely and on time, every time.
+                Our mission is to deliver more than just packages; we deliver peace of mind. By integrating state-of-the-art technology with a dedicated network of logistics professionals, we ensure that every shipment is tracked, secure, and delivered on time. We are devoted to a customer-centric approach, making your satisfaction our top priority.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                At HK SPEED COURIERS, we understand the importance of every parcel. Whether it's a critical business document, a personal gift, or commercial cargo, we handle each shipment with the utmost care and precision. Our team is trained to manage logistics efficiently, providing you with real-time tracking and transparent communication throughout the delivery process.
+                At HK SPEED COURIERS, we recognize that every parcel holds value. From critical business documents and high-value cargo to personal gifts, we handle each item with the utmost care and precision. Our team is expertly trained to manage complex logistics, providing transparent communication and real-time tracking throughout the entire delivery journey.
               </p>
               <p className="text-muted-foreground leading-relaxed">
-                We pride ourselves on our core values of integrity, reliability, and innovation. We continuously strive to improve our services, adapt to changing market needs, and exceed customer expectations. Thank you for choosing HK SPEED COURIERS. We look forward to serving your business.
+                Integrity, innovation, and reliability are the core values that drive us. We continuously strive to enhance our services, adapt to the dynamic needs of the market, and consistently exceed our customers' expectations. Thank you for placing your trust in HK SPEED COURIERS. We are honored to be your logistics partner and look forward to serving you.
               </p>
             </div>
         </div>
