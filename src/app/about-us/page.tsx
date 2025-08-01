@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Building2, Rocket, Lightbulb, ShieldCheck, ThumbsUp } from "lucide-react";
+import { Building2, Rocket, Lightbulb, ShieldCheck, ThumbsUp, Goal } from "lucide-react";
 import Image from 'next/image';
 
 export default function AboutUsPage() {
@@ -22,15 +22,22 @@ export default function AboutUsPage() {
                 Welcome to HK SPEED COURIERS, where we redefine logistics with a commitment to speed, reliability, and unparalleled customer service. Founded on the principle of bridging distances, we provide seamless and efficient delivery solutions tailored to meet the diverse needs of individuals and businesses.
               </p>
 
-              <div className="text-center">
-                  <div className="mx-auto bg-primary/10 text-primary rounded-full p-3 w-fit mb-4">
-                      <Rocket className="h-8 w-8" />
-                  </div>
-                  <h2 className="text-2xl font-headline font-bold">Our Mission</h2>
-                  <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
-                    Our mission is to deliver more than just packages; we deliver peace of mind. By integrating state-of-the-art technology with a dedicated network of logistics professionals, we ensure that every shipment is tracked, secure, and delivered on time. We are devoted to a customer-centric approach, making your satisfaction our top priority.
-                  </p>
+              <div className="bg-muted p-8 rounded-lg border">
+                <div className="flex flex-col md:flex-row items-center gap-8">
+                    <div className="flex-shrink-0">
+                        <div className="mx-auto bg-primary/10 text-primary rounded-full p-4 w-fit ring-8 ring-primary/5">
+                            <Goal className="h-10 w-10" />
+                        </div>
+                    </div>
+                    <div className="text-center md:text-left">
+                        <h2 className="text-2xl font-headline font-bold">Our Mission</h2>
+                        <p className="text-muted-foreground mt-2">
+                            Our mission is to deliver more than just packages; we deliver peace of mind. By integrating state-of-the-art technology with a dedicated network of logistics professionals, we ensure that every shipment is tracked, secure, and delivered on time. We are devoted to a customer-centric approach, making your satisfaction our top priority.
+                        </p>
+                    </div>
+                </div>
               </div>
+
 
               <div>
                   <h2 className="text-2xl font-headline font-bold text-center mb-8">Our Core Values</h2>
