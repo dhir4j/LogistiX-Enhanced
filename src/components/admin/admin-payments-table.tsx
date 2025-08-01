@@ -1,0 +1,86 @@
+"use client";
+
+import { useApi } from "@/hooks/use-api";
+import { Button } from "@/components/ui/button";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "../ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+
+interface Payment {
+    id: number;
+    order_id: string;
+    first_name: string;
+    last_name: string;
+    amount: number;
+    utr: string;
+    status: 'Pending' | 'Approved' | 'Rejected';
+    created_at: string;
+}
+
+export function AdminPaymentsTable() {
+    const { data: payments, isLoading, error, mutate } = useApi<Payment[]>('/admin/payments');
+    const { toast } = useToast();
+
+    const handleStatusUpdate = async (paymentId: number, newStatus: 'Approved' | 'Rejected') => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/payments/${paymentId}/status`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ status: newStatus }),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                toast({ title: "Success", description: result.message });
+                mutate(); 
+            } else {
+                toast({ title: "Error", description: result.error || "Failed to update payment status.", variant: "destructive" });
+            }
+        } catch (err) {
+            toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+        }
+    };
+
+    return (
+        <div className="bg-background border rounded-lg p-4">
+            <h2 className="text-xl font-semibold mb-4">Payment Requests</h2>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Shipment ID</TableHead>
+                        <TableHead>Customer</TableHead>
+                        <TableHead>Amount</TableHead>
+                        <TableHead>UTR Number</TableHead>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                        <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                    ))}
+                    {error && <TableRow><TableCell colSpan={7} className="text-center text-red-500">Failed to load payments.</TableCell></TableRow>}
+                    {!isLoading && !error && payments?.map((p) => (
+                        <TableRow key={p.id}>
+                            <TableCell>{p.order_id}</TableCell>
+                            <TableCell>{p.first_name} {p.last_name}</TableCell>
+                            <TableCell>₹{p.amount.toFixed(2)}</TableCell>
+                            <TableCell>{p.utr}</TableCell>
+                            <TableCell>{new Date(p.created_at).toLocaleDateString()}</TableCell>
+                            <TableCell><Badge variant={p.status === 'Approved' ? 'default' : p.status === 'Rejected' ? 'destructive' : 'secondary'}>{p.status}</Badge></TableCell>
+                            <TableCell>
+                                {p.status === 'Pending' ? (
+                                    <div className="flex gap-2">
+                                        <Button size="sm" onClick={() => handleStatusUpdate(p.id, 'Approved')}>Approve</Button>
+                                        <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(p.id, 'Rejected')}>Reject</Button>
+                                    </div>
+                                ) : 'Processed'}
+                            </TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+        </div>
+    );
+}
