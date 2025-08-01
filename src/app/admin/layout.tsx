@@ -13,6 +13,10 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
 
+  if (pathname === '/admin/login') {
+    return <>{children}</>;
+  }
+
   const navLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/users', label: 'Users', icon: Users },
@@ -35,7 +39,7 @@ export default function AdminLayout({
           <SidebarMenu>
             {navLinks.map(link => (
               <SidebarMenuItem key={link.href}>
-                <SidebarMenuButton asChild isActive={pathname === link.href}>
+                <SidebarMenuButton asChild isActive={pathname.startsWith(link.href)}>
                   <Link href={link.href}>
                     <link.icon />
                     <span>{link.label}</span>

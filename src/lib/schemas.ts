@@ -8,6 +8,9 @@ export const loginSchema = z.object({
 export const adminLoginSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   password: z.string().min(1, { message: "Password is required." }),
+  role: z.enum(['admin', 'employee'], {
+    required_error: "You need to select a role.",
+  }),
 });
 
 export const signupSchema = z.object({
