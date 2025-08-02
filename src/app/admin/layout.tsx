@@ -22,7 +22,7 @@ export default function AdminLayout({
   
   if (pathname === '/admin/login') {
     return (
-        <main className="p-4 sm:p-6 bg-secondary flex-1 h-screen">
+        <main className="h-screen">
             {children}
         </main>
     );
