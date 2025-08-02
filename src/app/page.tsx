@@ -129,7 +129,7 @@ export default function Home() {
             </div>
             <div className="relative h-[28rem] w-full animate-slide-in-from-right hidden lg:block">
               <Image 
-                src="/images/HK SPEED COURIERS.jpg"
+                src="/images/logo/hero_section.jpg"
                 alt="Courier holding a package" 
                 fill
                 className="rounded-lg object-cover shadow-sm"

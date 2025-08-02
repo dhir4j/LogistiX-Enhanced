@@ -23,7 +23,7 @@ export default function Footer() {
           {/* Brand */}
           <div className="flex flex-col space-y-4">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="/images/logo.png" alt="HK SPEED COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
+              <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
               <span className="text-xl font-bold font-headline">
                 HK SPEED COURIERS
               </span>

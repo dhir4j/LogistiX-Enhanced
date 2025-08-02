@@ -28,7 +28,7 @@ export default function AdminLayout({
       <Sidebar>
         <SidebarHeader>
           <div className="flex items-center gap-2">
-            <Image src="/images/logo.png" alt="Logo" width={40} height={40} />
+            <Image src="/images/logo/logo.png" alt="Logo" width={40} height={40} />
             <div className="flex flex-col">
               <h2 className="text-lg font-semibold">Admin Panel</h2>
               <p className="text-xs text-muted-foreground">RS SWIFT COURIERS</p>

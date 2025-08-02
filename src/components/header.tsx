@@ -47,7 +47,7 @@ export default function Header() {
       <div className="container flex h-20 items-center">
         <div className="mr-auto flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Image src="/images/logo.png" alt="HK SPEED COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
+            <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
             <span className="font-bold font-headline text-2xl sm:inline-block">
               HK SPEED COURIERS
             </span>
@@ -95,7 +95,7 @@ export default function Header() {
                     <SheetTitle>
                         <SheetClose asChild>
                             <Link href="/" className="flex items-center space-x-2">
-                                <Image src="/images/logo.png" alt="HK SPEED COURIERS Logo" width={40} height={40} />
+                                <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={40} height={40} />
                                 <span className="font-bold text-lg font-headline">HK SPEED COURIERS</span>
                             </Link>
                         </SheetClose>
