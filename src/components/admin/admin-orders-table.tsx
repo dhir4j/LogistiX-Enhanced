@@ -31,14 +31,14 @@ interface ShipmentsApiResponse {
 export function AdminOrdersTable() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
-    const [status, setStatus] = useState("");
+    const [status, setStatus] = useState("all");
 
     const queryParams = useMemo(() => {
         const params = new URLSearchParams();
         params.append('page', page.toString());
         params.append('limit', '10');
         if (search) params.append('q', search);
-        if (status) params.append('status', status);
+        if (status && status !== 'all') params.append('status', status);
         return params.toString();
     }, [page, search, status]);
 
@@ -101,7 +101,7 @@ export function AdminOrdersTable() {
                             <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="">All</SelectItem>
+                            <SelectItem value="all">All</SelectItem>
                             <SelectItem value="Booked">Booked</SelectItem>
                             <SelectItem value="In Transit">In Transit</SelectItem>
                             <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
