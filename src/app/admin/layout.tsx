@@ -13,16 +13,20 @@ export default function AdminLayout({
 }) {
   const pathname = usePathname();
 
-  if (pathname === '/admin/login') {
-    return <>{children}</>;
-  }
-
   const navLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/shipments', label: 'Shipments', icon: Ship },
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/payments', label: 'Payments', icon: CreditCard },
   ];
+  
+  if (pathname === '/admin/login') {
+    return (
+        <main className="p-4 sm:p-6 bg-secondary flex-1 h-screen">
+            {children}
+        </main>
+    );
+  }
 
   return (
     <SidebarProvider>
