@@ -11,6 +11,10 @@ import Image from 'next/image';
 export default function Header() {
   const pathname = usePathname();
 
+  if (pathname.startsWith('/admin')) {
+    return null;
+  }
+
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/about-us', label: 'About Us' },
