@@ -28,13 +28,13 @@ export default function Header() {
       <div className="bg-secondary text-secondary-foreground">
         <div className="container flex h-10 items-center justify-between text-xs">
           <div className="flex gap-4">
-             <a href="mailto:HKCOURIERS@GMAIL.COM" className="flex items-center gap-1.5 hover:text-primary transition-colors">
+             <a href="mailto:Hkspeedcouriersprivatelimited@gmail.com" className="flex items-center gap-1.5 hover:text-primary transition-colors">
                 <Mail className="h-3.5 w-3.5" />
-                HKCOURIERS@GMAIL.COM
+                Hkspeedcouriersprivatelimited@gmail.com
              </a>
-             <a href="tel:+919541195406" className="hidden sm:flex items-center gap-1.5 hover:text-primary transition-colors">
+             <a href="tel:8968927612" className="hidden sm:flex items-center gap-1.5 hover:text-primary transition-colors">
                 <Phone className="h-3.5 w-3.5" />
-                +91-95411-95406
+                +91-89689-27612
              </a>
           </div>
            <div className="hidden md:flex items-center gap-2">

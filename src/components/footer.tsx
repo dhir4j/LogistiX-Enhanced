@@ -74,15 +74,15 @@ export default function Footer() {
           <div className="flex flex-col space-y-4">
             <h3 className="font-headline text-base font-semibold uppercase tracking-wider">Head Office</h3>
             <p className="text-sm text-muted-foreground">
-                18AX MODEL TOWN EXTENSION<br />
-                LUDHIANA, NEAR PUNJAB & SIND BANK
+                SCF-148, FIRST FLOOR, URBAN ESTATE, PHASE-1,<br />
+                JALANDHAR, PUNJAB.
             </p>
             <p className="text-sm text-muted-foreground">
-              <a href="tel:+919541195406" className="hover:text-primary transition-colors">+91-95411-95406</a>
+              <a href="tel:8968927612" className="hover:text-primary transition-colors">+91-89689-27612</a>
             </p>
             <p className="text-sm text-muted-foreground">
-              <a href="mailto:RSSWIFTCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">
-                RSSWIFTCOURIERS@GMAIL.COM
+              <a href="mailto:Hkspeedcouriersprivatelimited@gmail.com" className="hover:text-primary transition-colors break-all">
+                Hkspeedcouriersprivatelimited@gmail.com
               </a>
             </p>
           </div>

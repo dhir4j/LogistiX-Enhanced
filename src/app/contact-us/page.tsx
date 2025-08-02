@@ -85,7 +85,7 @@ export default function ContactUsPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">Address</h3>
-                          <p className="text-muted-foreground">18AX MODEL TOWN EXTENSION, LUDHIANA<br/>NEAR PUNJAB & SIND BANK</p>
+                          <p className="text-muted-foreground">SCF-148, FIRST FLOOR, URBAN ESTATE, PHASE-1,<br/>JALANDHAR, PUNJAB.</p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4">
@@ -94,7 +94,7 @@ export default function ContactUsPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">Phone</h3>
-                          <p className="text-muted-foreground"><a href="tel:+919541195406" className="hover:text-primary transition-colors">+91-95411-95406</a></p>
+                          <p className="text-muted-foreground"><a href="tel:8968927612" className="hover:text-primary transition-colors">+91-89689-27612</a></p>
                         </div>
                     </div>
                     <div className="flex items-start gap-4">
@@ -103,7 +103,7 @@ export default function ContactUsPage() {
                         </div>
                         <div>
                           <h3 className="font-semibold text-lg">Email</h3>
-                          <p className="text-muted-foreground"><a href="mailto:RSSWIFTCOURIERS@GMAIL.COM" className="hover:text-primary transition-colors break-all">RSSWIFTCOURIERS@GMAIL.COM</a></p>
+                          <p className="text-muted-foreground"><a href="mailto:Hkspeedcouriersprivatelimited@gmail.com" className="hover:text-primary transition-colors break-all">Hkspeedcouriersprivatelimited@gmail.com</a></p>
                         </div>
                     </div>
                 </div>
