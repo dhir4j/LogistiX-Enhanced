@@ -58,7 +58,7 @@ export default function AdminLayout({
             </SidebarMenuItem>
              <SidebarMenuItem>
               <SidebarMenuButton asChild>
-                <Link href="/admin/login">
+                <Link href="/employee-login">
                     <LogOut />
                     <span>Logout</span>
                 </Link>

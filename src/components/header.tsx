@@ -42,7 +42,7 @@ export default function Header() {
                 <Link href="/login">Customer Login</Link>
               </Button>
               <Button asChild size="sm" variant="ghost" className="text-xs h-8">
-                <Link href="/admin/login">Employee Login</Link>
+                <Link href="/employee-login">Employee Login</Link>
               </Button>
             </div>
         </div>
@@ -51,9 +51,9 @@ export default function Header() {
       <div className="container flex h-20 items-center">
         <div className="mr-auto flex items-center">
           <Link href="/" className="mr-6 flex items-center space-x-2">
-            <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
+            <Image src="/images/logo/logo.png" alt="RS SWIFT COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
             <span className="font-bold font-headline text-2xl sm:inline-block">
-              HK SPEED COURIERS
+              RS SWIFT COURIERS
             </span>
           </Link>
         </div>
@@ -99,13 +99,13 @@ export default function Header() {
                     <SheetTitle>
                         <SheetClose asChild>
                             <Link href="/" className="flex items-center space-x-2">
-                                <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={40} height={40} />
-                                <span className="font-bold text-lg font-headline">HK SPEED COURIERS</span>
+                                <Image src="/images/logo/logo.png" alt="RS SWIFT COURIERS Logo" width={40} height={40} />
+                                <span className="font-bold text-lg font-headline">RS SWIFT COURIERS</span>
                             </Link>
                         </SheetClose>
                     </SheetTitle>
                     <SheetDescription>
-                        Main menu for navigating the HK SPEED COURIERS website.
+                        Main menu for navigating the RS SWIFT COURIERS website.
                     </SheetDescription>
                 </SheetHeader>
               <div className="flex flex-col h-full">
