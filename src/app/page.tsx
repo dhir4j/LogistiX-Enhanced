@@ -174,7 +174,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
               {deliveryItems.map((item, index) => (
-                <div key={item.title} className="relative aspect-square rounded-lg overflow-hidden group animate-fade-in-up w-[90%] mx-auto" style={{ animationDelay: `${index * 100}ms` }}>
+                <div key={item.title} className="relative aspect-square rounded-lg overflow-hidden group animate-fade-in-up w-[80%] mx-auto" style={{ animationDelay: `${index * 100}ms` }}>
                     <Image src={item.image} alt={item.title} fill className="object-cover transition-transform duration-300 group-hover:scale-110" data-ai-hint={item.hint} />
                     <div className="absolute inset-0 bg-black/50 flex items-center justify-center p-2">
                         <h3 className="text-white text-lg font-bold text-center font-headline">{item.title}</h3>
@@ -314,7 +314,7 @@ export default function Home() {
               <div className="md:col-span-6 animate-slide-in-from-left">
                   <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Your Partner in Professional Logistics</h2>
                   <p className="mt-4 text-muted-foreground text-lg">
-                      With decades of experience, RS SWIFT COURIERS is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
+                      RS SWIFT COURIERS is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
                   </p>
                   <Button asChild size="lg" className="mt-8">
                       <Link href="/about-us">Learn More About Us</Link>

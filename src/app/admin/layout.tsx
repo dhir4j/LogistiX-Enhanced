@@ -19,14 +19,6 @@ export default function AdminLayout({
     { href: '/admin/users', label: 'Users', icon: Users },
     { href: '/admin/payments', label: 'Payments', icon: CreditCard },
   ];
-  
-  if (pathname === '/admin/login') {
-    return (
-        <main className="h-screen">
-            {children}
-        </main>
-    );
-  }
 
   return (
     <SidebarProvider>
