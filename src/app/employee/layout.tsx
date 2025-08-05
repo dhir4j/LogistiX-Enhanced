@@ -1,7 +1,7 @@
 "use client";
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { LayoutDashboard, Book, FileUp, GitCompare, BoxCutter, Search, FileText, Printer, Send, Combine, User, Fuel, CreditCard } from "lucide-react";
+import { LayoutDashboard, Book, FileUp, GitCompare, Scissors, Search, FileText, Printer, Send, Combine, User, Fuel, CreditCard } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -18,7 +18,7 @@ export default function EmployeeLayout({
     { href: '/employee/booking', label: 'Booking', icon: Book },
     { href: '/employee/excel-import', label: 'Excel Import', icon: FileUp },
     { href: '/employee/rate-compare', label: 'Rate Compare', icon: GitCompare },
-    { href: '/employee/day-end', label: 'Day End', icon: BoxCutter },
+    { href: '/employee/day-end', label: 'Day End', icon: Scissors },
     { href: '/employee/tracking', label: 'Tracking', icon: Search },
     { href: '/employee/report', label: 'Report', icon: FileText },
     { href: '/employee/invoice-printing', label: 'Invoice Printing', icon: Printer },
