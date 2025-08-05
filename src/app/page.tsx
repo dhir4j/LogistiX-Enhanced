@@ -49,8 +49,8 @@ const howItWorksSteps = [
 ];
 
 const testimonials = [
-  { name: "Anjali Mehta", role: "E-commerce Store Owner", quote: "RS SWIFT COURIERS has transformed our shipping process. Their reliability and professionalism are unmatched. Our customers are happier than ever with the speedy deliveries." },
-  { name: "Rahul Verma", role: "Corporate Client", quote: "We trust RS SWIFT COURIERS with all our important documents and parcels. Their secure and timely service gives us complete peace of mind. Highly recommended for any business." },
+  { name: "Anjali Mehta", role: "E-commerce Store Owner", quote: "HK SPEED COURIERS has transformed our shipping process. Their reliability and professionalism are unmatched. Our customers are happier than ever with the speedy deliveries." },
+  { name: "Rahul Verma", role: "Corporate Client", quote: "We trust HK SPEED COURIERS with all our important documents and parcels. Their secure and timely service gives us complete peace of mind. Highly recommended for any business." },
   { name: "Priya Singh", role: "Individual Shipper", quote: "Sending a package to my family was so easy and affordable. The customer service was excellent, and the real-time tracking was a great feature. I'll definitely use their service again." },
 ]
 
@@ -314,7 +314,7 @@ export default function Home() {
               <div className="md:col-span-6 animate-slide-in-from-left">
                   <h2 className="text-3xl sm:text-4xl font-bold font-headline text-foreground">Your Partner in Professional Logistics</h2>
                   <p className="mt-4 text-muted-foreground text-lg">
-                      RS SWIFT COURIERS is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
+                      HK SPEED COURIERS is dedicated to providing superior logistics and courier services. We are founded on the principles of reliability, efficiency, and unwavering customer support, ensuring your business and personal shipping needs are met with the highest standards of excellence.
                   </p>
                   <Button asChild size="lg" className="mt-8">
                       <Link href="/about-us">Learn More About Us</Link>

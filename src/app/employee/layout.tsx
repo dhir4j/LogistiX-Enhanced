@@ -37,7 +37,7 @@ export default function EmployeeLayout({
             <Image src="/images/logo/logo.png" alt="Logo" width={40} height={40} className="bg-white rounded-full p-1"/>
             <div className="flex flex-col group-data-[collapsible=icon]:hidden">
               <h2 className="text-lg font-bold">Employee Panel</h2>
-              <p className="text-xs text-gray-400">RS SWIFT COURIERS</p>
+              <p className="text-xs text-gray-400">HK SPEED COURIERS</p>
             </div>
           </div>
         </SidebarHeader>
