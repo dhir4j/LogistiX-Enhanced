@@ -44,11 +44,13 @@ export default function EmployeeLoginPage() {
   const onSubmit = (data: AdminLoginFormValues) => {
     toast({
         title: `${data.role.charAt(0).toUpperCase() + data.role.slice(1)} Login Successful`,
-        description: data.role === 'admin' ? "Redirecting to dashboard..." : "Employee dashboard is under construction.",
+        description: data.role === 'admin' ? "Redirecting to admin dashboard..." : "Redirecting to employee dashboard...",
     });
 
     if (data.role === 'admin') {
         router.push('/admin/dashboard');
+    } else {
+        router.push('/employee/dashboard');
     }
   };
 
