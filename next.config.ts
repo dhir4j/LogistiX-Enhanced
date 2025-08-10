@@ -20,7 +20,7 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'production'
-      ? 'https://hard4j-4630.euw.devtunnels.ms/api'
+      ? 'http://www.server.hkspeedcouriers.com/api'
       : 'http://127.0.0.1:5000/api',
   }
 };
