@@ -3,7 +3,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const API_URL = "https://www.server.hkspeedcouriers.com/api";
+const API_URL = "https://www.server.hkspeedcouriers.com";
 
 export function useApi<T>(endpoint: string | null) {
     const [data, setData] = useState<T | null>(null);
