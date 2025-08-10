@@ -26,7 +26,6 @@ export default function EmployeeLayout({
     { href: '/employee/receiver', label: 'Receiver', icon: Combine },
     { href: '/employee/user', label: 'User', icon: User },
     { href: '/employee/fuel-surcharge', label: 'Fuel Surcharge', icon: Fuel },
-    { href: '/employee/customer-payment', label: 'Customer Payment', icon: CreditCard },
   ];
 
   return (
