@@ -19,7 +19,7 @@ class Config:
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # CORS Configuration
-    CORS_ORIGINS_ENV = "https://www.hkspeedcouriers.com,https://6000-firebase-hk-courier-1753367614212.cluster-bg6uurscprhn6qxr6xwtrhvkf6.cloudworkstations.dev"
+    CORS_ORIGINS_ENV = "https://www.hkspeedcouriers.com,https://www.server.hkspeedcouriers.com,https://6000-firebase-hk-courier-1753367614212.cluster-bg6uurscprhn6qxr6xwtrhvkf6.cloudworkstations.dev"
     CORS_ORIGINS = CORS_ORIGINS_ENV.split(',')
 
 
