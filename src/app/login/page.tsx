@@ -1,3 +1,4 @@
+
 "use client";
 
 import Link from "next/link";
@@ -41,13 +42,47 @@ export default function LoginPage() {
     },
   });
 
-  const onSubmit = (data: LoginFormValues) => {
-    console.log(data);
-    toast({
-      title: "Login Successful",
-      description: "Redirecting to your dashboard...",
-    });
-    router.push('/dashboard');
+  const onSubmit = async (data: LoginFormValues) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(data),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast({
+          title: "Login Failed",
+          description: result.error || "Invalid credentials.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      if (result.user?.isAdmin) {
+         toast({
+          title: "Login Role Error",
+          description: "This is a customer login page. Admins must log in via the employee portal.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+        title: "Login Successful",
+        description: "Redirecting to your dashboard...",
+      });
+      router.push('/dashboard');
+
+    } catch (error) {
+      toast({
+        title: "Network Error",
+        description: "Could not connect to the server.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
@@ -89,8 +124,8 @@ export default function LoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full text-lg py-6">
-                Login
+              <Button type="submit" className="w-full text-lg py-6" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>

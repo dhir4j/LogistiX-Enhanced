@@ -1,6 +1,8 @@
+
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -30,6 +32,7 @@ type SignupFormValues = z.infer<typeof signupSchema>;
 
 export default function SignupPage() {
   const { toast } = useToast();
+  const router = useRouter();
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -41,12 +44,44 @@ export default function SignupPage() {
     },
   });
 
-  const onSubmit = (data: SignupFormValues) => {
-    console.log(data);
-    toast({
-      title: "Account Created",
-      description: "You have successfully registered.",
-    });
+  const onSubmit = async (data: SignupFormValues) => {
+    const signupData = {
+        first_name: data.firstName,
+        last_name: data.lastName,
+        email: data.email,
+        password: data.password
+    };
+
+    try {
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/signup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(signupData),
+        });
+
+        const result = await response.json();
+
+        if (!response.ok) {
+            toast({
+                title: "Signup Failed",
+                description: result.error || "An unexpected error occurred.",
+                variant: "destructive",
+            });
+            return;
+        }
+
+        toast({
+            title: "Account Created",
+            description: "You have successfully registered. Please log in.",
+        });
+        router.push('/login');
+    } catch (error) {
+        toast({
+            title: "Network Error",
+            description: "Could not connect to the server.",
+            variant: "destructive",
+        });
+    }
   };
 
   return (
@@ -110,14 +145,14 @@ export default function SignupPage() {
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input type="password" placeholder="••••••••" className="h-11" />
+                      <Input type="password" placeholder="••••••••" {...field} className="h-11" />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full text-lg py-6">
-                Register
+              <Button type="submit" className="w-full text-lg py-6" disabled={form.formState.isSubmitting}>
+                 {form.formState.isSubmitting ? "Registering..." : "Register"}
               </Button>
             </form>
           </Form>
