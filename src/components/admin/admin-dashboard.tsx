@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useApi } from "@/hooks/use-api";
@@ -14,7 +15,7 @@ interface WebAnalytics {
 }
 
 export default function AdminDashboard() {
-    const { data: analytics, isLoading, error } = useApi<WebAnalytics>('/admin/web_analytics');
+    const { data: analytics, isLoading, error } = useApi<WebAnalytics>('/api/admin/web_analytics');
 
     const analyticsCards = [
         { title: "Total Orders", value: analytics?.total_orders, icon: Package },
@@ -36,10 +37,10 @@ export default function AdminDashboard() {
                             {isLoading ? (
                                 <Skeleton className="h-8 w-1/2" />
                             ) : error ? (
-                                <p className="text-xs text-red-500">Error loading data</p>
+                                <p className="text-xs text-red-500">Error</p>
                             ) : (
                                 <div className="text-2xl font-bold">
-                                    {card.isCurrency ? `₹${Number(card.value).toFixed(2)}` : card.value}
+                                    {card.isCurrency ? `₹${Number(card.value ?? 0).toFixed(2)}` : (card.value ?? 0)}
                                 </div>
                             )}
                         </CardContent>
