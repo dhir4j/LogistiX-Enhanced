@@ -45,11 +45,11 @@ export function AdminOrdersTable() {
         return params.toString();
     }, [page, search, status]);
 
-    const { data, isLoading, error, mutate } = useApi<ShipmentsApiResponse>(`/admin/shipments?${queryParams}`);
+    const { data, isLoading, error, mutate } = useApi<ShipmentsApiResponse>(`/api/admin/shipments?${queryParams}`);
 
     const handleStatusUpdate = async (shipmentId: string, newStatus: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/shipments/${shipmentId}/status`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/shipments/${shipmentId}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus, location: "Admin Update", activity: `Status updated to ${newStatus} by admin.` }),

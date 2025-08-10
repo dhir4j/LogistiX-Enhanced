@@ -51,7 +51,7 @@ export default function TrackingResultPage() {
         setIsLoading(true);
         setError(null);
         try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipments/${idFromUrl}`);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments/${idFromUrl}`);
           if (!response.ok) {
             const err = await response.json();
             throw new Error(err.error || 'Shipment not found');

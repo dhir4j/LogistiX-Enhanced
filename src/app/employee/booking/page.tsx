@@ -75,7 +75,7 @@ export default function EmployeeBookingPage() {
         const { receiver_address_state, receiver_address_country, package_weight_kg, service_type } = form.getValues();
 
         const isDomestic = receiver_address_country.toLowerCase() === "india";
-        const url = `${process.env.NEXT_PUBLIC_API_URL}${isDomestic ? "/domestic/price" : "/international/price"}`;
+        const url = `${process.env.NEXT_PUBLIC_API_URL}/api${isDomestic ? "/domestic/price" : "/international/price"}`;
         const body = isDomestic 
             ? { state: receiver_address_state, weight: package_weight_kg, mode: service_type }
             : { country: receiver_address_country, weight: package_weight_kg };
@@ -116,7 +116,7 @@ export default function EmployeeBookingPage() {
         };
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipments`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)

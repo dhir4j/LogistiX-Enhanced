@@ -33,7 +33,7 @@ export default function DashboardPage() {
         const fetchShipments = async () => {
           setIsLoading(true);
           try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipments?email=${session.email}`);
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments?email=${session.email}`);
             if (response.ok) {
               const data = await response.json();
               setShipments(data);

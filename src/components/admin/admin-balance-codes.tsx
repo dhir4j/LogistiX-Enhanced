@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -22,7 +23,7 @@ interface BalanceCode {
 }
 
 export default function AdminBalanceCodes() {
-    const { data: codes, isLoading, error, mutate } = useApi<BalanceCode[]>('/admin/balance-codes');
+    const { data: codes, isLoading, error, mutate } = useApi<BalanceCode[]>('/api/admin/balance-codes');
     const [amount, setAmount] = useState<number | string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
@@ -34,7 +35,7 @@ export default function AdminBalanceCodes() {
         }
         setIsSubmitting(true);
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/balance-codes`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/balance-codes`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ amount: Number(amount) }),

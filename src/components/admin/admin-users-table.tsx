@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -53,7 +54,7 @@ export function AdminUsersTable() {
         return params.toString();
     }, [page, search]);
 
-    const { data, isLoading, error, mutate } = useApi<UsersApiResponse>(`/admin/users?${queryParams}`);
+    const { data, isLoading, error, mutate } = useApi<UsersApiResponse>(`/api/admin/users?${queryParams}`);
     const { toast } = useToast();
 
     const form = useForm<CreateEmployeeFormValues>({
@@ -68,7 +69,7 @@ export function AdminUsersTable() {
 
     const handleCreateEmployee = async (values: CreateEmployeeFormValues) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/employees`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/employees`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(values),

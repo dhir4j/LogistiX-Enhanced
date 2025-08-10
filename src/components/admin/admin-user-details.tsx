@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useApi } from "@/hooks/use-api";
@@ -33,7 +34,7 @@ interface UserDetails {
 }
 
 export default function AdminUserDetails({ userId }: { userId: string }) {
-    const { data, isLoading, error } = useApi<UserDetails>(`/admin/users/${userId}`);
+    const { data, isLoading, error } = useApi<UserDetails>(`/api/admin/users/${userId}`);
 
     if (isLoading) return <div className="space-y-4">
         <Skeleton className="h-32 w-full" />

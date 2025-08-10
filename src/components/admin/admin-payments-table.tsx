@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useApi } from "@/hooks/use-api";
@@ -19,12 +20,12 @@ interface Payment {
 }
 
 export function AdminPaymentsTable() {
-    const { data: payments, isLoading, error, mutate } = useApi<Payment[]>('/admin/payments');
+    const { data: payments, isLoading, error, mutate } = useApi<Payment[]>('/api/admin/payments');
     const { toast } = useToast();
 
     const handleStatusUpdate = async (paymentId: number, newStatus: 'Approved' | 'Rejected') => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/payments/${paymentId}/status`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/payments/${paymentId}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ status: newStatus }),
