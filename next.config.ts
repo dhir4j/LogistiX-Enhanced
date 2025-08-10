@@ -20,8 +20,8 @@ const nextConfig: NextConfig = {
   },
   env: {
     NEXT_PUBLIC_API_URL: process.env.NODE_ENV === 'production'
-      ? 'http://www.server.hkspeedcouriers.com/api'
-      : 'http://127.0.0.1:5000/api',
+      ? 'https://www.server.hkspeedcouriers.com'
+      : 'http://127.0.0.1:5000',
   }
 };
 
