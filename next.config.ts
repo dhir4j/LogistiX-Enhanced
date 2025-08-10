@@ -1,4 +1,3 @@
-
 import type {NextConfig} from 'next';
 
 const nextConfig: NextConfig = {
@@ -19,9 +18,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  env: {
-    NEXT_PUBLIC_API_URL: 'https://www.server.hkspeedcouriers.com',
-  }
 };
 
 export default nextConfig;
