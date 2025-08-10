@@ -16,8 +16,8 @@ app = create_app()
 
 with app.app_context():
     print("Attempting to add or update admin user...")
-    admin_email = "dhillon"
-    admin_password = "dhillon@2025"
+    admin_email = "dhillon@logistix.com"
+    admin_password = "Dhillon@2025"
     
     # Check if the admin user already exists
     existing_admin = User.query.filter_by(email=admin_email).first()
