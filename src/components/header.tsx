@@ -15,7 +15,7 @@ export default function Header() {
   const { session, clearSession, isLoading } = useSession();
   const router = useRouter();
 
-  if (pathname.startsWith('/admin') || pathname.startsWith('/employee/')) {
+  if (pathname.startsWith('/admin') || (pathname.startsWith('/employee') && pathname !== '/employee-login')) {
     return null;
   }
 

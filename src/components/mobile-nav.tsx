@@ -62,7 +62,7 @@ export default function MobileNav({ navLinks }: MobileNavProps) {
                             </SheetClose>
                         </div>
                         <div className="border-t p-4 mt-auto">
-                            {!isLoading && (
+                            {isLoading ? null : (
                                 session ? (
                                     <div className="flex flex-col space-y-2">
                                         <SheetClose asChild>
