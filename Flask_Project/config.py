@@ -9,7 +9,7 @@ class Config:
     db_password = "m4dc0d3r"
     db_host = "hard4j-4630.postgres.pythonanywhere-services.com"
     db_port = "14630"
-    db_name = "shedload"
+    db_name = "LogistiX"
 
     # SQLAlchemy Configuration
     SQLALCHEMY_DATABASE_URI = (
