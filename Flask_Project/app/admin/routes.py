@@ -5,6 +5,7 @@ from sqlalchemy import or_, func
 from datetime import datetime
 import string
 import random
+from werkzeug.security import generate_password_hash
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
@@ -301,4 +302,39 @@ def get_user_details(user_id):
         "shipments": shipments_result,
         "payments": payments_result
     }), 200
+
+@admin_bp.route("/employees", methods=["POST"])
+def create_employee():
+    data = request.get_json()
+    first_name = data.get("firstName")
+    last_name = data.get("lastName")
+    email = data.get("email")
+    password = data.get("password")
+
+    if not all([first_name, last_name, email, password]):
+        return jsonify({"error": "Missing required fields"}), 400
+    
+    if User.query.filter_by(email=email).first():
+        return jsonify({"error": "Email already exists"}), 409
+
+    hashed_password = generate_password_hash(password)
+    new_employee = User(
+        first_name=first_name,
+        last_name=last_name,
+        email=email,
+        password=hashed_password,
+        is_admin=False # Employees are not admins
+    )
+    db.session.add(new_employee)
+    db.session.commit()
+
+    return jsonify({
+        "message": "Employee created successfully",
+        "user": {
+            "id": new_employee.id,
+            "email": new_employee.email,
+            "firstName": new_employee.first_name,
+            "lastName": new_employee.last_name
+        }
+    }), 201
   

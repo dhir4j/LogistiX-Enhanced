@@ -6,8 +6,14 @@ import { useApi } from '@/hooks/use-api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ChevronLeft, ChevronRight, Eye } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Eye, PlusCircle } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { useToast } from '@/hooks/use-toast';
 
 interface User {
     id: number;
@@ -25,9 +31,19 @@ interface UsersApiResponse {
     totalCount: number;
 }
 
+const createEmployeeSchema = z.object({
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});
+
+type CreateEmployeeFormValues = z.infer<typeof createEmployeeSchema>;
+
 export function AdminUsersTable() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
+    const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
 
     const queryParams = useMemo(() => {
         const params = new URLSearchParams();
@@ -37,18 +53,81 @@ export function AdminUsersTable() {
         return params.toString();
     }, [page, search]);
 
-    const { data, isLoading, error } = useApi<UsersApiResponse>(`/admin/users?${queryParams}`);
+    const { data, isLoading, error, mutate } = useApi<UsersApiResponse>(`/admin/users?${queryParams}`);
+    const { toast } = useToast();
+
+    const form = useForm<CreateEmployeeFormValues>({
+        resolver: zodResolver(createEmployeeSchema),
+        defaultValues: {
+            firstName: "",
+            lastName: "",
+            email: "",
+            password: "",
+        },
+    });
+
+    const handleCreateEmployee = async (values: CreateEmployeeFormValues) => {
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/employees`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(values),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                toast({ title: "Success", description: "Employee created successfully." });
+                setCreateDialogOpen(false);
+                form.reset();
+                mutate();
+            } else {
+                toast({ title: "Error", description: result.error || "Failed to create employee.", variant: "destructive" });
+            }
+        } catch (err) {
+            toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+        }
+    };
 
     return (
         <div className="bg-background border rounded-lg p-4">
             <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-semibold">User Management</h2>
-                <Input
-                    placeholder="Search by name or email..."
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="max-w-sm"
-                />
+                <div className="flex items-center gap-2">
+                    <Input
+                        placeholder="Search by name or email..."
+                        value={search}
+                        onChange={(e) => setSearch(e.target.value)}
+                        className="max-w-sm"
+                    />
+                    <Dialog open={isCreateDialogOpen} onOpenChange={setCreateDialogOpen}>
+                        <DialogTrigger asChild>
+                            <Button><PlusCircle className="mr-2 h-4 w-4" />Create Employee</Button>
+                        </DialogTrigger>
+                        <DialogContent>
+                            <DialogHeader>
+                                <DialogTitle>Create New Employee</DialogTitle>
+                            </DialogHeader>
+                            <Form {...form}>
+                                <form onSubmit={form.handleSubmit(handleCreateEmployee)} className="space-y-4">
+                                    <FormField control={form.control} name="firstName" render={({ field }) => (
+                                        <FormItem><FormLabel>First Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                    )} />
+                                    <FormField control={form.control} name="lastName" render={({ field }) => (
+                                        <FormItem><FormLabel>Last Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                    )} />
+                                    <FormField control={form.control} name="email" render={({ field }) => (
+                                        <FormItem><FormLabel>Email</FormLabel><FormControl><Input type="email" {...field} /></FormControl><FormMessage /></FormItem>
+                                    )} />
+                                    <FormField control={form.control} name="password" render={({ field }) => (
+                                        <FormItem><FormLabel>Password</FormLabel><FormControl><Input type="password" {...field} /></FormControl><FormMessage /></FormItem>
+                                    )} />
+                                    <Button type="submit" disabled={form.formState.isSubmitting}>
+                                        {form.formState.isSubmitting ? "Creating..." : "Create Employee"}
+                                    </Button>
+                                </form>
+                            </Form>
+                        </DialogContent>
+                    </Dialog>
+                </div>
             </div>
             <Table>
                 <TableHeader>

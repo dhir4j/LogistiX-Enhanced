@@ -41,16 +41,63 @@ export default function EmployeeLoginPage() {
     },
   });
 
-  const onSubmit = (data: AdminLoginFormValues) => {
-    toast({
-        title: `${data.role.charAt(0).toUpperCase() + data.role.slice(1)} Login Successful`,
-        description: data.role === 'admin' ? "Redirecting to admin dashboard..." : "Redirecting to employee dashboard...",
-    });
+  const onSubmit = async (data: AdminLoginFormValues) => {
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: data.email, password: data.password }),
+      });
 
-    if (data.role === 'admin') {
-        router.push('/admin/dashboard');
-    } else {
-        router.push('/employee/dashboard');
+      const result = await response.json();
+
+      if (!response.ok) {
+        toast({
+            title: "Login Failed",
+            description: result.error || "Invalid credentials.",
+            variant: "destructive",
+        });
+        return;
+      }
+
+      // Check role from form against role from API response
+      const isApiAdmin = result.user?.isAdmin;
+      const isFormAdmin = data.role === 'admin';
+
+      if (isFormAdmin && !isApiAdmin) {
+        toast({
+          title: "Access Denied",
+          description: "You are not an administrator.",
+          variant: "destructive",
+        });
+        return;
+      }
+      if (!isFormAdmin && isApiAdmin) {
+        toast({
+            title: "Role Mismatch",
+            description: "Admins must log in as admin.",
+            variant: "destructive",
+        });
+        return;
+      }
+
+      toast({
+          title: "Login Successful",
+          description: "Redirecting...",
+      });
+
+      if (isApiAdmin) {
+          router.push('/admin/dashboard');
+      } else {
+          router.push('/employee/dashboard');
+      }
+
+    } catch (error) {
+        toast({
+            title: "Network Error",
+            description: "Could not connect to the server.",
+            variant: "destructive",
+        });
     }
   };
 
@@ -61,8 +108,8 @@ export default function EmployeeLoginPage() {
           <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
             <ShieldCheck className="h-8 w-8" />
           </div>
-          <CardTitle className="text-3xl font-headline">Employee Login</CardTitle>
-          <CardDescription>Enter your credentials to access the portal.</CardDescription>
+          <CardTitle className="text-3xl font-headline">Staff Login</CardTitle>
+          <CardDescription>Enter your credentials to access the appropriate portal.</CardDescription>
         </CardHeader>
         <CardContent>
           <Form {...form}>
@@ -104,7 +151,7 @@ export default function EmployeeLoginPage() {
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input placeholder="admin@example.com" {...field} className="h-11"/>
+                      <Input placeholder="your.email@example.com" {...field} className="h-11"/>
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -123,8 +170,8 @@ export default function EmployeeLoginPage() {
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full text-lg py-6">
-                Login
+              <Button type="submit" className="w-full text-lg py-6" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? "Logging in..." : "Login"}
               </Button>
             </form>
           </Form>
