@@ -1,4 +1,3 @@
-
 from flask import Flask, jsonify, render_template_string
 from .extensions import db, cors
 from .auth.routes import auth_bp
@@ -13,9 +12,7 @@ def create_app(env="development"):
     app.config.from_object(config[env])
 
     db.init_app(app)
-    # Ensure CORS is initialized with the app's config
-    cors.init_app(app, resources={r"/api/*": {"origins": app.config["CORS_ORIGINS"]}}, supports_credentials=True)
-
+    cors.init_app(app, origins=app.config.get("CORS_ORIGINS", "*"), supports_credentials=True)
 
     @app.route("/")
     def index():
