@@ -1,0 +1,122 @@
+"use client";
+
+import { useState } from "react";
+import { useApi } from "@/hooks/use-api";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
+import { PlusCircle } from "lucide-react";
+
+interface BalanceCode {
+    id: number;
+    code: string;
+    amount: number;
+    is_redeemed: boolean;
+    created_at: string;
+    redeemed_at: string | null;
+    redeemed_by: string | null;
+}
+
+export default function AdminBalanceCodes() {
+    const { data: codes, isLoading, error, mutate } = useApi<BalanceCode[]>('/admin/balance-codes');
+    const [amount, setAmount] = useState<number | string>("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { toast } = useToast();
+
+    const handleCreateCode = async () => {
+        if (!amount || Number(amount) <= 0) {
+            toast({ title: "Error", description: "Please enter a valid amount.", variant: "destructive" });
+            return;
+        }
+        setIsSubmitting(true);
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/balance-codes`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: Number(amount) }),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                toast({ title: "Success", description: `Code ${result.code} created for ₹${result.amount}.` });
+                setAmount("");
+                mutate();
+            } else {
+                toast({ title: "Error", description: result.error || "Failed to create code.", variant: "destructive" });
+            }
+        } catch (err) {
+            toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    return (
+        <div className="space-y-6">
+            <Card>
+                <CardHeader>
+                    <CardTitle>Generate New Balance Code</CardTitle>
+                    <CardDescription>Create a top-up code for an employee. They can redeem this to add funds to their wallet.</CardDescription>
+                </CardHeader>
+                <CardContent className="flex items-center gap-2">
+                    <Input
+                        type="number"
+                        placeholder="Enter amount"
+                        value={amount}
+                        onChange={(e) => setAmount(e.target.value)}
+                        className="max-w-xs"
+                        disabled={isSubmitting}
+                    />
+                    <Button onClick={handleCreateCode} disabled={isSubmitting}>
+                        <PlusCircle className="mr-2 h-4 w-4" />
+                        {isSubmitting ? "Generating..." : "Generate Code"}
+                    </Button>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle>Generated Codes</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Code</TableHead>
+                                <TableHead>Amount</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead>Created At</TableHead>
+                                <TableHead>Redeemed By</TableHead>
+                                <TableHead>Redeemed At</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {isLoading && Array.from({ length: 5 }).map((_, i) => (
+                                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                            ))}
+                            {error && <TableRow><TableCell colSpan={6} className="text-center text-red-500">Failed to load codes.</TableCell></TableRow>}
+                            {!isLoading && !error && codes?.map((c) => (
+                                <TableRow key={c.id}>
+                                    <TableCell className="font-mono">{c.code}</TableCell>
+                                    <TableCell>₹{c.amount.toFixed(2)}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={c.is_redeemed ? "secondary" : "default"}>
+                                            {c.is_redeemed ? "Redeemed" : "Active"}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell>{new Date(c.created_at).toLocaleString()}</TableCell>
+                                    <TableCell>{c.redeemed_by || 'N/A'}</TableCell>
+                                    <TableCell>{c.redeemed_at ? new Date(c.redeemed_at).toLocaleString() : 'N/A'}</TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </CardContent>
+            </Card>
+        </div>
+    );
+}
+  

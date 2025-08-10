@@ -1,11 +1,56 @@
-
 from flask import Blueprint, request, jsonify
-from app.models import Shipment, User, PaymentRequest
+from app.models import Shipment, User, PaymentRequest, BalanceCode
 from app.extensions import db
 from sqlalchemy import or_, func
 from datetime import datetime
+import string
+import random
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
+
+def generate_code(length=12):
+    return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+
+@admin_bp.route("/balance-codes", methods=["POST"])
+def create_balance_code():
+    data = request.get_json()
+    amount = data.get("amount")
+    if not amount or not isinstance(amount, (int, float)) or amount <= 0:
+        return jsonify({"error": "Valid amount is required"}), 400
+
+    new_code = BalanceCode(
+        code=f"TOPUP-{generate_code()}",
+        amount=amount
+    )
+    db.session.add(new_code)
+    db.session.commit()
+    return jsonify({
+        "message": "Balance code created successfully",
+        "code": new_code.code,
+        "amount": float(new_code.amount)
+    }), 201
+
+@admin_bp.route("/balance-codes", methods=["GET"])
+def get_balance_codes():
+    codes = db.session.query(
+        BalanceCode,
+        User.email
+    ).outerjoin(
+        User, BalanceCode.redeemed_by_user_id == User.id
+    ).order_by(BalanceCode.created_at.desc()).all()
+    
+    result = []
+    for code, email in codes:
+        result.append({
+            "id": code.id,
+            "code": code.code,
+            "amount": float(code.amount),
+            "is_redeemed": code.is_redeemed,
+            "created_at": code.created_at.isoformat(),
+            "redeemed_at": code.redeemed_at.isoformat() if code.redeemed_at else None,
+            "redeemed_by": email
+        })
+    return jsonify(result), 200
 
 @admin_bp.route("/shipments", methods=["GET"])
 def get_all_shipments():
@@ -256,3 +301,4 @@ def get_user_details(user_id):
         "shipments": shipments_result,
         "payments": payments_result
     }), 200
+  

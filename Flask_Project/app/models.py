@@ -12,6 +12,9 @@ class User(db.Model):
     last_name = db.Column(db.String(100), nullable=False)
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Virtual balance for employees
+    balance = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
 
     shipments = db.relationship('Shipment', backref='user', lazy=True)
 
@@ -65,3 +68,16 @@ class PaymentRequest(db.Model):
     utr = db.Column(db.String(64), nullable=False)
     status = db.Column(db.String(20), default='Pending')  # Pending, Approved, Rejected
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class BalanceCode(db.Model):
+    __tablename__ = 'balance_codes'
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(16), unique=True, nullable=False, index=True)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    is_redeemed = db.Column(db.Boolean, default=False, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+    redeemed_at = db.Column(db.DateTime, nullable=True)
+    redeemed_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+
+    redeemed_by = db.relationship('User', backref='redeemed_codes', lazy=True)

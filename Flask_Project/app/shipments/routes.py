@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.models import Shipment, User, PaymentRequest
+from app.models import Shipment, User, PaymentRequest, BalanceCode
 from app.extensions import db
 from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema
 from app.utils import generate_shipment_id_str
@@ -29,18 +29,30 @@ def create_shipment():
     price_without_tax = round(final_total_price / 1.18, 2)
     tax_amount = round(final_total_price - price_without_tax, 2)
 
+    # Employee balance logic
+    if not user.is_admin: # Assuming employees are not admins
+        if user.balance >= final_total_price:
+            user.balance -= final_total_price
+            status = "Booked"
+            tracking_activity = "Shipment booked and paid with employee balance."
+        else:
+            return jsonify({"error": "Insufficient balance to book shipment."}), 402
+    else: # Customer flow
+        status = "Pending Payment"
+        tracking_activity = "Shipment created. Awaiting payment confirmation."
+
     now_iso = datetime.utcnow().isoformat()
     tracking_history = [{
-        "stage": "Pending Payment",
+        "stage": status,
         "date": now_iso,
         "location": shipment_data["sender_address_city"],
-        "activity": "Shipment created. Awaiting payment confirmation."
+        "activity": tracking_activity
     }]
 
     new_shipment = Shipment(
         user_id=user.id,
         shipment_id_str=generate_shipment_id_str(),
-        status="Pending Payment",
+        status=status,
         tracking_history=tracking_history,
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
@@ -54,7 +66,7 @@ def create_shipment():
 
     return jsonify({
         "shipment_id_str": new_shipment.shipment_id_str,
-        "message": "Shipment initiated successfully. Please complete payment.",
+        "message": "Shipment initiated successfully." if status == "Booked" else "Shipment initiated successfully. Please complete payment.",
         "data": {
             **shipment_data,
             "id": new_shipment.id,
@@ -187,3 +199,35 @@ def get_user_payments():
             "created_at": payment.created_at.isoformat()
         })
     return jsonify(result), 200
+
+@shipments_bp.route("/employee/redeem-code", methods=["POST"])
+def redeem_balance_code():
+    data = request.get_json()
+    code = data.get("code")
+    email = data.get("email")
+
+    if not code or not email:
+        return jsonify({"error": "Code and email are required"}), 400
+
+    user = User.query.filter_by(email=email).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    balance_code = BalanceCode.query.filter_by(code=code).first()
+    if not balance_code:
+        return jsonify({"error": "Invalid code"}), 404
+    if balance_code.is_redeemed:
+        return jsonify({"error": "This code has already been redeemed"}), 409
+
+    user.balance = (user.balance or 0) + balance_code.amount
+    balance_code.is_redeemed = True
+    balance_code.redeemed_at = datetime.utcnow()
+    balance_code.redeemed_by_user_id = user.id
+
+    db.session.commit()
+
+    return jsonify({
+        "message": f"Successfully redeemed code. Amount added: ₹{float(balance_code.amount)}",
+        "new_balance": float(user.balance)
+    }), 200
+  
