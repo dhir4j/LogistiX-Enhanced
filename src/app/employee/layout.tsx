@@ -1,10 +1,13 @@
+
 "use client";
 
-import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
-import { LayoutDashboard, Book, FileUp, GitCompare, Scissors, Search, FileText, Printer, Send, Combine, User, Fuel, CreditCard } from "lucide-react";
+import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from "@/components/ui/sidebar";
+import { LayoutDashboard, Book, FileUp, GitCompare, Scissors, Search, FileText, Printer, Send, Combine, User, Fuel, CreditCard, LogOut, Home } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "@/hooks/use-session";
+import { useEffect } from "react";
 
 export default function EmployeeLayout({
   children,
@@ -12,6 +15,22 @@ export default function EmployeeLayout({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const { session, clearSession, isLoading } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading && session?.isAdmin) {
+      router.push('/admin/dashboard');
+    }
+     if (!isLoading && !session) {
+      router.push('/employee-login');
+    }
+  }, [session, isLoading, router]);
+  
+  const handleLogout = () => {
+      clearSession();
+      router.push('/employee-login');
+  }
 
   const navLinks = [
     { href: '/employee/dashboard', label: 'Dashboard', icon: LayoutDashboard },
@@ -25,7 +44,7 @@ export default function EmployeeLayout({
     { href: '/employee/sender', label: 'Sender', icon: Send },
     { href: '/employee/receiver', label: 'Receiver', icon: Combine },
     { href: '/employee/user', label: 'User', icon: User },
-    { href: '/employee/fuel-surcharge', label: 'Fuel Surcharge', icon: Fuel },
+    { href: '/employee/fuel-surcharge', label: 'Redeem Code', icon: Fuel },
   ];
 
   return (
@@ -59,11 +78,29 @@ export default function EmployeeLayout({
             ))}
           </SidebarMenu>
         </SidebarContent>
+        <SidebarFooter>
+            <SidebarMenu>
+               <SidebarMenuItem>
+                <SidebarMenuButton asChild tooltip={{children: "Back to Website"}}>
+                    <Link href="/">
+                        <Home />
+                        <span className="group-data-[collapsible=icon]:hidden">Back to Website</span>
+                    </Link>
+                </SidebarMenuButton>
+               </SidebarMenuItem>
+               <SidebarMenuItem>
+                <SidebarMenuButton onClick={handleLogout} tooltip={{children: "Logout"}}>
+                    <LogOut />
+                    <span className="group-data-[collapsible=icon]:hidden">Logout</span>
+                </SidebarMenuButton>
+               </SidebarMenuItem>
+            </SidebarMenu>
+        </SidebarFooter>
       </Sidebar>
       <div className="flex-1 flex flex-col">
         <header className="flex items-center justify-between p-4 bg-white border-b md:justify-end">
             <SidebarTrigger className="md:hidden" />
-            <p className="text-sm font-medium">Welcome, Employee!</p>
+            <p className="text-sm font-medium">Welcome, {session?.firstName || 'Employee'}!</p>
         </header>
         <main className="flex-1 flex bg-gray-100">
             {children}

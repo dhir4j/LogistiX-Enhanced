@@ -1,37 +1,48 @@
+
 "use client";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useApi } from "@/hooks/use-api";
-import { DollarSign, Package, Users, BarChart } from "lucide-react";
+import { DollarSign, Package, BarChart, Loader2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useSession } from "@/hooks/use-session";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 
 interface EmployeeStats {
     balance: number;
-    total_shipments: number;
-    total_spent: number;
+    shipment_count: number;
+    total_spent: number; 
 }
-
-// Mocked useApi for now, replace with actual implementation
-const useEmployeeApi = <T,>(endpoint: string) => {
-    // This is a mock. In a real scenario, you'd fetch this.
-    const MOCK_DATA: Record<string, any> = {
-        '/employee/stats': {
-            balance: 4520.50,
-            total_shipments: 28,
-            total_spent: 12890.00
-        }
-    }
-    return { data: MOCK_DATA[endpoint] as T, isLoading: false, error: null };
-}
-
 
 export default function EmployeeDashboardPage() {
-    const { data: stats, isLoading, error } = useEmployeeApi<EmployeeStats>('/employee/stats');
+    const { session, isLoading: isSessionLoading } = useSession();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isSessionLoading && !session) {
+            router.push('/employee-login');
+        }
+    }, [session, isSessionLoading, router]);
+
+    const { data: stats, isLoading, error } = useApi<EmployeeStats>(session ? `/admin/users/${session.id}` : null);
+    
+    if (isSessionLoading || !session) {
+        return (
+          <div className="flex justify-center items-center h-screen w-full">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        );
+    }
+    
+    const userDetails = stats ? (stats as any).user : null;
+    const shipmentCount = stats ? (stats as any).shipments?.length || 0 : 0;
+    const totalSpent = stats ? (stats as any).shipments?.reduce((acc: number, s: any) => acc + s.total_with_tax_18_percent, 0) : 0;
 
     const statCards = [
-        { title: "Current Balance", value: stats?.balance, icon: DollarSign, isCurrency: true },
-        { title: "Total Shipments", value: stats?.total_shipments, icon: Package },
-        { title: "Total Spent", value: stats?.total_spent, icon: BarChart, isCurrency: true },
+        { title: "Current Balance", value: userDetails?.balance, icon: DollarSign, isCurrency: true },
+        { title: "Total Shipments", value: shipmentCount, icon: Package },
+        { title: "Total Spent", value: totalSpent, icon: BarChart, isCurrency: true },
     ];
 
   return (
@@ -59,7 +70,6 @@ export default function EmployeeDashboardPage() {
             ))}
         </div>
         
-        {/* Placeholder for more content like recent shipments table */}
         <div className="mt-8">
             <Card>
                 <CardHeader>
@@ -73,4 +83,3 @@ export default function EmployeeDashboardPage() {
     </div>
   );
 }
-  

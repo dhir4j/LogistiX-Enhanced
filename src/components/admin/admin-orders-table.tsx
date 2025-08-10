@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useMemo } from 'react';
@@ -9,6 +10,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { MoreHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
+import { useToast } from '@/hooks/use-toast';
 
 interface Shipment {
     id: number;
@@ -32,6 +34,7 @@ export function AdminOrdersTable() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("all");
+    const { toast } = useToast();
 
     const queryParams = useMemo(() => {
         const params = new URLSearchParams();
@@ -49,21 +52,24 @@ export function AdminOrdersTable() {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/admin/shipments/${shipmentId}/status`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ status: newStatus }),
+                body: JSON.stringify({ status: newStatus, location: "Admin Update", activity: `Status updated to ${newStatus} by admin.` }),
             });
             if (response.ok) {
+                toast({ title: "Success", description: "Shipment status updated." });
                 mutate();
             } else {
-                console.error("Failed to update status");
+                const err = await response.json();
+                toast({ title: "Error", description: err.error || "Failed to update status.", variant: "destructive"});
             }
         } catch (err) {
-            console.error("Error updating status:", err);
+            toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
         }
     };
     
     const exportToCSV = () => {
+        if (!data?.shipments.length) return;
         const headers = ["Order ID", "Sender", "Receiver", "Destination", "Date", "Amount", "Status"];
-        const rows = data?.shipments.map(s => [
+        const rows = data.shipments.map(s => [
             s.shipment_id_str,
             s.sender_name,
             s.receiver_name,
@@ -71,11 +77,11 @@ export function AdminOrdersTable() {
             new Date(s.booking_date).toLocaleDateString(),
             s.total_with_tax_18_percent,
             s.status
-        ]);
+        ].join(','));
 
         let csvContent = "data:text/csv;charset=utf-8," 
             + headers.join(",") + "\n" 
-            + rows?.map(e => e.join(",")).join("\n");
+            + rows.join("\n");
         
         const encodedUri = encodeURI(csvContent);
         const link = document.createElement("a");
@@ -101,7 +107,8 @@ export function AdminOrdersTable() {
                             <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All</SelectItem>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="Pending Payment">Pending Payment</SelectItem>
                             <SelectItem value="Booked">Booked</SelectItem>
                             <SelectItem value="In Transit">In Transit</SelectItem>
                             <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
@@ -165,11 +172,11 @@ export function AdminOrdersTable() {
                 </TableBody>
             </Table>
             <div className="flex items-center justify-end space-x-2 py-4">
-                <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 1}>
+                <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
                     <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                 </Button>
                 <span className="text-sm">Page {data?.currentPage || 1} of {data?.totalPages || 1}</span>
-                <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page === data?.totalPages}>
+                <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={!data || page === data.totalPages}>
                     Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
             </div>

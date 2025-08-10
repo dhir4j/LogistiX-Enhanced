@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -15,15 +15,14 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Plane, Ship, IndianRupee } from "lucide-react";
+import { CalendarIcon, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { shipmentBookingSchema } from "@/lib/schemas";
 import { Separator } from "@/components/ui/separator";
+import { useSession } from "@/hooks/use-session";
+import { useRouter } from "next/navigation";
 
 type ShipmentBookingFormValues = z.infer<typeof shipmentBookingSchema>;
-
-// Mock user, replace with actual session data
-const MOCK_EMPLOYEE_EMAIL = "employee@example.com";
 
 interface PriceResponse {
     total_price: number;
@@ -32,14 +31,21 @@ interface PriceResponse {
 
 export default function EmployeeBookingPage() {
     const { toast } = useToast();
+    const { session, isLoading: isSessionLoading } = useSession();
+    const router = useRouter();
     const [priceDetails, setPriceDetails] = useState<PriceResponse | null>(null);
     const [isCalculating, setIsCalculating] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     
+    useEffect(() => {
+        if (!isSessionLoading && !session) {
+            router.push('/employee-login');
+        }
+    }, [session, isSessionLoading, router]);
+
     const form = useForm<ShipmentBookingFormValues>({
         resolver: zodResolver(shipmentBookingSchema),
         defaultValues: {
-            // Sender
             sender_name: "",
             sender_address_street: "",
             sender_address_city: "",
@@ -47,7 +53,6 @@ export default function EmployeeBookingPage() {
             sender_address_pincode: "",
             sender_address_country: "India",
             sender_phone: "",
-            // Receiver
             receiver_name: "",
             receiver_address_street: "",
             receiver_address_city: "",
@@ -55,7 +60,6 @@ export default function EmployeeBookingPage() {
             receiver_address_pincode: "",
             receiver_address_country: "India",
             receiver_phone: "",
-            // Package
             package_weight_kg: 0.5,
             package_width_cm: 10,
             package_height_cm: 10,
@@ -65,15 +69,13 @@ export default function EmployeeBookingPage() {
         },
     });
 
-    const watchedFields = useWatch({ control: form.control });
-
     const handleGetPrice = async () => {
         setIsCalculating(true);
         setPriceDetails(null);
         const { receiver_address_state, receiver_address_country, package_weight_kg, service_type } = form.getValues();
 
         const isDomestic = receiver_address_country.toLowerCase() === "india";
-        const url = isDomestic ? "/api/domestic/price" : "/api/international/price";
+        const url = `${process.env.NEXT_PUBLIC_API_URL}${isDomestic ? "/domestic/price" : "/international/price"}`;
         const body = isDomestic 
             ? { state: receiver_address_state, weight: package_weight_kg, mode: service_type }
             : { country: receiver_address_country, weight: package_weight_kg };
@@ -102,15 +104,19 @@ export default function EmployeeBookingPage() {
             toast({ title: "Error", description: "Please calculate the price before booking.", variant: "destructive" });
             return;
         }
+        if (!session) {
+            toast({ title: "Error", description: "You must be logged in to book.", variant: "destructive" });
+            return;
+        }
         setIsSubmitting(true);
         const payload = {
             ...values,
-            user_email: MOCK_EMPLOYEE_EMAIL,
+            user_email: session.email,
             final_total_price_with_tax: priceDetails.total_price
         };
 
         try {
-            const response = await fetch('/api/shipments', {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipments`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -131,6 +137,15 @@ export default function EmployeeBookingPage() {
     };
 
     const isDomestic = useWatch({ control: form.control, name: "receiver_address_country" })?.toLowerCase() === 'india';
+    
+    if (isSessionLoading || !session) {
+        return (
+          <div className="flex justify-center items-center h-screen w-full">
+            <Loader2 className="h-8 w-8 animate-spin" />
+          </div>
+        );
+    }
+
 
     return (
         <div className="flex-1 p-4 sm:p-6 bg-gray-100">
@@ -278,4 +293,3 @@ export default function EmployeeBookingPage() {
         </div>
     );
 }
-

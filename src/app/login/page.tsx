@@ -27,12 +27,14 @@ import { Input } from "@/components/ui/input";
 import { loginSchema } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { LogIn } from "lucide-react";
+import { useSession } from "@/hooks/use-session";
 
 type LoginFormValues = z.infer<typeof loginSchema>;
 
 export default function LoginPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const { setSession } = useSession();
 
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
@@ -70,6 +72,7 @@ export default function LoginPage() {
         return;
       }
 
+      setSession(result.user);
       toast({
         title: "Login Successful",
         description: "Redirecting to your dashboard...",

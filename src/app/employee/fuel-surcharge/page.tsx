@@ -1,16 +1,28 @@
+
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Gift } from "lucide-react";
+import { Gift, Loader2 } from "lucide-react";
+import { useSession } from "@/hooks/use-session";
+import { useRouter } from "next/navigation";
+
 
 export default function RedeemCodePage() {
   const [code, setCode] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
+  const { session, isLoading: isSessionLoading } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isSessionLoading && !session) {
+        router.push('/employee-login');
+    }
+  }, [session, isSessionLoading, router]);
 
   const handleRedeem = async () => {
     if (!code) {
@@ -21,16 +33,22 @@ export default function RedeemCodePage() {
       });
       return;
     }
+    if (!session) {
+      toast({
+        title: "Error",
+        description: "You must be logged in to redeem a code.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-        // In a real app, you'd get the user's email from their session
-        const userEmail = "employee@example.com"; 
-
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/employee/redeem-code`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ code, email: userEmail }),
+            body: JSON.stringify({ code, email: session.email }),
         });
 
         const result = await response.json();
@@ -59,6 +77,14 @@ export default function RedeemCodePage() {
     }
   };
 
+  if (isSessionLoading || !session) {
+    return (
+        <div className="flex-1 flex items-center justify-center bg-gray-100 p-4">
+            <Loader2 className="h-8 w-8 animate-spin" />
+        </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex items-center justify-center bg-gray-100 p-4">
       <Card className="w-full max-w-lg">
@@ -86,4 +112,3 @@ export default function RedeemCodePage() {
     </div>
   );
 }
-  

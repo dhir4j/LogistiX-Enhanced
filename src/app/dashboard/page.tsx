@@ -1,19 +1,68 @@
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+
+"use client";
+
+import { useEffect, useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { LayoutDashboard, Package, PlusCircle, Truck, CheckCircle2 } from "lucide-react";
+import { LayoutDashboard, Package, PlusCircle, Truck, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { useSession } from "@/hooks/use-session";
+import { useRouter } from "next/navigation";
 
-const recentShipments = [
-  { id: 'RS847563', to: 'New Delhi', date: '2024-05-28', status: 'In Transit' },
-  { id: 'RS947362', to: 'Mumbai', date: '2024-05-27', status: 'Delivered' },
-  { id: 'RS192837', to: 'Bangalore', date: '2024-05-25', status: 'Delivered' },
-  { id: 'RS564738', to: 'Kolkata', date: '2024-05-24', status: 'Out for Delivery' },
-  { id: 'RS394857', to: 'Chennai', date: '2024-05-22', status: 'Delivered' },
-];
+interface Shipment {
+  id: number;
+  shipment_id_str: string;
+  receiver_name: string;
+  booking_date: string;
+  status: string;
+}
 
 export default function DashboardPage() {
+  const { session, isLoading: isSessionLoading } = useSession();
+  const router = useRouter();
+  const [shipments, setShipments] = useState<Shipment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    if (!isSessionLoading) {
+      if (!session) {
+        router.push('/login');
+      } else {
+        const fetchShipments = async () => {
+          setIsLoading(true);
+          try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipments?email=${session.email}`);
+            if (response.ok) {
+              const data = await response.json();
+              setShipments(data);
+            }
+          } catch (error) {
+            console.error("Failed to fetch shipments", error);
+          } finally {
+            setIsLoading(false);
+          }
+        };
+        fetchShipments();
+      }
+    }
+  }, [session, isSessionLoading, router]);
+
+  if (isSessionLoading || !session) {
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+  
+  const stats = {
+      total: shipments.length,
+      inTransit: shipments.filter(s => s.status === 'In Transit' || s.status === 'Out for Delivery').length,
+      delivered: shipments.filter(s => s.status === 'Delivered').length,
+  }
+
   return (
     <div className="bg-secondary min-h-[calc(100vh-10rem)]">
         <div className="container py-10">
@@ -23,7 +72,7 @@ export default function DashboardPage() {
                         <LayoutDashboard className="mr-3 h-8 w-8 text-primary" />
                         Client Dashboard
                     </h1>
-                    <p className="text-muted-foreground">Welcome back! Here's an overview of your shipping activity.</p>
+                    <p className="text-muted-foreground">Welcome back, {session.firstName}! Here's an overview of your shipping activity.</p>
                 </div>
                 <Button asChild className="mt-4 md:mt-0">
                     <Link href="/booking">
@@ -40,8 +89,7 @@ export default function DashboardPage() {
                         <Package className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">12</div>
-                        <p className="text-xs text-muted-foreground">+2 from last month</p>
+                        <div className="text-2xl font-bold">{stats.total}</div>
                     </CardContent>
                 </Card>
                 <Card className="shadow-sm">
@@ -50,8 +98,7 @@ export default function DashboardPage() {
                         <Truck className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">3</div>
-                        <p className="text-xs text-muted-foreground">1 arriving today</p>
+                        <div className="text-2xl font-bold">{stats.inTransit}</div>
                     </CardContent>
                 </Card>
                 <Card className="shadow-sm">
@@ -60,8 +107,7 @@ export default function DashboardPage() {
                         <CheckCircle2 className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">9</div>
-                        <p className="text-xs text-muted-foreground">In the last 30 days</p>
+                        <div className="text-2xl font-bold">{stats.delivered}</div>
                     </CardContent>
                 </Card>
 
@@ -70,6 +116,11 @@ export default function DashboardPage() {
                         <CardTitle>Recent Shipments</CardTitle>
                     </CardHeader>
                     <CardContent>
+                        {isLoading ? (
+                             <div className="flex justify-center items-center p-12">
+                                <Loader2 className="h-8 w-8 animate-spin" />
+                            </div>
+                        ) : (
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -81,34 +132,35 @@ export default function DashboardPage() {
                             </TableRow>
                           </TableHeader>
                           <TableBody>
-                            {recentShipments.map((shipment) => (
+                            {shipments.slice(0, 5).map((shipment) => (
                               <TableRow key={shipment.id}>
-                                <TableCell className="font-medium">{shipment.id}</TableCell>
-                                <TableCell>{shipment.to}</TableCell>
-                                <TableCell>{shipment.date}</TableCell>
+                                <TableCell className="font-medium">{shipment.shipment_id_str}</TableCell>
+                                <TableCell>{shipment.receiver_name}</TableCell>
+                                <TableCell>{new Date(shipment.booking_date).toLocaleDateString()}</TableCell>
                                 <TableCell>
                                     <Badge 
                                         variant={
                                             shipment.status === 'Delivered' ? 'default' : 
-                                            shipment.status === 'In Transit' ? 'secondary' : 'outline'
+                                            (shipment.status === 'In Transit' || shipment.status === 'Out for Delivery') ? 'secondary' : 'outline'
                                         }
                                         className={
                                             shipment.status === 'Delivered' ? 'bg-green-100 text-green-800' :
-                                            shipment.status === 'In Transit' ? 'bg-blue-100 text-blue-800' : ''
+                                            (shipment.status === 'In Transit' || shipment.status === 'Out for Delivery') ? 'bg-blue-100 text-blue-800' : ''
                                         }
                                     >
                                         {shipment.status}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-right">
-                                  <Button variant="outline" size="sm">
-                                    Track
+                                  <Button variant="outline" size="sm" asChild>
+                                    <Link href={`/track/${shipment.shipment_id_str}`}>Track</Link>
                                   </Button>
                                 </TableCell>
                               </TableRow>
                             ))}
                           </TableBody>
                         </Table>
+                        )}
                     </CardContent>
                 </Card>
             </div>

@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -5,29 +6,68 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
-const trackingSteps = [
-    { status: 'Delivered', location: 'Ludhiana, IN', timestamp: 'May 24, 2024, 10:30 AM', icon: CheckCircle2, complete: true, current: true },
-    { status: 'Out for Delivery', location: 'Ludhiana Hub, IN', timestamp: 'May 24, 2024, 8:00 AM', icon: Truck, complete: true, current: false },
-    { status: 'In Transit', location: 'Delhi Hub, IN', timestamp: 'May 23, 2024, 6:00 PM', icon: Truck, complete: true, current: false },
-    { status: 'Package Processed', location: 'Delhi Hub, IN', timestamp: 'May 23, 2024, 11:00 AM', icon: Warehouse, complete: true, current: false },
-    { status: 'Shipment Created', location: 'Mumbai, IN', timestamp: 'May 22, 2024, 3:00 PM', icon: PackageCheck, complete: true, current: false },
-];
+interface TrackingHistory {
+    stage: string;
+    date: string;
+    location: string;
+    activity: string;
+}
+
+interface ShipmentDetails {
+    shipment_id_str: string;
+    status: string;
+    tracking_history: TrackingHistory[];
+    // Add any other shipment details you want to display
+}
+
+const getStatusIcon = (status: string) => {
+    switch (status) {
+        case 'Delivered': return CheckCircle2;
+        case 'Out for Delivery': return Truck;
+        case 'In Transit': return Truck;
+        case 'Booked': return PackageCheck;
+        case 'Pending Payment': return PackageCheck;
+        default: return Warehouse;
+    }
+}
 
 export default function TrackingResultPage() {
   const params = useParams();
   const router = useRouter();
-  const [trackingId, setTrackingId] = useState('');
   
-  // The trackingId from the URL can be a string or an array of strings.
   const idFromUrl = Array.isArray(params.trackingId) ? params.trackingId[0] : params.trackingId;
+  const [trackingId, setTrackingId] = useState(idFromUrl || '');
+  const [shipmentDetails, setShipmentDetails] = useState<ShipmentDetails | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (idFromUrl) {
-      setTrackingId(idFromUrl);
+      const fetchShipmentDetails = async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/shipments/${idFromUrl}`);
+          if (!response.ok) {
+            const err = await response.json();
+            throw new Error(err.error || 'Shipment not found');
+          }
+          const data: ShipmentDetails = await response.json();
+          setShipmentDetails(data);
+        } catch (err: any) {
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchShipmentDetails();
+    } else {
+        setIsLoading(false);
     }
   }, [idFromUrl]);
 
@@ -71,31 +111,47 @@ export default function TrackingResultPage() {
                 <CardDescription>Tracking ID: <span className="font-bold text-primary">{idFromUrl}</span></CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="relative pl-8">
-                {/* Vertical line */}
-                <div className="absolute left-[39px] top-3 bottom-3 w-0.5 bg-border -translate-x-1/2"></div>
-                
-                {trackingSteps.map((step, index) => (
-                    <div key={index} className="flex items-start gap-6 mb-8 last:mb-0">
-                    <div className={cn(
-                        "z-10 flex h-10 w-10 items-center justify-center rounded-full ring-8 ring-secondary",
-                        step.complete ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-                    )}>
-                        <step.icon className="h-5 w-5" />
+                {isLoading && (
+                    <div className="flex items-center justify-center p-12">
+                        <Loader2 className="h-8 w-8 animate-spin" />
                     </div>
-                    <div className="pt-1.5">
-                        <p className={cn(
-                            "font-semibold text-lg",
-                            step.current ? "text-primary" : "text-foreground"
-                        )}>
-                        {step.status}
-                        </p>
-                        <p className="text-muted-foreground text-sm">{step.location}</p>
-                        <p className="text-muted-foreground text-xs">{step.timestamp}</p>
+                )}
+                {error && (
+                    <div className="text-center p-12 text-red-500">
+                        <p>{error}</p>
                     </div>
+                )}
+                {shipmentDetails && (
+                    <div className="relative pl-8">
+                        <div className="absolute left-[39px] top-3 bottom-3 w-0.5 bg-border -translate-x-1/2"></div>
+                        
+                        {shipmentDetails.tracking_history.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((step, index) => {
+                            const Icon = getStatusIcon(step.stage);
+                            const isCurrent = index === 0;
+                            return (
+                                <div key={index} className="flex items-start gap-6 mb-8 last:mb-0">
+                                <div className={cn(
+                                    "z-10 flex h-10 w-10 items-center justify-center rounded-full ring-8 ring-secondary",
+                                    'bg-primary text-primary-foreground'
+                                )}>
+                                    <Icon className="h-5 w-5" />
+                                </div>
+                                <div className="pt-1.5">
+                                    <p className={cn(
+                                        "font-semibold text-lg",
+                                        isCurrent ? "text-primary" : "text-foreground"
+                                    )}>
+                                    {step.stage}
+                                    </p>
+                                    <p className="text-muted-foreground text-sm">{step.location}</p>
+                                    <p className="text-muted-foreground text-sm">{step.activity}</p>
+                                    <p className="text-muted-foreground text-xs">{new Date(step.date).toLocaleString()}</p>
+                                </div>
+                                </div>
+                            )
+                        })}
                     </div>
-                ))}
-                </div>
+                )}
             </CardContent>
             </Card>
         </div>

@@ -26,12 +26,14 @@ import { adminLoginSchema } from "@/lib/schemas";
 import { useToast } from "@/hooks/use-toast";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { useRouter } from "next/navigation";
+import { useSession } from "@/hooks/use-session";
 
 type AdminLoginFormValues = z.infer<typeof adminLoginSchema>;
 
 export default function EmployeeLoginPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const { setSession } = useSession();
   
   const form = useForm<AdminLoginFormValues>({
     resolver: zodResolver(adminLoginSchema),
@@ -61,7 +63,6 @@ export default function EmployeeLoginPage() {
         return;
       }
 
-      // Check role from form against role from API response
       const isApiAdmin = result.user?.isAdmin;
       const isFormAdmin = data.role === 'admin';
 
@@ -82,6 +83,7 @@ export default function EmployeeLoginPage() {
         return;
       }
 
+      setSession(result.user);
       toast({
           title: "Login Successful",
           description: "Redirecting...",

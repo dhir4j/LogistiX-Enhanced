@@ -1,18 +1,27 @@
+
 "use client";
 
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { Plane, Menu, Mail, Phone, Search } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
+import { Mail, Phone, Search, LogOut, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetTrigger, SheetClose, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { cn } from '@/lib/utils';
 import Image from 'next/image';
+import { useSession } from '@/hooks/use-session';
+import MobileNav from './mobile-nav';
 
 export default function Header() {
   const pathname = usePathname();
+  const { session, clearSession, isLoading } = useSession();
+  const router = useRouter();
 
   if (pathname.startsWith('/admin') || pathname.startsWith('/employee')) {
     return null;
+  }
+
+  const handleLogout = () => {
+    clearSession();
+    router.push('/');
   }
 
   const navLinks = [
@@ -38,12 +47,27 @@ export default function Header() {
              </a>
           </div>
            <div className="hidden md:flex items-center gap-2">
-              <Button asChild size="sm" variant="ghost" className="text-xs h-8">
-                <Link href="/login">Customer Login</Link>
-              </Button>
-              <Button asChild size="sm" variant="ghost" className="text-xs h-8">
-                <Link href="/employee-login">Employee Login</Link>
-              </Button>
+              {!isLoading && (
+                session ? (
+                  <>
+                    <Button asChild size="sm" variant="ghost" className="text-xs h-8">
+                        <Link href="/dashboard"><UserCircle className='mr-2 h-4 w-4' />Dashboard</Link>
+                    </Button>
+                    <Button size="sm" variant="ghost" className="text-xs h-8" onClick={handleLogout}>
+                        <LogOut className='mr-2 h-4 w-4' />Logout
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button asChild size="sm" variant="ghost" className="text-xs h-8">
+                        <Link href="/login">Customer Login</Link>
+                    </Button>
+                    <Button asChild size="sm" variant="ghost" className="text-xs h-8">
+                        <Link href="/employee-login">Employee Login</Link>
+                    </Button>
+                  </>
+                )
+              )}
             </div>
         </div>
       </div>
@@ -83,62 +107,7 @@ export default function Header() {
                 </Link>
             </Button>
         </div>
-
-
-        {/* Mobile Navigation */}
-        <div className="lg:hidden">
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button variant="outline" size="icon">
-                <Menu className="h-6 w-6" />
-                <span className="sr-only">Toggle navigation menu</span>
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="right" className="w-[300px] p-0">
-                <SheetHeader className="p-6 border-b">
-                    <SheetTitle>
-                        <SheetClose asChild>
-                            <Link href="/" className="flex items-center space-x-2">
-                                <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={40} height={40} />
-                                <span className="font-bold text-lg font-headline">HK SPEED COURIERS</span>
-                            </Link>
-                        </SheetClose>
-                    </SheetTitle>
-                    <SheetDescription>
-                        Main menu for navigating the HK SPEED COURIERS website.
-                    </SheetDescription>
-                </SheetHeader>
-              <div className="flex flex-col h-full">
-                <div className="flex-1 flex flex-col space-y-1 p-4">
-                  {navLinks.map((link) => (
-                    <SheetClose key={link.href} asChild>
-                      <Button
-                        asChild
-                        variant={pathname === link.href ? "secondary" : "ghost"}
-                        className="justify-start text-base font-semibold"
-                      >
-                        <Link href={link.href}>{link.label}</Link>
-                      </Button>
-                    </SheetClose>
-                  ))}
-                   <SheetClose asChild>
-                      <Button asChild variant="ghost" className="justify-start text-base font-semibold"><Link href="/track">Track Order</Link></Button>
-                   </SheetClose>
-                </div>
-                <div className="border-t p-4 mt-auto">
-                    <div className="flex flex-col space-y-2">
-                         <SheetClose asChild>
-                            <Button asChild variant="default" className="w-full"><Link href="/login">Login</Link></Button>
-                         </SheetClose>
-                         <SheetClose asChild>
-                            <Button asChild variant="outline" className="w-full"><Link href="/signup">Sign Up</Link></Button>
-                         </SheetClose>
-                    </div>
-                </div>
-              </div>
-            </SheetContent>
-          </Sheet>
-        </div>
+        <MobileNav navLinks={navLinks} />
       </div>
     </header>
   );
