@@ -14,7 +14,7 @@ def create_app(env="development"):
 
     db.init_app(app)
     # Ensure CORS is initialized with the app's config
-    cors.init_app(app, origins=app.config.get("CORS_ORIGINS", "*"), supports_credentials=True)
+    cors.init_app(app, resources={r"/api/*": {"origins": app.config.get("CORS_ORIGINS", "*")}}, supports_credentials=True)
 
 
     @app.route("/")
