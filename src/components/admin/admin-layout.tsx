@@ -26,7 +26,7 @@ export default function AdminLayout({
 
   const handleLogout = () => {
       clearSession();
-      router.push('/employee-login');
+      router.push('/');
   }
 
   const navLinks = [
