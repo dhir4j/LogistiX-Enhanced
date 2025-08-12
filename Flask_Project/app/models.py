@@ -73,7 +73,7 @@ class BalanceCode(db.Model):
     __tablename__ = 'balance_codes'
 
     id = db.Column(db.Integer, primary_key=True)
-    code = db.Column(db.String(16), unique=True, nullable=False, index=True)
+    code = db.Column(db.String(20), unique=True, nullable=False, index=True)
     amount = db.Column(db.Numeric(10, 2), nullable=False)
     is_redeemed = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)

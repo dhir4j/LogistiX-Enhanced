@@ -9,7 +9,7 @@ from werkzeug.security import generate_password_hash
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
-def generate_code(length=12):
+def generate_code(length=8):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 @admin_bp.route("/balance-codes", methods=["POST"])
@@ -338,3 +338,4 @@ def create_employee():
         }
     }), 201
   
+    
