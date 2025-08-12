@@ -6,13 +6,30 @@ from datetime import datetime
 import string
 import random
 from werkzeug.security import generate_password_hash
+from functools import wraps
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
+
+# --- Admin Authentication Decorator ---
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        user_email = request.headers.get("X-User-Email")
+        if not user_email:
+            return jsonify({"error": "Authentication required: Missing user email header"}), 401
+        
+        user = User.query.filter_by(email=user_email).first()
+        if not user or not user.is_admin:
+            return jsonify({"error": "Forbidden: Admin access required"}), 403
+        
+        return f(*args, **kwargs)
+    return decorated_function
 
 def generate_code(length=8):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 @admin_bp.route("/balance-codes", methods=["POST"])
+@admin_required
 def create_balance_code():
     data = request.get_json()
     amount = data.get("amount")
@@ -32,6 +49,7 @@ def create_balance_code():
     }), 201
 
 @admin_bp.route("/balance-codes", methods=["GET"])
+@admin_required
 def get_balance_codes():
     codes = db.session.query(
         BalanceCode,
@@ -54,6 +72,7 @@ def get_balance_codes():
     return jsonify(result), 200
 
 @admin_bp.route("/shipments", methods=["GET"])
+@admin_required
 def get_all_shipments():
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
@@ -101,6 +120,7 @@ def get_all_shipments():
     }), 200
 
 @admin_bp.route("/shipments/<shipment_id_str>/status", methods=["PUT"])
+@admin_required
 def update_shipment_status(shipment_id_str):
     data = request.get_json()
     new_status = data.get("status")
@@ -137,6 +157,7 @@ def update_shipment_status(shipment_id_str):
     }), 200
 
 @admin_bp.route("/web_analytics", methods=["GET"])
+@admin_required
 def web_analytics():
     total_orders = db.session.query(func.count(Shipment.id)).scalar() or 0
     total_revenue = db.session.query(func.coalesce(func.sum(Shipment.total_with_tax_18_percent), 0)).scalar() or 0.0
@@ -151,6 +172,7 @@ def web_analytics():
     }), 200
 
 @admin_bp.route("/payments", methods=["GET"])
+@admin_required
 def get_payments():
     payments_query = db.session.query(
         PaymentRequest,
@@ -178,6 +200,7 @@ def get_payments():
     return jsonify(result), 200
 
 @admin_bp.route("/payments/<int:payment_id>/status", methods=["PUT"])
+@admin_required
 def update_payment_status(payment_id):
     data = request.get_json()
     new_status = data.get("status")
@@ -221,6 +244,7 @@ def update_payment_status(payment_id):
     return jsonify({"message": f"Payment {new_status.lower()} successfully"}), 200
 
 @admin_bp.route("/users", methods=["GET"])
+@admin_required
 def get_all_users():
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
@@ -260,6 +284,7 @@ def get_all_users():
     }), 200
 
 @admin_bp.route("/users/<int:user_id>", methods=["GET"])
+@admin_required
 def get_user_details(user_id):
     user = User.query.get_or_404(user_id)
     if user.is_admin:
@@ -304,6 +329,7 @@ def get_user_details(user_id):
     }), 200
 
 @admin_bp.route("/employees", methods=["POST"])
+@admin_required
 def create_employee():
     data = request.get_json()
     first_name = data.get("firstName")
@@ -338,4 +364,6 @@ def create_employee():
         }
     }), 201
   
+    
+
     
