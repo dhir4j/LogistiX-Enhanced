@@ -71,16 +71,18 @@ export default function EmployeeLoginPage() {
             toast({ title: "Access Denied", description: "You are not an administrator.", variant: "destructive" });
             return;
         }
+        // If the user is an admin and trying to log in as admin, that's fine.
       } else { // Form role is 'employee'
         if (user.isAdmin) {
-             toast({ title: "Role Mismatch", description: "Admins must log in as admin.", variant: "destructive" });
+             toast({ title: "Role Mismatch", description: "Administrators must log in via the 'Admin' role selection.", variant: "destructive" });
              return;
         }
         if (!user.isEmployee) {
-            toast({ title: "Access Denied", description: "This account is not an employee account.", variant: "destructive" });
+            toast({ title: "Access Denied", description: "This account is for customers only. Please use the customer login page.", variant: "destructive" });
             return;
         }
       }
+
 
       setSession(user);
       toast({
