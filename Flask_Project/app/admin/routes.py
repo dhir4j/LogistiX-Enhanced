@@ -331,18 +331,25 @@ def get_user_details(user_id):
             "status": p.status,
             "created_at": p.created_at.isoformat()
         })
+    
+    user_details = {
+        "id": user.id,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "email": user.email,
+        "created_at": user.created_at.isoformat()
+    }
+
+    if user.is_employee:
+        user_details["balance"] = float(user.balance)
 
     return jsonify({
-        "user": {
-            "id": user.id,
-            "first_name": user.first_name,
-            "last_name": user.last_name,
-            "email": user.email,
-            "created_at": user.created_at.isoformat()
-        },
+        "user": user_details,
         "shipments": shipments_result,
         "payments": payments_result
     }), 200
+
+# --- Employee CRUD ---
 
 @admin_bp.route("/employees", methods=["POST"])
 @admin_required
@@ -387,7 +394,7 @@ def get_all_employees():
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
     q = request.args.get("q")
-    query = User.query.filter(User.is_employee == True)
+    query = User.query.filter_by(is_employee=True)
 
     if q:
         like_q = f"%{q}%"
@@ -420,8 +427,43 @@ def get_all_employees():
         "currentPage": page,
         "totalCount": total_count
     }), 200
-    
 
-    
+@admin_bp.route("/employees/<int:employee_id>", methods=["PUT"])
+@admin_required
+def update_employee(employee_id):
+    employee = User.query.get_or_404(employee_id)
+    if not employee.is_employee:
+        return jsonify({"error": "This is not an employee account"}), 400
 
+    data = request.get_json()
     
+    # Update fields if they exist in the request
+    if 'firstName' in data:
+        employee.first_name = data['firstName']
+    if 'lastName' in data:
+        employee.last_name = data['lastName']
+    if 'email' in data and data['email'] != employee.email:
+        if User.query.filter_by(email=data['email']).first():
+            return jsonify({"error": "Email already in use"}), 409
+        employee.email = data['email']
+    if 'password' in data and data['password']:
+        employee.password = generate_password_hash(data['password'])
+
+    db.session.commit()
+    return jsonify({"message": "Employee updated successfully"}), 200
+
+@admin_bp.route("/employees/<int:employee_id>", methods=["DELETE"])
+@admin_required
+def delete_employee(employee_id):
+    employee = User.query.get_or_404(employee_id)
+    if not employee.is_employee:
+        return jsonify({"error": "This is not an employee account"}), 400
+
+    # You might want to decide what to do with their shipments.
+    # For now, we will just delete the user. The shipments will remain
+    # but the user_id will point to a non-existent user unless you set up
+    # specific cascade delete behavior or handle it manually.
+    
+    db.session.delete(employee)
+    db.session.commit()
+    return jsonify({"message": "Employee deleted successfully"}), 200
