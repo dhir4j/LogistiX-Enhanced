@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -32,10 +33,10 @@ export default function TrackPage() {
             <div className="flex w-full items-center space-x-2">
               <Input
                 type="text"
-                placeholder="Enter your Tracking ID, e.g., RS123456789IN"
+                placeholder="Enter your Tracking ID, e.g., RS..."
                 className="text-base h-12"
                 value={trackingId}
-                onChange={(e) => setTrackingId(e.target.value)}
+                onChange={(e) => setTrackingId(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
               />
               <Button type="submit" onClick={handleTrack} size="lg" className="h-12">

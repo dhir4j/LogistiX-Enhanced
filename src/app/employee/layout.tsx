@@ -46,7 +46,7 @@ export default function EmployeeLayout({
   const navLinks = [
     { href: '/employee/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/employee/booking', label: 'Booking', icon: Book },
-    { href: '/track', label: 'Tracking', icon: Search },
+    { href: '/employee/awb-tracking', label: 'AWB / Tracking', icon: Search },
     { href: '/employee/fuel-surcharge', label: 'Redeem Code', icon: Fuel },
     { href: '/employee/excel-export', label: 'Excel Export', icon: FileDown },
     { href: '#', label: 'Rate Compare', icon: AreaChart, disabled: true },
