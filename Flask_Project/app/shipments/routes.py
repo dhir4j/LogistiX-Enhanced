@@ -31,7 +31,7 @@ def create_shipment():
     tax_amount = round(final_total_price - price_without_tax, 2)
 
     # Employee balance logic
-    if not user.is_admin: # Assuming employees are not admins
+    if user.is_employee:
         if user.balance >= final_total_price:
             user.balance -= final_total_price
             status = "Booked"
@@ -122,7 +122,30 @@ def get_user_shipments():
     if not user_email:
         return jsonify({"error": "Missing email parameter"}), 400
 
-    shipments = Shipment.query.filter_by(user_email=user_email).order_by(Shipment.booking_date.desc()).all()
+    from_date_str = request.args.get("from_date")
+    to_date_str = request.args.get("to_date")
+    status = request.args.get("status")
+
+    query = Shipment.query.filter_by(user_email=user_email)
+
+    if from_date_str:
+        try:
+            from_date = datetime.fromisoformat(from_date_str.replace("Z", "+00:00")).date()
+            query = query.filter(Shipment.booking_date >= from_date)
+        except ValueError:
+            return jsonify({"error": "Invalid from_date format. Use ISO format."}), 400
+    
+    if to_date_str:
+        try:
+            to_date = datetime.fromisoformat(to_date_str.replace("Z", "+00:00")).date()
+            query = query.filter(Shipment.booking_date <= to_date)
+        except ValueError:
+            return jsonify({"error": "Invalid to_date format. Use ISO format."}), 400
+
+    if status and status.lower() != 'all':
+        query = query.filter(Shipment.status == status)
+
+    shipments = query.order_by(Shipment.booking_date.desc()).all()
 
     result = []
     for s in shipments:
@@ -154,6 +177,7 @@ def get_shipment_detail(shipment_id_str):
         "sender_address_pincode": shipment.sender_address_pincode,
         "sender_address_country": shipment.sender_address_country,
         "sender_phone": shipment.sender_phone,
+        "user_email": shipment.user_email,
         "receiver_name": shipment.receiver_name,
         "receiver_address_street": shipment.receiver_address_street,
         "receiver_address_city": shipment.receiver_address_city,
@@ -162,7 +186,11 @@ def get_shipment_detail(shipment_id_str):
         "receiver_address_country": shipment.receiver_address_country,
         "receiver_phone": shipment.receiver_phone,
         "package_weight_kg": float(shipment.package_weight_kg),
+        "package_length_cm": float(shipment.package_length_cm),
+        "package_width_cm": float(shipment.package_width_cm),
+        "package_height_cm": float(shipment.package_height_cm),
         "booking_date": shipment.booking_date.isoformat(),
+        "service_type": shipment.service_type,
         "status": shipment.status,
         "price_without_tax": float(shipment.price_without_tax),
         "tax_amount_18_percent": float(shipment.tax_amount_18_percent),
@@ -236,6 +264,8 @@ def redeem_balance_code():
 @shipments_bp.route("/employee/addresses", methods=["POST"])
 def add_saved_address():
     user_email = request.headers.get("X-User-Email")
+    if not user_email:
+        return jsonify({"error": "User not found"}), 404
     user = User.query.filter_by(email=user_email).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -254,6 +284,9 @@ def add_saved_address():
 @shipments_bp.route("/employee/addresses", methods=["GET"])
 def get_saved_addresses():
     user_email = request.headers.get("X-User-Email")
+    if not user_email:
+        return jsonify({"error": "User not found"}), 404
+        
     user = User.query.filter_by(email=user_email).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -265,6 +298,9 @@ def get_saved_addresses():
 @shipments_bp.route("/employee/addresses/<int:address_id>", methods=["DELETE"])
 def delete_saved_address(address_id):
     user_email = request.headers.get("X-User-Email")
+    if not user_email:
+        return jsonify({"error": "User not found"}), 404
+        
     user = User.query.filter_by(email=user_email).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
