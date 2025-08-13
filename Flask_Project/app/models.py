@@ -90,6 +90,7 @@ class SavedAddress(db.Model):
     __tablename__ = 'saved_addresses'
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    address_type = db.Column(db.String(50), nullable=False) # 'sender' or 'receiver'
     nickname = db.Column(db.String(100), nullable=False)
     name = db.Column(db.String(255), nullable=False)
     address_street = db.Column(db.String(255), nullable=False)
@@ -98,3 +99,5 @@ class SavedAddress(db.Model):
     address_pincode = db.Column(db.String(10), nullable=False)
     address_country = db.Column(db.String(100), nullable=False)
     phone = db.Column(db.String(30), nullable=False)
+
+    __table_args__ = (db.UniqueConstraint('user_id', 'nickname', 'address_type', name='_user_nickname_type_uc'),)

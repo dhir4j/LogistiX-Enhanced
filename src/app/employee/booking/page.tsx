@@ -4,7 +4,6 @@
 import { useState, useEffect } from "react";
 import { useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -15,17 +14,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, BookUser, Save } from "lucide-react";
+import { CalendarIcon, Loader2, BookUser } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { shipmentBookingSchema } from "@/lib/schemas";
+import type { ShipmentBookingFormValues } from "@/lib/schemas";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "@/hooks/use-session";
 import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { useApi } from "@/hooks/use-api";
 import { Checkbox } from "@/components/ui/checkbox";
-
-type ShipmentBookingFormValues = z.infer<typeof shipmentBookingSchema>;
 
 interface PriceResponse {
     total_price: number;
@@ -34,6 +32,7 @@ interface PriceResponse {
 
 interface SavedAddress {
     id: number;
+    address_type: 'sender' | 'receiver';
     nickname: string;
     name: string;
     address_street: string;
@@ -51,39 +50,26 @@ export default function EmployeeBookingPage() {
     const [priceDetails, setPriceDetails] = useState<PriceResponse | null>(null);
     const [isCalculating, setIsCalculating] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const { data: addresses, mutate: mutateAddresses } = useApi<SavedAddress[]>('/api/employee/addresses');
+    
+    // Separate API calls for sender and receiver addresses
+    const { data: senderAddresses, mutate: mutateSenderAddresses } = useApi<SavedAddress[]>('/api/employee/addresses?type=sender');
+    const { data: receiverAddresses, mutate: mutateReceiverAddresses } = useApi<SavedAddress[]>('/api/employee/addresses?type=receiver');
     
     const form = useForm<ShipmentBookingFormValues>({
         resolver: zodResolver(shipmentBookingSchema),
         defaultValues: {
-            sender_name: "",
-            sender_address_street: "",
-            sender_address_city: "",
-            sender_address_state: "",
-            sender_address_pincode: "",
-            sender_address_country: "India",
-            sender_phone: "",
-            save_sender_address: false,
-            sender_address_nickname: "",
-            receiver_name: "",
-            receiver_address_street: "",
-            receiver_address_city: "",
-            receiver_address_state: "",
-            receiver_address_pincode: "",
-            receiver_address_country: "India",
-            receiver_phone: "",
-            save_receiver_address: false,
-            receiver_address_nickname: "",
-            package_weight_kg: 0.5,
-            package_width_cm: 10,
-            package_height_cm: 10,
-            package_length_cm: 10,
-            pickup_date: new Date(),
-            service_type: "Standard",
+            sender_name: "", sender_address_street: "", sender_address_city: "",
+            sender_address_state: "", sender_address_pincode: "", sender_address_country: "India",
+            sender_phone: "", save_sender_address: false, sender_address_nickname: "",
+            receiver_name: "", receiver_address_street: "", receiver_address_city: "",
+            receiver_address_state: "", receiver_address_pincode: "", receiver_address_country: "India",
+            receiver_phone: "", save_receiver_address: false, receiver_address_nickname: "",
+            package_weight_kg: 0.5, package_width_cm: 10, package_height_cm: 10,
+            package_length_cm: 10, pickup_date: new Date(), service_type: "Standard",
         },
     });
 
-    const watchedFields = useWatch({ 
+    const watchedPriceFields = useWatch({ 
         control: form.control, 
         name: ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type"] 
     });
@@ -130,14 +116,8 @@ export default function EmployeeBookingPage() {
     };
     
     useEffect(() => {
-        const subscription = form.watch((value, { name, type }) => {
-            if (name && ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type"].includes(name)) {
-                handleGetPrice();
-            }
-        });
-        return () => subscription.unsubscribe();
-    }, [form.watch]);
-
+        handleGetPrice();
+    }, [watchedPriceFields, form.getValues]);
 
     const saveAddress = async (type: 'sender' | 'receiver') => {
         const values = form.getValues();
@@ -150,6 +130,7 @@ export default function EmployeeBookingPage() {
             address_pincode: type === 'sender' ? values.sender_address_pincode : values.receiver_address_pincode,
             address_country: type === 'sender' ? values.sender_address_country : values.receiver_address_country,
             phone: type === 'sender' ? values.sender_phone : values.receiver_phone,
+            address_type: type
         };
 
         if (!addressData.nickname) {
@@ -163,11 +144,11 @@ export default function EmployeeBookingPage() {
                 headers: { 'Content-Type': 'application/json', 'X-User-Email': session!.email },
                 body: JSON.stringify(addressData)
             });
+            const result = await response.json();
             if (response.ok) {
                 toast({ title: "Success", description: `Address "${addressData.nickname}" saved.`});
-                mutateAddresses();
+                if(type === 'sender') mutateSenderAddresses(); else mutateReceiverAddresses();
             } else {
-                const result = await response.json();
                 toast({ title: "Save Failed", description: result.error, variant: "destructive"});
             }
         } catch (error) {
@@ -189,7 +170,12 @@ export default function EmployeeBookingPage() {
         if (values.save_sender_address) await saveAddress('sender');
         if (values.save_receiver_address) await saveAddress('receiver');
 
-        const payload = { ...values, user_email: session.email, final_total_price_with_tax: priceDetails.total_price };
+        const payload = {
+            ...values,
+            pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
+            user_email: session.email,
+            final_total_price_with_tax: priceDetails.total_price
+        };
 
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments`, {
@@ -226,7 +212,7 @@ export default function EmployeeBookingPage() {
         form.setValue(`${type}_phone`, address.phone);
     };
 
-    const AddressBookDialog = ({ type }: { type: 'sender' | 'receiver' }) => (
+    const AddressBookDialog = ({ type, addresses }: { type: 'sender' | 'receiver', addresses: SavedAddress[] | null | undefined }) => (
         <Dialog>
             <DialogTrigger asChild>
                 <Button variant="outline" size="sm"><BookUser className="mr-2 h-4 w-4" /> Address Book</Button>
@@ -244,7 +230,7 @@ export default function EmployeeBookingPage() {
                             </Button>
                         </DialogClose>
                     ))}
-                    {addresses?.length === 0 && <p className="text-muted-foreground text-sm">No saved addresses found.</p>}
+                    {!addresses || addresses.length === 0 && <p className="text-muted-foreground text-sm p-4 text-center">No saved addresses found for {type}.</p>}
                 </div>
             </DialogContent>
         </Dialog>
@@ -269,7 +255,7 @@ export default function EmployeeBookingPage() {
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle>Sender Details</CardTitle>
-                                <AddressBookDialog type="sender" />
+                                <AddressBookDialog type="sender" addresses={senderAddresses} />
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <FormField name="sender_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
@@ -284,7 +270,7 @@ export default function EmployeeBookingPage() {
                                 <FormField control={form.control} name="save_sender_address" render={({ field }) => (
                                     <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to the address book</FormLabel></div>
+                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to sender book</FormLabel></div>
                                     </FormItem>
                                 )}/>
                                 {watchSaveSender && <FormField name="sender_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Head Office" /></FormControl><FormMessage /></FormItem> )}/>}
@@ -294,7 +280,7 @@ export default function EmployeeBookingPage() {
                          <Card>
                             <CardHeader className="flex flex-row items-center justify-between">
                                 <CardTitle>Receiver Details</CardTitle>
-                                <AddressBookDialog type="receiver" />
+                                <AddressBookDialog type="receiver" addresses={receiverAddresses} />
                             </CardHeader>
                             <CardContent className="space-y-4">
                                 <FormField name="receiver_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
@@ -312,20 +298,24 @@ export default function EmployeeBookingPage() {
                                 <FormField control={form.control} name="save_receiver_address" render={({ field }) => (
                                     <FormItem className="flex flex-row items-start space-x-3 space-y-0">
                                     <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to the address book</FormLabel></div>
+                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to receiver book</FormLabel></div>
                                     </FormItem>
                                 )}/>
                                 {watchSaveReceiver && <FormField name="receiver_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Warehouse" /></FormControl><FormMessage /></FormItem> )}/>}
                             </CardContent>
                         </Card>
-                        <Card>
+                    </div>
+
+                    {/* Pricing and Action Section */}
+                    <div className="lg:col-span-1 space-y-6">
+                        <Card className="sticky top-20">
                             <CardHeader><CardTitle>Package & Service</CardTitle></CardHeader>
                             <CardContent className="space-y-4">
-                                 <div className="grid md:grid-cols-4 gap-4">
+                                 <div className="grid grid-cols-2 gap-4">
                                      <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                     <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                     <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                     <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                  </div>
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <FormField name="pickup_date" control={form.control} render={({ field }) => (
@@ -357,12 +347,6 @@ export default function EmployeeBookingPage() {
                                     )} />}
                                 </div>
                             </CardContent>
-                        </Card>
-                    </div>
-
-                    {/* Pricing and Action Section */}
-                    <div className="lg:col-span-1 space-y-6">
-                        <Card className="sticky top-20">
                              <CardHeader><CardTitle>Price & Book</CardTitle></CardHeader>
                              <CardContent className="space-y-4">
                                 {(isCalculating) && (
@@ -402,4 +386,3 @@ export default function EmployeeBookingPage() {
         </div>
     );
 }
-

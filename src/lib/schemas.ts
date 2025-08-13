@@ -63,3 +63,5 @@ export const shipmentBookingSchema = z.object({
     message: "Nickname is required to save receiver address",
     path: ["receiver_address_nickname"],
 });
+
+export type ShipmentBookingFormValues = z.infer<typeof shipmentBookingSchema>;

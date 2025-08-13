@@ -5,7 +5,7 @@ from app.extensions import db
 from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema, SavedAddressSchema
 from app.utils import generate_shipment_id_str
 from datetime import datetime, time
-from sqlalchemy import func
+from sqlalchemy import func, exc
 
 shipments_bp = Blueprint("shipments", __name__, url_prefix="/api")
 
@@ -17,6 +17,11 @@ def create_shipment():
     final_total_price = data.pop("final_total_price_with_tax", None)
 
     try:
+        # We pop these as they are not part of the ShipmentCreateSchema
+        data.pop("save_sender_address", None)
+        data.pop("sender_address_nickname", None)
+        data.pop("save_receiver_address", None)
+        data.pop("receiver_address_nickname", None)
         shipment_data = schema.load(data)
     except Exception as e:
         return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
@@ -64,6 +69,7 @@ def create_shipment():
     db.session.add(new_shipment)
     db.session.commit()
     
+    # We can't jsonify date objects directly
     shipment_data['pickup_date'] = shipment_data['pickup_date'].isoformat()
 
     return jsonify({
@@ -334,8 +340,17 @@ def add_saved_address():
         return jsonify({"error": "Invalid address data", "details": e.messages}), 400
 
     new_address = SavedAddress(user_id=user.id, **address_data)
-    db.session.add(new_address)
-    db.session.commit()
+    
+    try:
+        db.session.add(new_address)
+        db.session.commit()
+    except exc.IntegrityError:
+        db.session.rollback()
+        return jsonify({"error": f"An address with the nickname '{address_data['nickname']}' already exists for this address type."}), 409
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": "Could not save address.", "details": str(e)}), 500
+
     return jsonify(schema.dump(new_address)), 201
 
 @shipments_bp.route("/employee/addresses", methods=["GET"])
@@ -348,7 +363,13 @@ def get_saved_addresses():
     if not user:
         return jsonify({"error": "User not found"}), 404
     
-    addresses = SavedAddress.query.filter_by(user_id=user.id).all()
+    address_type = request.args.get('type')
+    query = SavedAddress.query.filter_by(user_id=user.id)
+
+    if address_type in ['sender', 'receiver']:
+        query = query.filter_by(address_type=address_type)
+    
+    addresses = query.all()
     schema = SavedAddressSchema(many=True)
     return jsonify(schema.dump(addresses)), 200
 
