@@ -10,8 +10,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { PlusCircle } from "lucide-react";
+import { PlusCircle, Trash2 } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 
 interface BalanceCode {
     id: number;
@@ -64,6 +65,30 @@ export default function AdminBalanceCodes() {
             setIsSubmitting(false);
         }
     };
+    
+    const handleDeleteCode = async (codeId: number) => {
+        if (!session?.email) {
+            toast({ title: "Error", description: "Authentication error.", variant: "destructive" });
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/balance-codes/${codeId}`, {
+                method: 'DELETE',
+                headers: { 'X-User-Email': session.email },
+            });
+            const result = await response.json();
+            if (response.ok) {
+                toast({ title: "Success", description: result.message });
+                mutate();
+            } else {
+                 toast({ title: "Error", description: result.error || "Failed to delete code.", variant: "destructive" });
+            }
+        } catch (err) {
+            toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+        }
+    };
+
 
     return (
         <div className="space-y-6">
@@ -102,13 +127,14 @@ export default function AdminBalanceCodes() {
                                 <TableHead>Created At</TableHead>
                                 <TableHead>Redeemed By</TableHead>
                                 <TableHead>Redeemed At</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {isLoading && Array.from({ length: 5 }).map((_, i) => (
-                                <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                                <TableRow key={i}><TableCell colSpan={7}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
                             ))}
-                            {error && <TableRow><TableCell colSpan={6} className="text-center text-red-500">Failed to load codes.</TableCell></TableRow>}
+                            {error && <TableRow><TableCell colSpan={7} className="text-center text-red-500">Failed to load codes.</TableCell></TableRow>}
                             {!isLoading && !error && codes?.map((c) => (
                                 <TableRow key={c.id}>
                                     <TableCell className="font-mono">{c.code}</TableCell>
@@ -121,6 +147,27 @@ export default function AdminBalanceCodes() {
                                     <TableCell>{new Date(c.created_at).toLocaleString()}</TableCell>
                                     <TableCell>{c.redeemed_by || 'N/A'}</TableCell>
                                     <TableCell>{c.redeemed_at ? new Date(c.redeemed_at).toLocaleString() : 'N/A'}</TableCell>
+                                    <TableCell className="text-right">
+                                         <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button variant="destructive" size="sm" disabled={c.is_redeemed}>
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This will permanently delete the balance code <span className="font-bold">{c.code}</span>.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction onClick={() => handleDeleteCode(c.id)}>Delete</AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+                                    </TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -130,4 +177,5 @@ export default function AdminBalanceCodes() {
         </div>
     );
 }
-  
+
+    

@@ -71,6 +71,21 @@ def get_balance_codes():
         })
     return jsonify(result), 200
 
+@admin_bp.route("/balance-codes/<int:code_id>", methods=["DELETE"])
+@admin_required
+def delete_balance_code(code_id):
+    code = BalanceCode.query.get(code_id)
+    if not code:
+        return jsonify({"error": "Code not found"}), 404
+    
+    if code.is_redeemed:
+        return jsonify({"error": "Cannot delete a redeemed code"}), 400
+
+    db.session.delete(code)
+    db.session.commit()
+    
+    return jsonify({"message": "Balance code deleted successfully"}), 200
+
 @admin_bp.route("/shipments", methods=["GET"])
 @admin_required
 def get_all_shipments():
@@ -364,6 +379,8 @@ def create_employee():
         }
     }), 201
   
+    
+
     
 
     
