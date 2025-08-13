@@ -63,33 +63,32 @@ export default function EmployeeLoginPage() {
         return;
       }
 
-      const isApiAdmin = result.user?.isAdmin;
+      const user = result.user;
       const isFormAdmin = data.role === 'admin';
 
-      if (isFormAdmin && !isApiAdmin) {
-        toast({
-          title: "Access Denied",
-          description: "You are not an administrator.",
-          variant: "destructive",
-        });
-        return;
-      }
-      if (!isFormAdmin && isApiAdmin) {
-        toast({
-            title: "Role Mismatch",
-            description: "Admins must log in as admin.",
-            variant: "destructive",
-        });
-        return;
+      if (isFormAdmin) {
+        if (!user.isAdmin) {
+            toast({ title: "Access Denied", description: "You are not an administrator.", variant: "destructive" });
+            return;
+        }
+      } else { // Form role is 'employee'
+        if (user.isAdmin) {
+             toast({ title: "Role Mismatch", description: "Admins must log in as admin.", variant: "destructive" });
+             return;
+        }
+        if (!user.isEmployee) {
+            toast({ title: "Access Denied", description: "This account is not an employee account.", variant: "destructive" });
+            return;
+        }
       }
 
-      setSession(result.user);
+      setSession(user);
       toast({
           title: "Login Successful",
           description: "Redirecting...",
       });
 
-      if (isApiAdmin) {
+      if (user.isAdmin) {
           router.push('/admin/dashboard');
       } else {
           router.push('/employee/dashboard');

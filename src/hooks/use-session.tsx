@@ -9,6 +9,7 @@ interface User {
     firstName: string;
     lastName: string;
     isAdmin: boolean;
+    isEmployee: boolean;
 }
 
 interface SessionContextType {

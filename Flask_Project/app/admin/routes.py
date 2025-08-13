@@ -37,7 +37,7 @@ def create_balance_code():
         return jsonify({"error": "Valid amount is required"}), 400
 
     new_code = BalanceCode(
-        code=f"TOPUP-{generate_code()}",
+        code=f"TOPUP-{generate_code(length=8)}",
         amount=amount
     )
     db.session.add(new_code)
@@ -176,7 +176,7 @@ def update_shipment_status(shipment_id_str):
 def web_analytics():
     total_orders = db.session.query(func.count(Shipment.id)).scalar() or 0
     total_revenue = db.session.query(func.coalesce(func.sum(Shipment.total_with_tax_18_percent), 0)).scalar() or 0.0
-    total_users = db.session.query(func.count(User.id)).filter(User.is_admin == False).scalar() or 0
+    total_users = db.session.query(func.count(User.id)).filter(User.is_admin == False, User.is_employee == False).scalar() or 0
     avg_revenue = (total_revenue / total_orders) if total_orders > 0 else 0.0
 
     return jsonify({
@@ -264,7 +264,8 @@ def get_all_users():
     page = int(request.args.get("page", 1))
     limit = int(request.args.get("limit", 10))
     q = request.args.get("q")
-    query = User.query.filter(User.is_admin == False)
+    # Only get customers (not admins, not employees)
+    query = User.query.filter(User.is_admin == False, User.is_employee == False)
 
     if q:
         like_q = f"%{q}%"
@@ -364,7 +365,8 @@ def create_employee():
         last_name=last_name,
         email=email,
         password=hashed_password,
-        is_admin=False # Employees are not admins
+        is_admin=False,
+        is_employee=True
     )
     db.session.add(new_employee)
     db.session.commit()
@@ -379,6 +381,45 @@ def create_employee():
         }
     }), 201
   
+@admin_bp.route("/employees", methods=["GET"])
+@admin_required
+def get_all_employees():
+    page = int(request.args.get("page", 1))
+    limit = int(request.args.get("limit", 10))
+    q = request.args.get("q")
+    query = User.query.filter(User.is_employee == True)
+
+    if q:
+        like_q = f"%{q}%"
+        query = query.filter(
+            or_(
+                User.first_name.ilike(like_q),
+                User.last_name.ilike(like_q),
+                User.email.ilike(like_q)
+            )
+        )
+    
+    total_count = query.count()
+    pagination = query.order_by(User.created_at.desc()).paginate(page=page, per_page=limit, error_out=False)
+    employees = pagination.items
+
+    result = []
+    for user in employees:
+        result.append({
+            "id": user.id,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "email": user.email,
+            "created_at": user.created_at.isoformat(),
+            "shipment_count": len(user.shipments)
+        })
+
+    return jsonify({
+        "users": result,
+        "totalPages": pagination.pages or 1,
+        "currentPage": page,
+        "totalCount": total_count
+    }), 200
     
 
     

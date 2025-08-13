@@ -2,7 +2,7 @@
 "use client";
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Book, FileUp, GitCompare, Scissors, Search, FileText, Printer, Send, Combine, User, Fuel, CreditCard, LogOut, Home } from "lucide-react";
+import { LayoutDashboard, Book, FileUp, GitCompare, Scissors, Search, FileText, Printer, Send, Combine, User, Fuel, CreditCard, LogOut, Home, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -19,17 +19,28 @@ export default function EmployeeLayout({
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && session?.isAdmin) {
-      router.push('/admin/dashboard');
-    }
-     if (!isLoading && !session) {
-      router.push('/employee-login');
+    if (!isLoading) {
+      if (!session) {
+        router.push('/employee-login');
+      } else if (session.isAdmin) {
+        router.push('/admin/dashboard');
+      } else if (!session.isEmployee) {
+        router.push('/employee-login');
+      }
     }
   }, [session, isLoading, router]);
   
   const handleLogout = () => {
       clearSession();
       router.push('/employee-login');
+  }
+
+   if (isLoading || !session || !session.isEmployee) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   const navLinks = [

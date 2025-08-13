@@ -1,7 +1,7 @@
 "use client"
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, CreditCard, LogOut, Ship, Home, Gift } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, LogOut, Ship, Home, Gift, Briefcase } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -16,7 +16,8 @@ export default function AdminLayout({
   const navLinks = [
     { href: '/admin/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/admin/shipments', label: 'Shipments', icon: Ship },
-    { href: '/admin/users', label: 'Users', icon: Users },
+    { href: '/admin/users', label: 'Customers', icon: Users },
+    { href: '/admin/employees', label: 'Employees', icon: Briefcase },
     { href: '/admin/payments', label: 'Payments', icon: CreditCard },
     { href: '/admin/balance-codes', label: 'Balance Codes', icon: Gift },
   ];

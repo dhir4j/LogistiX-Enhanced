@@ -24,7 +24,8 @@ def signup():
         last_name=user_data["last_name"],
         email=user_data["email"],
         password=hashed_password,
-        is_admin=False
+        is_admin=False,
+        is_employee=False,
     )
     db.session.add(new_user)
     db.session.commit()
@@ -50,6 +51,7 @@ def login():
             "email": user.email,
             "firstName": user.first_name,
             "lastName": user.last_name,
-            "isAdmin": user.is_admin
+            "isAdmin": user.is_admin,
+            "isEmployee": user.is_employee,
         }
     }), 200
