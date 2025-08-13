@@ -27,7 +27,7 @@ with app.app_context():
         print("Updating password and ensuring admin/employee status is set correctly.")
         existing_admin.password = generate_password_hash(admin_password)
         existing_admin.is_admin = True
-        existing_admin.is_employee = False # Admins are not employees in this context
+        existing_admin.is_employee = False # Admins are not employees
         if not existing_admin.first_name:
             existing_admin.first_name = "Admin"
         if not existing_admin.last_name:
@@ -52,4 +52,3 @@ with app.app_context():
     except Exception as e:
         db.session.rollback()
         print(f"An error occurred during database commit: {e}")
-

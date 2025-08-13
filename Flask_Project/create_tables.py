@@ -14,6 +14,13 @@ from app import create_app, db
 app = create_app()
 
 with app.app_context():
+    print("Dropping all existing tables...")
+    try:
+        db.drop_all()
+        print("Tables dropped successfully.")
+    except Exception as e:
+        print(f"An error occurred while dropping tables: {e}")
+
     print("Creating database tables...")
     try:
         db.create_all()
