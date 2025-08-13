@@ -11,6 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { MoreHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
+import { useSession } from '@/hooks/use-session';
 
 interface Shipment {
     id: number;
@@ -35,6 +36,7 @@ export function AdminOrdersTable() {
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("all");
     const { toast } = useToast();
+    const { session } = useSession();
 
     const queryParams = useMemo(() => {
         const params = new URLSearchParams();
@@ -48,10 +50,17 @@ export function AdminOrdersTable() {
     const { data, isLoading, error, mutate } = useApi<ShipmentsApiResponse>(`/api/admin/shipments?${queryParams}`);
 
     const handleStatusUpdate = async (shipmentId: string, newStatus: string) => {
+        if (!session?.email) {
+            toast({ title: "Error", description: "Authentication error. Please log in again.", variant: "destructive" });
+            return;
+        }
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/shipments/${shipmentId}/status`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Email': session.email,
+                },
                 body: JSON.stringify({ status: newStatus, location: "Admin Update", activity: `Status updated to ${newStatus} by admin.` }),
             });
             if (response.ok) {

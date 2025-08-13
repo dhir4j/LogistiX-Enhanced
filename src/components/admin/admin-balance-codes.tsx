@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { PlusCircle } from "lucide-react";
+import { useSession } from "@/hooks/use-session";
 
 interface BalanceCode {
     id: number;
@@ -27,17 +28,26 @@ export default function AdminBalanceCodes() {
     const [amount, setAmount] = useState<number | string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
+    const { session } = useSession();
 
     const handleCreateCode = async () => {
         if (!amount || Number(amount) <= 0) {
             toast({ title: "Error", description: "Please enter a valid amount.", variant: "destructive" });
             return;
         }
+        if (!session?.email) {
+            toast({ title: "Error", description: "Authentication error. Please log in again.", variant: "destructive" });
+            return;
+        }
+
         setIsSubmitting(true);
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/balance-codes`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Email': session.email,
+                },
                 body: JSON.stringify({ amount: Number(amount) }),
             });
             const result = await response.json();

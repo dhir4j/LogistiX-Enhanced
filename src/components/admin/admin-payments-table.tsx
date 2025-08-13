@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "../ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { useSession } from "@/hooks/use-session";
 
 interface Payment {
     id: number;
@@ -22,12 +23,20 @@ interface Payment {
 export function AdminPaymentsTable() {
     const { data: payments, isLoading, error, mutate } = useApi<Payment[]>('/api/admin/payments');
     const { toast } = useToast();
+    const { session } = useSession();
 
     const handleStatusUpdate = async (paymentId: number, newStatus: 'Approved' | 'Rejected') => {
+        if (!session?.email) {
+            toast({ title: "Error", description: "Authentication error. Please log in again.", variant: "destructive" });
+            return;
+        }
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/payments/${paymentId}/status`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Email': session.email,
+                },
                 body: JSON.stringify({ status: newStatus }),
             });
             const result = await response.json();

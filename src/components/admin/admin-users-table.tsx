@@ -15,6 +15,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { useToast } from '@/hooks/use-toast';
+import { useSession } from '@/hooks/use-session';
 
 interface User {
     id: number;
@@ -45,6 +46,7 @@ export function AdminUsersTable() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [isCreateDialogOpen, setCreateDialogOpen] = useState(false);
+    const { session } = useSession();
 
     const queryParams = useMemo(() => {
         const params = new URLSearchParams();
@@ -68,10 +70,17 @@ export function AdminUsersTable() {
     });
 
     const handleCreateEmployee = async (values: CreateEmployeeFormValues) => {
+        if (!session?.email) {
+            toast({ title: "Error", description: "Authentication error. Please log in again.", variant: "destructive" });
+            return;
+        }
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/employees`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Email': session.email,
+                },
                 body: JSON.stringify(values),
             });
             const result = await response.json();
