@@ -24,9 +24,10 @@ with app.app_context():
     
     if existing_admin:
         print(f"Admin user with email '{admin_email}' already exists.")
-        print("Updating password and ensuring admin status is set correctly.")
+        print("Updating password and ensuring admin/employee status is set correctly.")
         existing_admin.password = generate_password_hash(admin_password)
         existing_admin.is_admin = True
+        existing_admin.is_employee = False # Admins are not employees in this context
         if not existing_admin.first_name:
             existing_admin.first_name = "Admin"
         if not existing_admin.last_name:
@@ -39,7 +40,8 @@ with app.app_context():
             password=generate_password_hash(admin_password),
             first_name="Admin",
             last_name="User",
-            is_admin=True
+            is_admin=True,
+            is_employee=False
         )
         db.session.add(new_admin)
         print("New admin user created successfully!")
