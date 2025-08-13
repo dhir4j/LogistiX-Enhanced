@@ -4,7 +4,8 @@ from app.models import Shipment, User, PaymentRequest, BalanceCode, SavedAddress
 from app.extensions import db
 from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema, SavedAddressSchema
 from app.utils import generate_shipment_id_str
-from datetime import datetime
+from datetime import datetime, time
+from sqlalchemy import func
 
 shipments_bp = Blueprint("shipments", __name__, url_prefix="/api")
 
@@ -259,6 +260,62 @@ def redeem_balance_code():
         "message": f"Successfully redeemed code. Amount added: ₹{float(balance_code.amount)}",
         "new_balance": float(user.balance)
     }), 200
+
+@shipments_bp.route('/employee/day-end-stats', methods=['GET'])
+def get_day_end_stats():
+    user_email = request.headers.get("X-User-Email")
+    if not user_email:
+        return jsonify({"error": "Authentication required"}), 401
+    
+    user = User.query.filter_by(email=user_email).first()
+    if not user or not user.is_employee:
+        return jsonify({"error": "Employee not found or not authorized"}), 403
+
+    today_start = datetime.combine(datetime.utcnow().date(), time.min)
+    
+    # Base query for today's shipments by the user
+    todays_shipments_query = Shipment.query.filter(
+        Shipment.user_id == user.id,
+        Shipment.booking_date >= today_start
+    )
+    
+    # Calculate stats
+    todays_shipments_count = todays_shipments_query.count()
+    todays_shipments_value = todays_shipments_query.with_entities(
+        func.sum(Shipment.total_with_tax_18_percent)
+    ).scalar() or 0
+    
+    # Get shipments for the table
+    todays_shipments_list = todays_shipments_query.order_by(Shipment.booking_date.desc()).all()
+    shipments_result = [{
+        "id": s.id,
+        "shipment_id_str": s.shipment_id_str,
+        "receiver_name": s.receiver_name,
+        "status": s.status,
+        "total_with_tax_18_percent": float(s.total_with_tax_18_percent)
+    } for s in todays_shipments_list]
+
+    # Get shipments by hour for the graph
+    shipments_by_hour_query = db.session.query(
+        func.extract('hour', Shipment.booking_date).label('hour'),
+        func.count(Shipment.id).label('count')
+    ).filter(
+        Shipment.user_id == user.id,
+        Shipment.booking_date >= today_start
+    ).group_by('hour').order_by('hour').all()
+
+    # Format for recharts
+    shipments_by_hour = [{"hour": f"{int(h):02d}:00", "shipments": c} for h, c in shipments_by_hour_query]
+
+
+    return jsonify({
+        "current_balance": float(user.balance),
+        "todays_shipments_count": todays_shipments_count,
+        "todays_shipments_value": float(todays_shipments_value),
+        "todays_shipments": shipments_result,
+        "shipments_by_hour": shipments_by_hour
+    }), 200
+
 
 # Address Book Endpoints
 @shipments_bp.route("/employee/addresses", methods=["POST"])
