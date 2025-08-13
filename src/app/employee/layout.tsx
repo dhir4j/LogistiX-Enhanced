@@ -50,7 +50,7 @@ export default function EmployeeLayout({
     { href: '#', label: 'Rate Compare', icon: AreaChart, disabled: true },
     { href: '#', label: 'Day End', icon: BarChart, disabled: true },
     { href: '/employee/awb-tracking', label: 'AWB / Tracking', icon: Search },
-    { href: '#', label: 'Invoice Printing', icon: Printer, disabled: true },
+    { href: '/employee/invoice-printing', label: 'Invoice Printing', icon: Printer },
     { href: '#', label: 'Report', icon: FileText, disabled: true },
     { href: '#', label: 'Sender', icon: User, disabled: true },
     { href: '#', label: 'Receiver', icon: User, disabled: true },
