@@ -30,6 +30,7 @@ interface UsersApiResponse {
     users: User[];
     totalPages: number;
     currentPage: number;
+
     totalCount: number;
 }
 
@@ -150,33 +151,39 @@ export function AdminUsersTable() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {isLoading && Array.from({ length: 5 }).map((_, i) => (
-                        <TableRow key={i}><TableCell colSpan={5}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
-                    ))}
-                    {error && <TableRow><TableCell colSpan={5} className="text-center text-red-500">Failed to load users.</TableCell></TableRow>}
-                    {!isLoading && !error && data?.users.map((user) => (
-                        <TableRow key={user.id}>
-                            <TableCell>{user.first_name} {user.last_name}</TableCell>
-                            <TableCell>{user.email}</TableCell>
-                            <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
-                            <TableCell>{user.shipment_count}</TableCell>
-                            <TableCell>
-                                <Button asChild variant="outline" size="sm">
-                                    <Link href={`/admin/users/${user.id}`}>
-                                        <Eye className="mr-2 h-4 w-4" /> View Details
-                                    </Link>
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                    {isLoading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <TableRow key={i}><TableCell colSpan={5}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                        ))
+                    ) : error ? (
+                        <TableRow><TableCell colSpan={5} className="text-center text-red-500 py-10">Failed to load users.</TableCell></TableRow>
+                    ) : data?.users.length === 0 ? (
+                        <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">No users found.</TableCell></TableRow>
+                    ) : (
+                        data?.users.map((user) => (
+                            <TableRow key={user.id}>
+                                <TableCell>{user.first_name} {user.last_name}</TableCell>
+                                <TableCell>{user.email}</TableCell>
+                                <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
+                                <TableCell>{user.shipment_count}</TableCell>
+                                <TableCell>
+                                    <Button asChild variant="outline" size="sm">
+                                        <Link href={`/admin/users/${user.id}`}>
+                                            <Eye className="mr-2 h-4 w-4" /> View Details
+                                        </Link>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    )}
                 </TableBody>
             </Table>
             <div className="flex items-center justify-end space-x-2 py-4">
-                <Button variant="outline" size="sm" onClick={() => setPage(p => p - 1)} disabled={page === 1}>
+                <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1 || !data || data.totalPages <= 1}>
                     <ChevronLeft className="h-4 w-4 mr-1" /> Previous
                 </Button>
                  <span className="text-sm">Page {data?.currentPage || 1} of {data?.totalPages || 1}</span>
-                <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={page === data?.totalPages}>
+                <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={!data || page === data.totalPages}>
                     Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
             </div>

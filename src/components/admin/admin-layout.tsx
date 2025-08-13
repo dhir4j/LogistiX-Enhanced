@@ -2,7 +2,7 @@
 "use client"
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Users, CreditCard, LogOut, Ship, Home, Gift } from "lucide-react";
+import { LayoutDashboard, Users, CreditCard, LogOut, Ship, Home, Gift, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -27,6 +27,14 @@ export default function AdminLayout({
   const handleLogout = () => {
       clearSession();
       router.push('/');
+  }
+
+  if (isLoading || !session?.isAdmin) {
+    return (
+      <div className="flex h-screen w-full items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
   }
 
   const navLinks = [
