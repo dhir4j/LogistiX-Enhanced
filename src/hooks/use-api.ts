@@ -13,7 +13,7 @@ export function useApi<T>(endpoint: string | null) {
     const { session } = useSession();
 
     const fetchData = useCallback(async () => {
-        if (endpoint === null) {
+        if (endpoint === null || !session) { // Don't fetch if no endpoint or no session
             setIsLoading(false);
             return;
         }
@@ -41,7 +41,7 @@ export function useApi<T>(endpoint: string | null) {
         } finally {
             setIsLoading(false);
         }
-    }, [endpoint, session]);
+    }, [endpoint, session]); // Add session as a dependency
 
     useEffect(() => {
         fetchData();
@@ -53,5 +53,3 @@ export function useApi<T>(endpoint: string | null) {
 
     return { data, isLoading, error, mutate };
 }
-
-    
