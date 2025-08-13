@@ -15,13 +15,14 @@ def create_shipment():
     data = request.get_json()
 
     final_total_price = data.pop("final_total_price_with_tax", None)
+    
+    # Explicitly pop fields not in the schema before loading
+    data.pop("save_sender_address", None)
+    data.pop("sender_address_nickname", None)
+    data.pop("save_receiver_address", None)
+    data.pop("receiver_address_nickname", None)
 
     try:
-        # We pop these as they are not part of the ShipmentCreateSchema
-        data.pop("save_sender_address", None)
-        data.pop("sender_address_nickname", None)
-        data.pop("save_receiver_address", None)
-        data.pop("receiver_address_nickname", None)
         shipment_data = schema.load(data)
     except Exception as e:
         return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
@@ -369,7 +370,7 @@ def get_saved_addresses():
     if address_type in ['sender', 'receiver']:
         query = query.filter_by(address_type=address_type)
     
-    addresses = query.all()
+    addresses = query.order_by(SavedAddress.nickname).all()
     schema = SavedAddressSchema(many=True)
     return jsonify(schema.dump(addresses)), 200
 
