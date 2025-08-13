@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft, Loader2 } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft, Loader2, Download, FileText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -78,7 +78,7 @@ export default function TrackingResultPage() {
   };
 
   return (
-    <div className="bg-secondary py-16 sm:py-24">
+    <div className="bg-secondary py-16 sm:py-24 min-h-[calc(100vh-10rem)]">
       <div className="container">
         <div className="max-w-4xl mx-auto">
             <div className="mb-6">
@@ -96,7 +96,7 @@ export default function TrackingResultPage() {
                 placeholder="Enter your Tracking ID"
                 className="text-base h-12"
                 value={trackingId}
-                onChange={(e) => setTrackingId(e.target.value)}
+                onChange={(e) => setTrackingId(e.target.value.toUpperCase())}
                 onKeyDown={(e) => e.key === 'Enter' && handleTrack()}
               />
               <Button type="submit" onClick={handleTrack} size="lg" className="h-12">
@@ -107,8 +107,22 @@ export default function TrackingResultPage() {
             
             <Card className="shadow-md border">
             <CardHeader>
-                <CardTitle className="font-headline text-2xl">Shipment Progress</CardTitle>
-                <CardDescription>Tracking ID: <span className="font-bold text-primary">{idFromUrl}</span></CardDescription>
+                <div className="flex justify-between items-start">
+                    <div>
+                        <CardTitle className="font-headline text-2xl">Shipment Progress</CardTitle>
+                        <CardDescription>Tracking ID: <span className="font-bold text-primary">{idFromUrl}</span></CardDescription>
+                    </div>
+                     {shipmentDetails && (
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" asChild>
+                                <Link href={`/awb/${idFromUrl}`} target="_blank"><Download className="mr-2 h-4 w-4"/> AWB</Link>
+                            </Button>
+                             <Button variant="outline" size="sm" asChild>
+                                <Link href={`/invoice/${idFromUrl}`} target="_blank"><FileText className="mr-2 h-4 w-4"/> Invoice</Link>
+                            </Button>
+                        </div>
+                    )}
+                </div>
             </CardHeader>
             <CardContent>
                 {isLoading && (

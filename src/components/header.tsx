@@ -24,6 +24,13 @@ export default function Header() {
     router.push('/');
   }
 
+  const getDashboardHref = () => {
+    if (!session) return '/login';
+    if (session.isAdmin) return '/admin/dashboard';
+    if (session.isEmployee) return '/employee/dashboard';
+    return '/dashboard';
+  }
+
   const navLinks = [
     { href: '/', label: 'Home' },
     { href: '/about-us', label: 'About Us' },
@@ -51,7 +58,7 @@ export default function Header() {
                 session ? (
                   <>
                     <Button asChild size="sm" variant="ghost" className="text-xs h-8">
-                        <Link href="/dashboard"><UserCircle className='mr-2 h-4 w-4' />Dashboard</Link>
+                        <Link href={getDashboardHref()}><UserCircle className='mr-2 h-4 w-4' />Dashboard</Link>
                     </Button>
                     <Button size="sm" variant="ghost" className="text-xs h-8" onClick={handleLogout}>
                         <LogOut className='mr-2 h-4 w-4' />Logout
