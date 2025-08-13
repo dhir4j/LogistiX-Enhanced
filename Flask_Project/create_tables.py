@@ -25,6 +25,6 @@ with app.app_context():
     try:
         db.create_all()
         print("Tables created successfully!")
-        print("You should now see 'users', 'shipments', 'payment_requests', and 'balance_codes' tables in your database.")
+        print("You should now see 'users', 'shipments', 'payment_requests', 'balance_codes', and 'saved_addresses' tables in your database.")
     except Exception as e:
         print(f"An error occurred while creating tables: {e}")
