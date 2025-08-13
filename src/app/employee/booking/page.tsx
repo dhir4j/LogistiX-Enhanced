@@ -21,7 +21,7 @@ import type { ShipmentBookingFormValues } from "@/lib/schemas";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "@/hooks/use-session";
 import { useRouter } from "next/navigation";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogDescription } from "@/components/ui/dialog";
 import { useApi } from "@/hooks/use-api";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -218,7 +218,12 @@ export default function EmployeeBookingPage() {
                 <Button variant="outline" size="sm"><BookUser className="mr-2 h-4 w-4" /> Address Book</Button>
             </DialogTrigger>
             <DialogContent>
-                <DialogHeader><DialogTitle>Select {type === 'sender' ? 'Sender' : 'Receiver'} Address</DialogTitle></DialogHeader>
+                <DialogHeader>
+                    <DialogTitle>Select {type === 'sender' ? 'Sender' : 'Receiver'} Address</DialogTitle>
+                    <DialogDescription>
+                        Click on an address to auto-fill the form.
+                    </DialogDescription>
+                </DialogHeader>
                 <div className="space-y-2 max-h-80 overflow-y-auto">
                     {addresses?.map(addr => (
                          <DialogClose asChild key={addr.id}>
@@ -386,3 +391,5 @@ export default function EmployeeBookingPage() {
         </div>
     );
 }
+
+    

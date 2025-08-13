@@ -6,6 +6,7 @@ from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema, SavedAddressS
 from app.utils import generate_shipment_id_str
 from datetime import datetime, time
 from sqlalchemy import func, exc
+from decimal import Decimal
 
 shipments_bp = Blueprint("shipments", __name__, url_prefix="/api")
 
@@ -39,8 +40,9 @@ def create_shipment():
 
     # Employee balance logic
     if user.is_employee:
-        if user.balance >= final_total_price:
-            user.balance -= final_total_price
+        final_price_decimal = Decimal(str(final_total_price))
+        if user.balance >= final_price_decimal:
+            user.balance -= final_price_decimal
             status = "Booked"
             tracking_activity = "Shipment booked and paid with employee balance."
         else:
@@ -391,3 +393,5 @@ def delete_saved_address(address_id):
     db.session.delete(address)
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
+
+    
