@@ -1,3 +1,4 @@
+
 from .extensions import db
 from sqlalchemy.dialects.postgresql import JSONB
 from datetime import datetime
@@ -18,6 +19,8 @@ class User(db.Model):
     balance = db.Column(db.Numeric(10, 2), nullable=False, default=0.00)
 
     shipments = db.relationship('Shipment', backref='user', lazy=True)
+    saved_addresses = db.relationship('SavedAddress', backref='user', lazy=True, cascade="all, delete-orphan")
+
 
 class Shipment(db.Model):
     __tablename__ = "shipments"
@@ -82,3 +85,16 @@ class BalanceCode(db.Model):
     redeemed_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
 
     redeemed_by = db.relationship('User', backref='redeemed_codes', lazy=True)
+
+class SavedAddress(db.Model):
+    __tablename__ = 'saved_addresses'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    nickname = db.Column(db.String(100), nullable=False)
+    name = db.Column(db.String(255), nullable=False)
+    address_street = db.Column(db.String(255), nullable=False)
+    address_city = db.Column(db.String(100), nullable=False)
+    address_state = db.Column(db.String(100), nullable=False)
+    address_pincode = db.Column(db.String(10), nullable=False)
+    address_country = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(30), nullable=False)

@@ -2,7 +2,7 @@
 "use client";
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Book, User, Fuel, LogOut, Home, Loader2, Search } from "lucide-react";
+import { LayoutDashboard, Book, User, Fuel, LogOut, Home, Loader2, Search, FileDown, AreaChart, BarChart, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -48,6 +48,9 @@ export default function EmployeeLayout({
     { href: '/employee/booking', label: 'Booking', icon: Book },
     { href: '/track', label: 'Tracking', icon: Search },
     { href: '/employee/fuel-surcharge', label: 'Redeem Code', icon: Fuel },
+    { href: '/employee/excel-export', label: 'Excel Export', icon: FileDown },
+    { href: '#', label: 'Rate Compare', icon: AreaChart, disabled: true },
+    { href: '#', label: 'Day End', icon: BarChart, disabled: true },
   ];
 
   return (
@@ -68,9 +71,10 @@ export default function EmployeeLayout({
               <SidebarMenuItem key={link.href}>
                 <SidebarMenuButton 
                   asChild 
-                  isActive={pathname.startsWith(link.href)}
+                  isActive={pathname.startsWith(link.href) && link.href !== '#'}
                   tooltip={{ children: link.label }}
                   className="data-[active=true]:bg-gray-700 hover:bg-gray-700/80"
+                  disabled={link.disabled}
                 >
                   <Link href={link.href}>
                     <link.icon className="h-5 w-5" />

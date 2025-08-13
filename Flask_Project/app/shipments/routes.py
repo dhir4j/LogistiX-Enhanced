@@ -1,7 +1,8 @@
+
 from flask import Blueprint, request, jsonify
-from app.models import Shipment, User, PaymentRequest, BalanceCode
+from app.models import Shipment, User, PaymentRequest, BalanceCode, SavedAddress
 from app.extensions import db
-from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema
+from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema, SavedAddressSchema
 from app.utils import generate_shipment_id_str
 from datetime import datetime
 
@@ -230,4 +231,48 @@ def redeem_balance_code():
         "message": f"Successfully redeemed code. Amount added: ₹{float(balance_code.amount)}",
         "new_balance": float(user.balance)
     }), 200
-  
+
+# Address Book Endpoints
+@shipments_bp.route("/employee/addresses", methods=["POST"])
+def add_saved_address():
+    user_email = request.headers.get("X-User-Email")
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    schema = SavedAddressSchema()
+    try:
+        address_data = schema.load(request.get_json())
+    except Exception as e:
+        return jsonify({"error": "Invalid address data", "details": e.messages}), 400
+
+    new_address = SavedAddress(user_id=user.id, **address_data)
+    db.session.add(new_address)
+    db.session.commit()
+    return jsonify(schema.dump(new_address)), 201
+
+@shipments_bp.route("/employee/addresses", methods=["GET"])
+def get_saved_addresses():
+    user_email = request.headers.get("X-User-Email")
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+    
+    addresses = SavedAddress.query.filter_by(user_id=user.id).all()
+    schema = SavedAddressSchema(many=True)
+    return jsonify(schema.dump(addresses)), 200
+
+@shipments_bp.route("/employee/addresses/<int:address_id>", methods=["DELETE"])
+def delete_saved_address(address_id):
+    user_email = request.headers.get("X-User-Email")
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    address = SavedAddress.query.filter_by(id=address_id, user_id=user.id).first()
+    if not address:
+        return jsonify({"error": "Address not found or permission denied"}), 404
+    
+    db.session.delete(address)
+    db.session.commit()
+    return jsonify({"message": "Address deleted"}), 200

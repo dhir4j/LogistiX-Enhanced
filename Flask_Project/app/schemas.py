@@ -1,3 +1,4 @@
+
 from marshmallow import Schema, fields, validate
 
 class SignupSchema(Schema):
@@ -42,3 +43,18 @@ class PaymentSubmitSchema(Schema):
     shipment_id_str = fields.Str(required=True)
     utr = fields.Str(required=True, validate=validate.Length(min=12, max=12, error="UTR must be 12 digits."))
     amount = fields.Float(required=True)
+
+class SavedAddressSchema(Schema):
+    id = fields.Int(dump_only=True)
+    nickname = fields.Str(required=True)
+    name = fields.Str(required=True)
+    address_street = fields.Str(required=True)
+    address_city = fields.Str(required=True)
+    address_state = fields.Str(required=True)
+    address_pincode = fields.Str(required=True)
+    address_country = fields.Str(required=True)
+    phone = fields.Str(required=True)
+
+    class Meta:
+        # Fields to show when sending data back to the client
+        fields = ("id", "nickname", "name", "address_street", "address_city", "address_state", "address_pincode", "address_country", "phone")
