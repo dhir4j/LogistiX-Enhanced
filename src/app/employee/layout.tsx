@@ -49,14 +49,12 @@ export default function EmployeeLayout({
     { href: '/employee/excel-export', label: 'Excel Export', icon: FileDown },
     { href: '#', label: 'Rate Compare', icon: AreaChart, disabled: true },
     { href: '#', label: 'Day End', icon: BarChart, disabled: true },
-    { href: '/employee/awb-tracking', label: 'Tracking', icon: Search },
+    { href: '/employee/awb-tracking', label: 'AWB / Tracking', icon: Search },
     { href: '#', label: 'Report', icon: FileText, disabled: true },
-    { href: '/employee/awb-tracking', label: 'Invoice Printing', icon: FileDown },
     { href: '#', label: 'Sender', icon: User, disabled: true },
     { href: '#', label: 'Receiver', icon: User, disabled: true },
     { href: '#', label: 'User', icon: User, disabled: true },
-    { href: '/employee/fuel-surcharge', label: 'Fuel Surcharge', icon: Fuel },
-    { href: '#', label: 'Customer Payment', icon: User, disabled: true },
+    { href: '/employee/fuel-surcharge', label: 'Redeem Code', icon: Fuel },
   ];
 
   return (
@@ -115,7 +113,7 @@ export default function EmployeeLayout({
             <SidebarTrigger className="md:hidden" />
             <p className="text-sm font-medium">Welcome, {session?.firstName || 'Employee'}!</p>
         </header>
-        <main className="flex-1 flex bg-gray-100">
+        <main className="flex-1 flex bg-gray-100/50">
             {children}
         </main>
       </div>

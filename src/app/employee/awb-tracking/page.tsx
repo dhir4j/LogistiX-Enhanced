@@ -5,7 +5,7 @@ import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, Loader2, Printer, Download } from 'lucide-react';
+import { Search, Loader2, Download } from 'lucide-react';
 import { useSession } from '@/hooks/use-session';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
@@ -101,7 +101,7 @@ export default function AwbTrackingPage() {
   };
   
   return (
-    <div className="flex-1 p-4 sm:p-6 bg-gray-100 w-full">
+    <div className="flex-1 p-4 sm:p-6 bg-gray-100/50 w-full">
         <div className="max-w-4xl mx-auto space-y-6">
             <Card>
                 <CardHeader>
@@ -151,3 +151,4 @@ export default function AwbTrackingPage() {
     </div>
   );
 }
+

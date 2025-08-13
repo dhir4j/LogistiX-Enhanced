@@ -15,18 +15,33 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, BookUser, Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { shipmentBookingSchema } from "@/lib/schemas";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "@/hooks/use-session";
 import { useRouter } from "next/navigation";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose } from "@/components/ui/dialog";
+import { useApi } from "@/hooks/use-api";
+import { Checkbox } from "@/components/ui/checkbox";
 
 type ShipmentBookingFormValues = z.infer<typeof shipmentBookingSchema>;
 
 interface PriceResponse {
     total_price: number;
     [key: string]: any;
+}
+
+interface SavedAddress {
+    id: number;
+    nickname: string;
+    name: string;
+    address_street: string;
+    address_city: string;
+    address_state: string;
+    address_pincode: string;
+    address_country: string;
+    phone: string;
 }
 
 export default function EmployeeBookingPage() {
@@ -36,13 +51,8 @@ export default function EmployeeBookingPage() {
     const [priceDetails, setPriceDetails] = useState<PriceResponse | null>(null);
     const [isCalculating, setIsCalculating] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const { data: addresses, mutate: mutateAddresses } = useApi<SavedAddress[]>('/api/employee/addresses');
     
-    useEffect(() => {
-        if (!isSessionLoading && !session) {
-            router.push('/employee-login');
-        }
-    }, [session, isSessionLoading, router]);
-
     const form = useForm<ShipmentBookingFormValues>({
         resolver: zodResolver(shipmentBookingSchema),
         defaultValues: {
@@ -53,6 +63,8 @@ export default function EmployeeBookingPage() {
             sender_address_pincode: "",
             sender_address_country: "India",
             sender_phone: "",
+            save_sender_address: false,
+            sender_address_nickname: "",
             receiver_name: "",
             receiver_address_street: "",
             receiver_address_city: "",
@@ -60,6 +72,8 @@ export default function EmployeeBookingPage() {
             receiver_address_pincode: "",
             receiver_address_country: "India",
             receiver_phone: "",
+            save_receiver_address: false,
+            receiver_address_nickname: "",
             package_weight_kg: 0.5,
             package_width_cm: 10,
             package_height_cm: 10,
@@ -69,12 +83,28 @@ export default function EmployeeBookingPage() {
         },
     });
 
+    const watchedFields = useWatch({ 
+        control: form.control, 
+        name: ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type"] 
+    });
+
+    useEffect(() => {
+        if (!isSessionLoading && !session) {
+            router.push('/employee-login');
+        }
+    }, [session, isSessionLoading, router]);
+
     const handleGetPrice = async () => {
+        const { receiver_address_state, receiver_address_country, package_weight_kg, service_type } = form.getValues();
+        const isDomestic = receiver_address_country.toLowerCase() === "india";
+        
+        if (isDomestic && !receiver_address_state) return;
+        if (!isDomestic && !receiver_address_country) return;
+        if (!package_weight_kg || package_weight_kg <= 0) return;
+
         setIsCalculating(true);
         setPriceDetails(null);
-        const { receiver_address_state, receiver_address_country, package_weight_kg, service_type } = form.getValues();
-
-        const isDomestic = receiver_address_country.toLowerCase() === "india";
+        
         const url = `${process.env.NEXT_PUBLIC_API_URL}/api${isDomestic ? "/domestic/price" : "/international/price"}`;
         const body = isDomestic 
             ? { state: receiver_address_state, weight: package_weight_kg, mode: service_type }
@@ -90,18 +120,64 @@ export default function EmployeeBookingPage() {
             if(response.ok) {
                 setPriceDetails(data);
             } else {
-                toast({ title: "Error", description: data.error || "Could not calculate price.", variant: "destructive" });
+                toast({ title: "Pricing Error", description: data.error || "Could not calculate price.", variant: "destructive" });
             }
         } catch (error) {
-            toast({ title: "Error", description: "Failed to connect to pricing service.", variant: "destructive" });
+            toast({ title: "Network Error", description: "Failed to connect to pricing service.", variant: "destructive" });
         } finally {
             setIsCalculating(false);
+        }
+    };
+    
+    useEffect(() => {
+        const subscription = form.watch((value, { name, type }) => {
+            if (name && ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type"].includes(name)) {
+                handleGetPrice();
+            }
+        });
+        return () => subscription.unsubscribe();
+    }, [form.watch]);
+
+
+    const saveAddress = async (type: 'sender' | 'receiver') => {
+        const values = form.getValues();
+        const addressData = {
+            nickname: type === 'sender' ? values.sender_address_nickname : values.receiver_address_nickname,
+            name: type === 'sender' ? values.sender_name : values.receiver_name,
+            address_street: type === 'sender' ? values.sender_address_street : values.receiver_address_street,
+            address_city: type === 'sender' ? values.sender_address_city : values.receiver_address_city,
+            address_state: type === 'sender' ? values.sender_address_state : values.receiver_address_state,
+            address_pincode: type === 'sender' ? values.sender_address_pincode : values.receiver_address_pincode,
+            address_country: type === 'sender' ? values.sender_address_country : values.receiver_address_country,
+            phone: type === 'sender' ? values.sender_phone : values.receiver_phone,
+        };
+
+        if (!addressData.nickname) {
+            toast({ title: "Save Error", description: "Please provide a nickname to save the address.", variant: "destructive" });
+            return;
+        }
+
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/employee/addresses`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-User-Email': session!.email },
+                body: JSON.stringify(addressData)
+            });
+            if (response.ok) {
+                toast({ title: "Success", description: `Address "${addressData.nickname}" saved.`});
+                mutateAddresses();
+            } else {
+                const result = await response.json();
+                toast({ title: "Save Failed", description: result.error, variant: "destructive"});
+            }
+        } catch (error) {
+            toast({ title: "Network Error", description: "Could not save address.", variant: "destructive"});
         }
     };
 
     const onSubmit = async (values: ShipmentBookingFormValues) => {
         if (!priceDetails) {
-            toast({ title: "Error", description: "Please calculate the price before booking.", variant: "destructive" });
+            toast({ title: "Error", description: "Please wait for price calculation before booking.", variant: "destructive" });
             return;
         }
         if (!session) {
@@ -109,11 +185,11 @@ export default function EmployeeBookingPage() {
             return;
         }
         setIsSubmitting(true);
-        const payload = {
-            ...values,
-            user_email: session.email,
-            final_total_price_with_tax: priceDetails.total_price
-        };
+        
+        if (values.save_sender_address) await saveAddress('sender');
+        if (values.save_receiver_address) await saveAddress('receiver');
+
+        const payload = { ...values, user_email: session.email, final_total_price_with_tax: priceDetails.total_price };
 
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments`, {
@@ -135,9 +211,45 @@ export default function EmployeeBookingPage() {
             setIsSubmitting(false);
         }
     };
-
-    const isDomestic = useWatch({ control: form.control, name: "receiver_address_country" })?.toLowerCase() === 'india';
     
+    const isDomestic = useWatch({ control: form.control, name: "receiver_address_country" })?.toLowerCase() === 'india';
+    const watchSaveSender = useWatch({ control: form.control, name: "save_sender_address" });
+    const watchSaveReceiver = useWatch({ control: form.control, name: "save_receiver_address" });
+
+    const applyAddress = (address: SavedAddress, type: 'sender' | 'receiver') => {
+        form.setValue(`${type}_name`, address.name);
+        form.setValue(`${type}_address_street`, address.address_street);
+        form.setValue(`${type}_address_city`, address.address_city);
+        form.setValue(`${type}_address_state`, address.address_state);
+        form.setValue(`${type}_address_pincode`, address.address_pincode);
+        form.setValue(`${type}_address_country`, address.address_country);
+        form.setValue(`${type}_phone`, address.phone);
+    };
+
+    const AddressBookDialog = ({ type }: { type: 'sender' | 'receiver' }) => (
+        <Dialog>
+            <DialogTrigger asChild>
+                <Button variant="outline" size="sm"><BookUser className="mr-2 h-4 w-4" /> Address Book</Button>
+            </DialogTrigger>
+            <DialogContent>
+                <DialogHeader><DialogTitle>Select {type === 'sender' ? 'Sender' : 'Receiver'} Address</DialogTitle></DialogHeader>
+                <div className="space-y-2 max-h-80 overflow-y-auto">
+                    {addresses?.map(addr => (
+                         <DialogClose asChild key={addr.id}>
+                            <Button variant="ghost" className="w-full justify-start h-auto" onClick={() => applyAddress(addr, type)}>
+                                <div className="text-left">
+                                    <p className="font-bold">{addr.nickname}</p>
+                                    <p className="text-sm text-muted-foreground">{addr.name}, {addr.address_street}, {addr.address_city}</p>
+                                </div>
+                            </Button>
+                        </DialogClose>
+                    ))}
+                    {addresses?.length === 0 && <p className="text-muted-foreground text-sm">No saved addresses found.</p>}
+                </div>
+            </DialogContent>
+        </Dialog>
+    );
+
     if (isSessionLoading || !session) {
         return (
           <div className="flex justify-center items-center h-screen w-full">
@@ -148,90 +260,79 @@ export default function EmployeeBookingPage() {
 
 
     return (
-        <div className="flex-1 p-4 sm:p-6 bg-gray-100">
+        <div className="flex-1 p-4 sm:p-6 bg-gray-100/50">
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                 <div className="grid lg:grid-cols-3 gap-6">
                     {/* Main Form Section */}
                     <div className="lg:col-span-2 space-y-6">
                         <Card>
-                            <CardHeader><CardTitle>Sender Details</CardTitle></CardHeader>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Sender Details</CardTitle>
+                                <AddressBookDialog type="sender" />
+                            </CardHeader>
                             <CardContent className="space-y-4">
-                                <FormField name="sender_name" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="sender_address_street" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
+                                <FormField name="sender_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="sender_address_street" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 <div className="grid md:grid-cols-3 gap-4">
-                                    <FormField name="sender_address_city" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField name="sender_address_state" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField name="sender_address_pincode" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Pincode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
+                                    <FormField name="sender_address_city" control={form.control} render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="sender_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="sender_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 </div>
-                                <FormField name="sender_phone" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormField name="sender_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <Separator />
+                                <FormField control={form.control} name="save_sender_address" render={({ field }) => (
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to the address book</FormLabel></div>
+                                    </FormItem>
                                 )}/>
+                                {watchSaveSender && <FormField name="sender_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Head Office" /></FormControl><FormMessage /></FormItem> )}/>}
+
                             </CardContent>
                         </Card>
                          <Card>
-                            <CardHeader><CardTitle>Receiver Details</CardTitle></CardHeader>
+                            <CardHeader className="flex flex-row items-center justify-between">
+                                <CardTitle>Receiver Details</CardTitle>
+                                <AddressBookDialog type="receiver" />
+                            </CardHeader>
                             <CardContent className="space-y-4">
-                                <FormField name="receiver_name" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="receiver_address_street" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
-                                )}/>
+                                <FormField name="receiver_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="receiver_address_street" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 <div className="grid md:grid-cols-3 gap-4">
-                                    <FormField name="receiver_address_city" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                     <FormField name="receiver_address_state" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>State/Province</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Pincode/ZIP</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
+                                    <FormField name="receiver_address_city" control={form.control} render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                     <FormField name="receiver_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State/Province</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode/ZIP</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 </div>
                                  <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField name="receiver_address_country" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField name="receiver_phone" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
+                                    <FormField name="receiver_address_country" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="receiver_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 </div>
+                                <Separator />
+                                <FormField control={form.control} name="save_receiver_address" render={({ field }) => (
+                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                    <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to the address book</FormLabel></div>
+                                    </FormItem>
+                                )}/>
+                                {watchSaveReceiver && <FormField name="receiver_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Warehouse" /></FormControl><FormMessage /></FormItem> )}/>}
                             </CardContent>
                         </Card>
                         <Card>
                             <CardHeader><CardTitle>Package & Service</CardTitle></CardHeader>
                             <CardContent className="space-y-4">
                                  <div className="grid md:grid-cols-4 gap-4">
-                                     <FormField name="package_weight_kg" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField name="package_length_cm" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField name="package_width_cm" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
-                                    <FormField name="package_height_cm" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem>
-                                    )}/>
+                                     <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                  </div>
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <FormField name="pickup_date" control={form.control} render={({ field }) => (
                                         <FormItem className="flex flex-col"><FormLabel>Pickup Date</FormLabel>
                                             <Popover><PopoverTrigger asChild>
                                                 <FormControl>
-                                                    <Button variant={"outline"} className={cn("pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                    <Button variant={"outline"} className={cn("w-full justify-start pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
                                                         {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
                                                         <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
                                                     </Button>
@@ -261,14 +362,16 @@ export default function EmployeeBookingPage() {
 
                     {/* Pricing and Action Section */}
                     <div className="lg:col-span-1 space-y-6">
-                        <Card>
-                             <CardHeader><CardTitle>Price Details</CardTitle></CardHeader>
+                        <Card className="sticky top-20">
+                             <CardHeader><CardTitle>Price & Book</CardTitle></CardHeader>
                              <CardContent className="space-y-4">
-                                <Button type="button" className="w-full" onClick={handleGetPrice} disabled={isCalculating}>
-                                    {isCalculating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                    {isCalculating ? "Calculating..." : "Calculate Price"}
-                                </Button>
-                                {priceDetails && (
+                                {(isCalculating) && (
+                                    <div className="flex items-center justify-center text-muted-foreground">
+                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                        Calculating...
+                                    </div>
+                                )}
+                                {priceDetails && !isCalculating && (
                                     <div className="space-y-2 text-sm">
                                         <Separator />
                                         <div className="flex justify-between"><span>Service:</span> <span className="font-medium">{isDomestic ? priceDetails.mode : "International Express"}</span></div>
@@ -278,14 +381,20 @@ export default function EmployeeBookingPage() {
                                             <span>Total Price:</span>
                                             <span>₹{priceDetails.total_price.toFixed(2)}</span>
                                         </div>
+                                         <p className="text-xs text-muted-foreground pt-2">This price is inclusive of all taxes and fees. Employee balance will be used for payment.</p>
                                     </div>
                                 )}
+                                {!priceDetails && !isCalculating && (
+                                    <p className="text-sm text-muted-foreground text-center">Fill in destination and weight details to see the price.</p>
+                                )}
+                             </CardContent>
+                             <CardContent>
+                                <Button type="submit" size="lg" className="w-full h-12 text-lg" disabled={!priceDetails || isSubmitting || isCalculating}>
+                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                    {isSubmitting ? "Booking..." : "Book Shipment"}
+                                </Button>
                              </CardContent>
                         </Card>
-                        <Button type="submit" size="lg" className="w-full h-14 text-xl" disabled={!priceDetails || isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isSubmitting ? "Booking..." : "Book Shipment"}
-                        </Button>
                     </div>
                 </div>
             </form>
@@ -293,3 +402,4 @@ export default function EmployeeBookingPage() {
         </div>
     );
 }
+
