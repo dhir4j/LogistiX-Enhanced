@@ -2,7 +2,7 @@
 "use client";
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter } from "@/components/ui/sidebar";
-import { LayoutDashboard, Book, FileUp, GitCompare, Scissors, Search, FileText, Printer, Send, Combine, User, Fuel, CreditCard, LogOut, Home, Loader2 } from "lucide-react";
+import { LayoutDashboard, Book, User, Fuel, LogOut, Home, Loader2, Search } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -46,15 +46,7 @@ export default function EmployeeLayout({
   const navLinks = [
     { href: '/employee/dashboard', label: 'Dashboard', icon: LayoutDashboard },
     { href: '/employee/booking', label: 'Booking', icon: Book },
-    { href: '/employee/excel-import', label: 'Excel Import', icon: FileUp },
-    { href: '/employee/rate-compare', label: 'Rate Compare', icon: GitCompare },
-    { href: '/employee/day-end', label: 'Day End', icon: Scissors },
-    { href: '/employee/tracking', label: 'Tracking', icon: Search },
-    { href: '/employee/report', label: 'Report', icon: FileText },
-    { href: '/employee/invoice-printing', label: 'Invoice Printing', icon: Printer },
-    { href: '/employee/sender', label: 'Sender', icon: Send },
-    { href: '/employee/receiver', label: 'Receiver', icon: Combine },
-    { href: '/employee/user', label: 'User', icon: User },
+    { href: '/track', label: 'Tracking', icon: Search },
     { href: '/employee/fuel-surcharge', label: 'Redeem Code', icon: Fuel },
   ];
 
