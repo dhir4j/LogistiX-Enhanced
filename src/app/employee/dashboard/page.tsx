@@ -10,9 +10,12 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 
 interface EmployeeStats {
-    balance: number;
-    shipment_count: number;
-    total_spent: number; 
+    user: {
+        balance: number;
+    };
+    shipments: {
+        total_with_tax_18_percent: number;
+    }[];
 }
 
 export default function EmployeeDashboardPage() {
@@ -25,7 +28,7 @@ export default function EmployeeDashboardPage() {
         }
     }, [session, isSessionLoading, router]);
 
-    const { data: stats, isLoading, error } = useApi<EmployeeStats>(session ? `/admin/users/${session.id}` : null);
+    const { data: stats, isLoading, error } = useApi<EmployeeStats>(session ? `/api/admin/users/${session.id}` : null);
     
     if (isSessionLoading || !session) {
         return (
@@ -35,9 +38,9 @@ export default function EmployeeDashboardPage() {
         );
     }
     
-    const userDetails = stats ? (stats as any).user : null;
-    const shipmentCount = stats ? (stats as any).shipments?.length || 0 : 0;
-    const totalSpent = stats ? (stats as any).shipments?.reduce((acc: number, s: any) => acc + s.total_with_tax_18_percent, 0) : 0;
+    const userDetails = stats ? stats.user : null;
+    const shipmentCount = stats ? stats.shipments?.length || 0 : 0;
+    const totalSpent = stats ? stats.shipments?.reduce((acc: number, s: any) => acc + s.total_with_tax_18_percent, 0) : 0;
 
     const statCards = [
         { title: "Current Balance", value: userDetails?.balance, icon: DollarSign, isCurrency: true },
