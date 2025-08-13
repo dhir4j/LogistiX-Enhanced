@@ -7,6 +7,7 @@ import string
 import random
 from werkzeug.security import generate_password_hash
 from functools import wraps
+from decimal import Decimal, InvalidOperation
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
@@ -32,9 +33,17 @@ def generate_code(length=8):
 @admin_required
 def create_balance_code():
     data = request.get_json()
-    amount = data.get("amount")
-    if not amount or not isinstance(amount, (int, float)) or amount <= 0:
-        return jsonify({"error": "Valid amount is required"}), 400
+    amount_str = data.get("amount")
+    
+    if not amount_str:
+        return jsonify({"error": "Amount is required"}), 400
+
+    try:
+        amount = Decimal(amount_str)
+        if amount <= 0:
+            raise ValueError()
+    except (InvalidOperation, ValueError):
+        return jsonify({"error": "Valid, positive amount is required"}), 400
 
     new_code = BalanceCode(
         code=f"TOPUP-{generate_code(length=8)}",
@@ -467,3 +476,5 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return jsonify({"message": "Employee deleted successfully"}), 200
+
+    

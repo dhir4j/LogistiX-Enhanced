@@ -26,14 +26,14 @@ interface BalanceCode {
 
 export default function AdminBalanceCodes() {
     const { data: codes, isLoading, error, mutate } = useApi<BalanceCode[]>('/api/admin/balance-codes');
-    const [amount, setAmount] = useState<number | string>("");
+    const [amount, setAmount] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
     const { session } = useSession();
 
     const handleCreateCode = async () => {
-        if (!amount || Number(amount) <= 0) {
-            toast({ title: "Error", description: "Please enter a valid amount.", variant: "destructive" });
+        if (!amount || !/^\d+(\.\d{1,2})?$/.test(amount) || Number(amount) <= 0) {
+            toast({ title: "Error", description: "Please enter a valid positive amount.", variant: "destructive" });
             return;
         }
         if (!session?.email) {
@@ -49,7 +49,7 @@ export default function AdminBalanceCodes() {
                     'Content-Type': 'application/json',
                     'X-User-Email': session.email,
                 },
-                body: JSON.stringify({ amount: Number(amount) }),
+                body: JSON.stringify({ amount: amount }),
             });
             const result = await response.json();
             if (response.ok) {
@@ -99,8 +99,8 @@ export default function AdminBalanceCodes() {
                 </CardHeader>
                 <CardContent className="flex items-center gap-2">
                     <Input
-                        type="number"
-                        placeholder="Enter amount"
+                        type="text"
+                        placeholder="Enter amount, e.g., 21000"
                         value={amount}
                         onChange={(e) => setAmount(e.target.value)}
                         className="max-w-xs"
@@ -178,4 +178,5 @@ export default function AdminBalanceCodes() {
     );
 }
 
+    
     
