@@ -82,7 +82,7 @@ class BalanceCode(db.Model):
     is_redeemed = db.Column(db.Boolean, default=False, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
     redeemed_at = db.Column(db.DateTime, nullable=True)
-    redeemed_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    redeemed_by_user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='SET NULL'), nullable=True)
 
     redeemed_by = db.relationship('User', backref='redeemed_codes', lazy=True)
 
@@ -101,3 +101,5 @@ class SavedAddress(db.Model):
     phone = db.Column(db.String(30), nullable=False)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'nickname', 'address_type', name='_user_nickname_type_uc'),)
+
+    

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useApi } from "@/hooks/use-api";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { PlusCircle, Trash2 } from "lucide-react";
 import { useSession } from "@/hooks/use-session";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 
 interface BalanceCode {
     id: number;
@@ -25,7 +26,16 @@ interface BalanceCode {
 }
 
 export default function AdminBalanceCodes() {
-    const { data: codes, isLoading, error, mutate } = useApi<BalanceCode[]>('/api/admin/balance-codes');
+    const [statusFilter, setStatusFilter] = useState("all");
+    const queryParams = useMemo(() => {
+        const params = new URLSearchParams();
+        if (statusFilter !== 'all') {
+            params.append('status', statusFilter);
+        }
+        return params.toString();
+    }, [statusFilter]);
+
+    const { data: codes, isLoading, error, mutate } = useApi<BalanceCode[]>(`/api/admin/balance-codes?${queryParams}`);
     const [amount, setAmount] = useState<string>("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const { toast } = useToast();
@@ -114,8 +124,21 @@ export default function AdminBalanceCodes() {
             </Card>
 
             <Card>
-                <CardHeader>
-                    <CardTitle>Generated Codes</CardTitle>
+                <CardHeader className="flex flex-row justify-between items-center">
+                    <div className="space-y-1">
+                        <CardTitle>Generated Codes</CardTitle>
+                        <CardDescription>A list of all generated balance top-up codes.</CardDescription>
+                    </div>
+                     <Select value={statusFilter} onValueChange={setStatusFilter}>
+                        <SelectTrigger className="w-[180px]">
+                            <SelectValue placeholder="Filter by status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="redeemed">Redeemed</SelectItem>
+                        </SelectContent>
+                    </Select>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -140,7 +163,7 @@ export default function AdminBalanceCodes() {
                                     <TableCell className="font-mono">{c.code}</TableCell>
                                     <TableCell>₹{c.amount.toFixed(2)}</TableCell>
                                     <TableCell>
-                                        <Badge variant={c.is_redeemed ? "secondary" : "default"}>
+                                        <Badge variant={c.is_redeemed ? "secondary" : "default"} className={c.is_redeemed ? "" : "bg-green-600 hover:bg-green-700"}>
                                             {c.is_redeemed ? "Redeemed" : "Active"}
                                         </Badge>
                                     </TableCell>
@@ -178,5 +201,4 @@ export default function AdminBalanceCodes() {
     );
 }
 
-    
     

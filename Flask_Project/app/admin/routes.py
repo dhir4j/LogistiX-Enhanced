@@ -60,12 +60,21 @@ def create_balance_code():
 @admin_bp.route("/balance-codes", methods=["GET"])
 @admin_required
 def get_balance_codes():
-    codes = db.session.query(
+    status = request.args.get("status")
+
+    query = db.session.query(
         BalanceCode,
         User.email
     ).outerjoin(
         User, BalanceCode.redeemed_by_user_id == User.id
-    ).order_by(BalanceCode.created_at.desc()).all()
+    )
+
+    if status == 'active':
+        query = query.filter(BalanceCode.is_redeemed == False)
+    elif status == 'redeemed':
+        query = query.filter(BalanceCode.is_redeemed == True)
+
+    codes = query.order_by(BalanceCode.created_at.desc()).all()
     
     result = []
     for code, email in codes:
@@ -476,5 +485,7 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return jsonify({"message": "Employee deleted successfully"}), 200
+
+    
 
     
