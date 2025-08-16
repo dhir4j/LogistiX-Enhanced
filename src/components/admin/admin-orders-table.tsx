@@ -12,6 +12,12 @@ import { MoreHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-reac
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/use-session';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
+import { useForm } from 'react-hook-form';
+import * as z from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { Textarea } from '../ui/textarea';
 
 interface Shipment {
     id: number;
@@ -31,10 +37,22 @@ interface ShipmentsApiResponse {
     totalCount: number;
 }
 
+const statusUpdateSchema = z.object({
+  status: z.string().min(1, "Status is required."),
+  location: z.string().min(1, "Location is required."),
+  activity: z.string().min(1, "Activity/Comment is required."),
+});
+
+type StatusUpdateFormValues = z.infer<typeof statusUpdateSchema>;
+
+const statusOptions = ['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled'];
+
 export function AdminOrdersTable() {
     const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("all");
+    const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
+    const [isUpdateDialogOpen, setUpdateDialogOpen] = useState(false);
     const { toast } = useToast();
     const { session } = useSession();
 
@@ -48,24 +66,40 @@ export function AdminOrdersTable() {
     }, [page, search, status]);
 
     const { data, isLoading, error, mutate } = useApi<ShipmentsApiResponse>(`/api/admin/shipments?${queryParams}`);
+    
+    const form = useForm<StatusUpdateFormValues>({
+        resolver: zodResolver(statusUpdateSchema),
+    });
 
-    const handleStatusUpdate = async (shipmentId: string, newStatus: string) => {
-        if (!session?.email) {
-            toast({ title: "Error", description: "Authentication error. Please log in again.", variant: "destructive" });
+    const handleOpenUpdateDialog = (shipment: Shipment) => {
+        setSelectedShipment(shipment);
+        form.reset({
+            status: shipment.status,
+            location: '',
+            activity: '',
+        });
+        setUpdateDialogOpen(true);
+    };
+
+    const handleStatusUpdate = async (values: StatusUpdateFormValues) => {
+        if (!selectedShipment || !session?.email) {
+            toast({ title: "Error", description: "Authentication error or no shipment selected.", variant: "destructive" });
             return;
         }
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/shipments/${shipmentId}/status`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/shipments/${selectedShipment.shipment_id_str}/status`, {
                 method: 'PUT',
                 headers: { 
                     'Content-Type': 'application/json',
                     'X-User-Email': session.email,
                 },
-                body: JSON.stringify({ status: newStatus, location: "Admin Update", activity: `Status updated to ${newStatus} by admin.` }),
+                body: JSON.stringify(values),
             });
             if (response.ok) {
                 toast({ title: "Success", description: "Shipment status updated." });
                 mutate();
+                setUpdateDialogOpen(false);
+                setSelectedShipment(null);
             } else {
                 const err = await response.json();
                 toast({ title: "Error", description: err.error || "Failed to update status.", variant: "destructive"});
@@ -161,20 +195,7 @@ export function AdminOrdersTable() {
                             <TableCell>₹{s.total_with_tax_18_percent.toFixed(2)}</TableCell>
                             <TableCell>{s.status}</TableCell>
                             <TableCell>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="ghost" className="h-8 w-8 p-0">
-                                            <MoreHorizontal className="h-4 w-4" />
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        {['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled'].map(st => (
-                                            <DropdownMenuItem key={st} onClick={() => handleStatusUpdate(s.shipment_id_str, st)}>
-                                                Set as {st}
-                                            </DropdownMenuItem>
-                                        ))}
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
+                               <Button variant="outline" size="sm" onClick={() => handleOpenUpdateDialog(s)}>Update</Button>
                             </TableCell>
                         </TableRow>
                     ))}
@@ -189,6 +210,41 @@ export function AdminOrdersTable() {
                     Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
             </div>
+             <Dialog open={isUpdateDialogOpen} onOpenChange={setUpdateDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Update Shipment: {selectedShipment?.shipment_id_str}</DialogTitle>
+                        <DialogDescription>Add a new entry to the tracking history.</DialogDescription>
+                    </DialogHeader>
+                    <Form {...form}>
+                        <form onSubmit={form.handleSubmit(handleStatusUpdate)} className="space-y-4">
+                            <FormField control={form.control} name="status" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>New Status</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a status" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            {statusOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            <FormField control={form.control} name="location" render={({ field }) => (
+                                <FormItem><FormLabel>Location</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                            )}/>
+                            <FormField control={form.control} name="activity" render={({ field }) => (
+                                <FormItem><FormLabel>Activity / Comment</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                            )}/>
+                            <Button type="submit" disabled={form.formState.isSubmitting}>
+                                {form.formState.isSubmitting ? "Updating..." : "Update Status"}
+                            </Button>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
+
+    

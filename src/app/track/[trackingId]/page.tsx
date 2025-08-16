@@ -6,7 +6,7 @@ import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft, Loader2, Download, FileText } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft, Loader2, Download, FileText, CircleAlert } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 
@@ -31,7 +31,18 @@ const getStatusIcon = (status: string) => {
         case 'In Transit': return Truck;
         case 'Booked': return PackageCheck;
         case 'Pending Payment': return PackageCheck;
+        case 'Cancelled': return CircleAlert;
         default: return Warehouse;
+    }
+}
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'Delivered': return 'bg-green-500 text-white';
+        case 'Cancelled': return 'bg-red-500 text-white';
+        case 'Out for Delivery':
+        case 'In Transit': return 'bg-blue-500 text-white';
+        default: return 'bg-primary text-primary-foreground';
     }
 }
 
@@ -137,29 +148,28 @@ export default function TrackingResultPage() {
                 )}
                 {shipmentDetails && (
                     <div className="relative pl-8">
-                        <div className="absolute left-[39px] top-3 bottom-3 w-0.5 bg-border -translate-x-1/2"></div>
+                        <div className="absolute left-[20px] top-4 bottom-4 w-0.5 bg-border -translate-x-1/2"></div>
                         
                         {shipmentDetails.tracking_history.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((step, index) => {
                             const Icon = getStatusIcon(step.stage);
-                            const isCurrent = index === 0;
+                            const iconColor = getStatusColor(step.stage);
                             return (
                                 <div key={index} className="flex items-start gap-6 mb-8 last:mb-0">
                                 <div className={cn(
                                     "z-10 flex h-10 w-10 items-center justify-center rounded-full ring-8 ring-secondary",
-                                    'bg-primary text-primary-foreground'
+                                    iconColor
                                 )}>
                                     <Icon className="h-5 w-5" />
                                 </div>
-                                <div className="pt-1.5">
-                                    <p className={cn(
-                                        "font-semibold text-lg",
-                                        isCurrent ? "text-primary" : "text-foreground"
-                                    )}>
-                                    {step.stage}
-                                    </p>
-                                    <p className="text-muted-foreground text-sm">{step.location}</p>
-                                    <p className="text-muted-foreground text-sm">{step.activity}</p>
-                                    <p className="text-muted-foreground text-xs">{new Date(step.date).toLocaleString()}</p>
+                                <div className="pt-1.5 flex-1">
+                                    <div className="grid grid-cols-3 gap-4 items-start">
+                                        <div className="col-span-2">
+                                            <p className="font-semibold text-lg">{step.activity}</p>
+                                            <p className="text-muted-foreground text-sm">{new Date(step.date).toLocaleString()}</p>
+                                        </div>
+                                        <p className="text-muted-foreground text-sm font-medium text-right">{step.location}</p>
+                                    </div>
+                                    <p className="text-muted-foreground text-sm mt-1">{step.stage}</p>
                                 </div>
                                 </div>
                             )
@@ -173,3 +183,5 @@ export default function TrackingResultPage() {
     </div>
   );
 }
+
+    
