@@ -5,12 +5,20 @@ import { useState, useRef } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, Loader2, Download } from 'lucide-react';
+import { Search, Loader2, Download, PackageCheck, Truck, Warehouse, CheckCircle2, CircleAlert } from 'lucide-react';
 import { useSession } from '@/hooks/use-session';
 import { useToast } from '@/hooks/use-toast';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import AwbSheet from '@/components/awb-sheet';
+import { cn } from '@/lib/utils';
+
+interface TrackingHistory {
+    stage: string;
+    date: string;
+    location: string;
+    activity: string;
+}
 
 interface ShipmentDetails {
     shipment_id_str: string;
@@ -37,6 +45,29 @@ interface ShipmentDetails {
     service_type: string;
     booking_date: string;
     total_with_tax_18_percent: number;
+    tracking_history: TrackingHistory[];
+}
+
+const getStatusIcon = (status: string) => {
+    switch (status) {
+        case 'Delivered': return CheckCircle2;
+        case 'Out for Delivery': return Truck;
+        case 'In Transit': return Truck;
+        case 'Booked': return PackageCheck;
+        case 'Pending Payment': return PackageCheck;
+        case 'Cancelled': return CircleAlert;
+        default: return Warehouse;
+    }
+}
+
+const getStatusColor = (status: string) => {
+    switch (status) {
+        case 'Delivered': return 'bg-green-500 text-white';
+        case 'Cancelled': return 'bg-red-500 text-white';
+        case 'Out for Delivery':
+        case 'In Transit': return 'bg-blue-500 text-white';
+        default: return 'bg-primary text-primary-foreground';
+    }
 }
 
 
@@ -116,6 +147,7 @@ export default function AwbTrackingPage() {
                             className="h-11"
                             value={trackingId}
                             onChange={(e) => setTrackingId(e.target.value.toUpperCase())}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
                             disabled={isLoading}
                         />
                         <Button onClick={handleSearch} disabled={isLoading} className="h-11">
@@ -126,7 +158,50 @@ export default function AwbTrackingPage() {
                 </CardContent>
             </Card>
 
+            {isLoading && (
+              <div className="flex items-center justify-center p-12">
+                  <Loader2 className="h-8 w-8 animate-spin" />
+              </div>
+            )}
+
             {shipmentDetails && (
+              <>
+                <Card>
+                  <CardHeader>
+                      <CardTitle className="font-headline text-2xl">Shipment Progress</CardTitle>
+                      <CardDescription>Tracking ID: <span className="font-bold text-primary">{shipmentDetails.shipment_id_str}</span></CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                      <div className="relative pl-8">
+                          <div className="absolute left-[20px] top-4 bottom-4 w-0.5 bg-border -translate-x-1/2"></div>
+                          {shipmentDetails.tracking_history.sort((a,b) => new Date(b.date).getTime() - new Date(a.date).getTime()).map((step, index) => {
+                              const Icon = getStatusIcon(step.stage);
+                              const iconColor = getStatusColor(step.stage);
+                              return (
+                                  <div key={index} className="flex items-start gap-6 mb-8 last:mb-0">
+                                  <div className={cn(
+                                      "z-10 flex h-10 w-10 items-center justify-center rounded-full ring-8 ring-secondary",
+                                      iconColor
+                                  )}>
+                                      <Icon className="h-5 w-5" />
+                                  </div>
+                                  <div className="pt-1.5 flex-1">
+                                      <div className="grid grid-cols-3 gap-4 items-start">
+                                          <div className="col-span-2">
+                                              <p className="font-semibold text-lg">{step.activity}</p>
+                                              <p className="text-muted-foreground text-sm">{new Date(step.date).toLocaleString()}</p>
+                                          </div>
+                                          <p className="text-muted-foreground text-sm font-medium text-right">{step.location}</p>
+                                      </div>
+                                      <p className="text-muted-foreground text-sm mt-1">{step.stage}</p>
+                                  </div>
+                                  </div>
+                              )
+                          })}
+                      </div>
+                  </CardContent>
+                </Card>
+
                 <Card>
                     <CardHeader>
                         <div className="flex justify-between items-center">
@@ -146,9 +221,9 @@ export default function AwbTrackingPage() {
                         </div>
                     </CardContent>
                 </Card>
+              </>
             )}
         </div>
     </div>
   );
 }
-
