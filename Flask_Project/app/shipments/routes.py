@@ -61,7 +61,7 @@ def create_shipment():
 
     new_shipment = Shipment(
         user_id=user.id,
-        shipment_id_str=generate_shipment_id_str(),
+        shipment_id_str=generate_shipment_id_str(db.session, Shipment),
         status=status,
         tracking_history=tracking_history,
         price_without_tax=price_without_tax,
@@ -280,7 +280,7 @@ def get_day_end_stats():
     if not user or not user.is_employee:
         return jsonify({"error": "Employee not found or not authorized"}), 403
 
-    # Base query for today's shipments by the user
+    # Base query for all shipments by the user
     all_shipments_query = Shipment.query.filter(
         Shipment.user_id == user.id
     )
@@ -377,3 +377,5 @@ def delete_saved_address(address_id):
     db.session.delete(address)
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
+
+    
