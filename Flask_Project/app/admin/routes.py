@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.models import Shipment, User, PaymentRequest, BalanceCode
 from app.extensions import db
 from sqlalchemy import or_, func
+from sqlalchemy.orm.attributes import flag_modified
 from datetime import datetime
 import string
 import random
@@ -178,6 +179,7 @@ def update_shipment_status(shipment_id_str):
     history = shipment.tracking_history or []
     history.append(entry)
     shipment.tracking_history = history
+    flag_modified(shipment, "tracking_history")
     db.session.commit()
 
     return jsonify({
@@ -272,6 +274,8 @@ def update_payment_status(payment_id):
                     "activity": "Shipment booked and payment confirmed."
                  })
             shipment.tracking_history = history
+            flag_modified(shipment, "tracking_history")
+
 
     db.session.commit()
     return jsonify({"message": f"Payment {new_status.lower()} successfully"}), 200
@@ -485,9 +489,3 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return jsonify({"message": "Employee deleted successfully"}), 200
-
-    
-
-    
-
-    

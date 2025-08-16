@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -85,8 +85,8 @@ export default function AwbTrackingPage() {
   const awbRef = useRef<HTMLDivElement>(null);
 
 
-  const handleSearch = async () => {
-    if (!trackingId) {
+  const handleSearch = useCallback(async (idToSearch: string) => {
+    if (!idToSearch) {
       toast({ title: "Error", description: "Please enter a Tracking ID.", variant: "destructive" });
       return;
     }
@@ -99,7 +99,7 @@ export default function AwbTrackingPage() {
     setShipmentDetails(null);
     
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments/${trackingId}`,{
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments/${idToSearch}`,{
            headers: { 'X-User-Email': session.email }
       });
       if (!response.ok) {
@@ -114,13 +114,13 @@ export default function AwbTrackingPage() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [session, toast]);
   
   useEffect(() => {
     if (idFromQuery) {
-        handleSearch();
+        handleSearch(idFromQuery);
     }
-  }, [idFromQuery]);
+  }, [idFromQuery, handleSearch]);
 
 
   const handleDownloadPdf = async () => {
@@ -158,10 +158,10 @@ export default function AwbTrackingPage() {
                             className="h-11"
                             value={trackingId}
                             onChange={(e) => setTrackingId(e.target.value.toUpperCase())}
-                            onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                            onKeyDown={(e) => e.key === 'Enter' && handleSearch(trackingId)}
                             disabled={isLoading}
                         />
-                        <Button onClick={handleSearch} disabled={isLoading} className="h-11">
+                        <Button onClick={() => handleSearch(trackingId)} disabled={isLoading} className="h-11">
                             {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Search className="mr-2 h-4 w-4" />}
                             Search
                         </Button>
