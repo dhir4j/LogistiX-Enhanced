@@ -35,8 +35,8 @@ def create_shipment():
     if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
         return jsonify({"error": "Valid final_total_price_with_tax is required"}), 400
     
-    price_without_tax = round(final_total_price / 1.18, 2)
-    tax_amount = round(final_total_price - price_without_tax, 2)
+    price_without_tax = round(Decimal(str(final_total_price)) / Decimal('1.18'), 2)
+    tax_amount = Decimal(str(final_total_price)) - price_without_tax
 
     # Employee balance logic
     if user.is_employee:
@@ -280,49 +280,33 @@ def get_day_end_stats():
     if not user or not user.is_employee:
         return jsonify({"error": "Employee not found or not authorized"}), 403
 
-    today_start = datetime.combine(datetime.utcnow().date(), time.min)
-    
     # Base query for today's shipments by the user
-    todays_shipments_query = Shipment.query.filter(
-        Shipment.user_id == user.id,
-        Shipment.booking_date >= today_start
+    all_shipments_query = Shipment.query.filter(
+        Shipment.user_id == user.id
     )
     
     # Calculate stats
-    todays_shipments_count = todays_shipments_query.count()
-    todays_shipments_value = todays_shipments_query.with_entities(
+    total_shipments_count = all_shipments_query.count()
+    total_shipments_value = all_shipments_query.with_entities(
         func.sum(Shipment.total_with_tax_18_percent)
     ).scalar() or 0
     
     # Get shipments for the table
-    todays_shipments_list = todays_shipments_query.order_by(Shipment.booking_date.desc()).all()
+    all_shipments_list = all_shipments_query.order_by(Shipment.booking_date.desc()).all()
     shipments_result = [{
         "id": s.id,
         "shipment_id_str": s.shipment_id_str,
         "receiver_name": s.receiver_name,
         "status": s.status,
         "total_with_tax_18_percent": float(s.total_with_tax_18_percent)
-    } for s in todays_shipments_list]
-
-    # Get shipments by hour for the graph
-    shipments_by_hour_query = db.session.query(
-        func.extract('hour', Shipment.booking_date).label('hour'),
-        func.count(Shipment.id).label('count')
-    ).filter(
-        Shipment.user_id == user.id,
-        Shipment.booking_date >= today_start
-    ).group_by('hour').order_by('hour').all()
-
-    # Format for recharts
-    shipments_by_hour = [{"hour": f"{int(h):02d}:00", "shipments": c} for h, c in shipments_by_hour_query]
+    } for s in all_shipments_list]
 
 
     return jsonify({
         "current_balance": float(user.balance),
-        "todays_shipments_count": todays_shipments_count,
-        "todays_shipments_value": float(todays_shipments_value),
-        "todays_shipments": shipments_result,
-        "shipments_by_hour": shipments_by_hour
+        "total_shipments_count": total_shipments_count,
+        "total_shipments_value": float(total_shipments_value),
+        "all_shipments": shipments_result,
     }), 200
 
 
@@ -393,5 +377,3 @@ def delete_saved_address(address_id):
     db.session.delete(address)
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
-
-    

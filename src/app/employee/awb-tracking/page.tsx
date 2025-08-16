@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
@@ -12,6 +12,7 @@ import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import AwbSheet from '@/components/awb-sheet';
 import { cn } from '@/lib/utils';
+import { useSearchParams } from 'next/navigation';
 
 interface TrackingHistory {
     stage: string;
@@ -72,7 +73,10 @@ const getStatusColor = (status: string) => {
 
 
 export default function AwbTrackingPage() {
-  const [trackingId, setTrackingId] = useState('');
+  const searchParams = useSearchParams();
+  const idFromQuery = searchParams.get('id');
+
+  const [trackingId, setTrackingId] = useState(idFromQuery || '');
   const [shipmentDetails, setShipmentDetails] = useState<ShipmentDetails | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -111,6 +115,13 @@ export default function AwbTrackingPage() {
       setIsLoading(false);
     }
   };
+  
+  useEffect(() => {
+    if (idFromQuery) {
+        handleSearch();
+    }
+  }, [idFromQuery]);
+
 
   const handleDownloadPdf = async () => {
     const input = awbRef.current;

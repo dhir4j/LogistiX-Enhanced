@@ -15,9 +15,9 @@ import { Button } from "@/components/ui/button";
 
 interface EmployeeStats {
     current_balance: number;
-    todays_shipments_count: number;
-    todays_shipments_value: number;
-    todays_shipments: {
+    total_shipments_count: number;
+    total_shipments_value: number;
+    all_shipments: {
         id: number;
         shipment_id_str: string;
         receiver_name: string;
@@ -47,8 +47,8 @@ export default function EmployeeDashboardPage() {
     
     const statCards = [
         { title: "Current Balance", value: stats?.current_balance, icon: DollarSign, isCurrency: true },
-        { title: "Shipments Today", value: stats?.todays_shipments_count, icon: Package },
-        { title: "Volume Today", value: stats?.todays_shipments_value, icon: BarChart, isCurrency: true },
+        { title: "Total Shipments", value: stats?.total_shipments_count, icon: Package },
+        { title: "Total Volume", value: stats?.total_shipments_value, icon: BarChart, isCurrency: true },
     ];
 
   return (
@@ -79,7 +79,7 @@ export default function EmployeeDashboardPage() {
         <div className="mt-8">
             <Card>
                 <CardHeader>
-                    <CardTitle>Recent Activity (Today's Shipments)</CardTitle>
+                    <CardTitle>Recent Activity</CardTitle>
                 </CardHeader>
                 <CardContent>
                    {isLoading ? (
@@ -90,7 +90,7 @@ export default function EmployeeDashboardPage() {
                         </div>
                    ) : error ? (
                         <p className="text-center text-red-500">Could not load recent activity.</p>
-                   ) : stats && stats.todays_shipments.length > 0 ? (
+                   ) : stats && stats.all_shipments.length > 0 ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -101,7 +101,7 @@ export default function EmployeeDashboardPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {stats.todays_shipments.map((shipment) => (
+                                {stats.all_shipments.slice(0, 10).map((shipment) => (
                                     <TableRow key={shipment.id}>
                                         <TableCell className="font-medium">{shipment.shipment_id_str}</TableCell>
                                         <TableCell>{shipment.receiver_name}</TableCell>
@@ -116,7 +116,7 @@ export default function EmployeeDashboardPage() {
                             </TableBody>
                         </Table>
                    ) : (
-                        <p className="text-center text-muted-foreground">No shipments created today.</p>
+                        <p className="text-center text-muted-foreground">No shipments created yet.</p>
                    )}
                 </CardContent>
             </Card>
