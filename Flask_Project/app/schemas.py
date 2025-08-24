@@ -27,14 +27,14 @@ class ShipmentCreateSchema(Schema):
     receiver_address_city = fields.Str(required=True)
     receiver_address_state = fields.Str(required=True)
     receiver_address_pincode = fields.Str(required=True)
-    receiver_address_country = fields.Str(required=True)
     receiver_phone = fields.Str(required=True)
 
     # Package
     package_weight_kg = fields.Float(required=True)
     pickup_date = fields.Date(required=True)
     service_type = fields.Str(required=False, allow_none=True) # Optional now
-    user_email = fields.Email(required=True)
+    # user_email is handled separately in the route
+    # user_email = fields.Email(required=True)
 
 class PaymentSubmitSchema(Schema):
     shipment_id_str = fields.Str(required=True)
@@ -56,5 +56,5 @@ class SavedAddressSchema(Schema):
     class Meta:
         # Fields to show when sending data back to the client
         fields = ("id", "nickname", "name", "address_street", "address_city", "address_state", "address_pincode", "address_country", "phone", "address_type")
-
+    
     

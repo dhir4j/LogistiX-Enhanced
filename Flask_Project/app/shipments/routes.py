@@ -15,6 +15,13 @@ def create_shipment():
     schema = ShipmentCreateSchema()
     data = request.get_json()
 
+    # --- FIX START ---
+    # Extract user_email before validation to prevent it from being passed twice.
+    user_email_from_payload = data.pop("user_email", None)
+    if not user_email_from_payload:
+        return jsonify({"error": "user_email is a required field"}), 400
+    # --- FIX END ---
+
     final_total_price = data.pop("final_total_price_with_tax", None)
     
     # Explicitly pop fields not in the schema before loading
@@ -22,14 +29,14 @@ def create_shipment():
     data.pop("sender_address_nickname", None)
     data.pop("save_receiver_address", None)
     data.pop("receiver_address_nickname", None)
-    data.pop("shipmentType", None) # Remove shipmentType from data
+    data.pop("shipmentType", None)
 
     try:
+        # user_email is no longer in `data`, so it won't be in `shipment_data`
         shipment_data = schema.load(data)
     except Exception as e:
         return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
 
-    user_email_from_payload = shipment_data.pop("user_email")
     user = User.query.filter_by(email=user_email_from_payload).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
@@ -63,19 +70,18 @@ def create_shipment():
 
     new_shipment = Shipment(
         user_id=user.id,
-        user_email=user_email_from_payload,
+        user_email=user_email_from_payload, # Pass the explicitly handled email
         shipment_id_str=generate_shipment_id_str(db.session, Shipment),
         status=status,
         tracking_history=tracking_history,
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
         total_with_tax_18_percent=final_total_price,
-        **shipment_data
+        **shipment_data # shipment_data no longer contains user_email
     )
     db.session.add(new_shipment)
     db.session.commit()
     
-    # We can't jsonify date objects directly
     shipment_data['pickup_date'] = shipment_data['pickup_date'].isoformat()
 
     return jsonify({
@@ -378,5 +384,5 @@ def delete_saved_address(address_id):
     db.session.delete(address)
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
-
+    
     
