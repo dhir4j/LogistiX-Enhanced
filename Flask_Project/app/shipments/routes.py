@@ -29,7 +29,8 @@ def create_shipment():
     except Exception as e:
         return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
 
-    user = User.query.filter_by(email=shipment_data["user_email"]).first()
+    user_email_from_payload = shipment_data.pop("user_email")
+    user = User.query.filter_by(email=user_email_from_payload).first()
     if not user:
         return jsonify({"error": "User not found"}), 404
         
@@ -62,7 +63,7 @@ def create_shipment():
 
     new_shipment = Shipment(
         user_id=user.id,
-        user_email=user.email,
+        user_email=user_email_from_payload,
         shipment_id_str=generate_shipment_id_str(db.session, Shipment),
         status=status,
         tracking_history=tracking_history,
@@ -83,6 +84,7 @@ def create_shipment():
         "data": {
             **shipment_data,
             "id": new_shipment.id,
+            "user_email": new_shipment.user_email,
             "price_without_tax": float(new_shipment.price_without_tax),
             "tax_amount_18_percent": float(new_shipment.tax_amount_18_percent),
             "total_with_tax_18_percent": float(new_shipment.total_with_tax_18_percent),
