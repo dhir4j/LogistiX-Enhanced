@@ -15,9 +15,13 @@ export default function Header() {
   const { session, clearSession, isLoading } = useSession();
   const router = useRouter();
 
-  const isDashboardLayout = pathname.startsWith('/dashboard') || pathname.startsWith('/my-shipments') || pathname.startsWith('/address-book') || pathname.startsWith('/payments');
+  // This regex checks if the path is inside the (customer) route group
+  const isCustomerDashboard = /^\/\(customer\)\//.test(pathname) || /^\/dashboard|\/my-shipments|\/booking|\/address-book|\/payments|\/track/.test(pathname);
 
-  if (pathname.startsWith('/admin') || (pathname.startsWith('/employee') && pathname !== '/employee-login') || isDashboardLayout) {
+  // More specific check for admin and employee pages
+  const isAdminOrEmployeePage = pathname.startsWith('/admin') || (pathname.startsWith('/employee') && pathname !== '/employee-login');
+
+  if (isAdminOrEmployeePage || isCustomerDashboard) {
     return null;
   }
 
@@ -121,3 +125,5 @@ export default function Header() {
     </header>
   );
 }
+
+    
