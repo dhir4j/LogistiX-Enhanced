@@ -21,9 +21,8 @@ def intl_price():
         if "error" in price_result:
             return jsonify(price_result), 404
 
-        # Apply tax and discount consistently
-        total_with_tax = round(price_result["base_price"] * 1.18, 2)
-        final_price = round(total_with_tax * 0.7, 2)
+        # Apply only the 18% tax, no other discounts
+        final_price = round(price_result["base_price"] * 1.18, 2)
 
         return jsonify({
             "country": price_result["country_name"],
