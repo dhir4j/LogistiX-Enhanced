@@ -32,9 +32,8 @@ class ShipmentCreateSchema(Schema):
     # Package
     package_weight_kg = fields.Float(required=True)
     pickup_date = fields.Date(required=True)
-    service_type = fields.Str(required=False, allow_none=True) # Optional now
-    # user_email is handled separately in the route
-    # user_email = fields.Email(required=True)
+    service_type = fields.Str(required=True)
+
 
 class PaymentSubmitSchema(Schema):
     shipment_id_str = fields.Str(required=True)
