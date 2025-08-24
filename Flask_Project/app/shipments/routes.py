@@ -15,12 +15,9 @@ def create_shipment():
     schema = ShipmentCreateSchema()
     data = request.get_json()
 
-    # --- FIX START ---
-    # Extract user_email before validation to prevent it from being passed twice.
     user_email_from_payload = data.pop("user_email", None)
     if not user_email_from_payload:
         return jsonify({"error": "user_email is a required field"}), 400
-    # --- FIX END ---
 
     final_total_price = data.pop("final_total_price_with_tax", None)
     
@@ -32,7 +29,6 @@ def create_shipment():
     data.pop("shipmentType", None)
 
     try:
-        # user_email is no longer in `data`, so it won't be in `shipment_data`
         shipment_data = schema.load(data)
     except Exception as e:
         return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
@@ -70,7 +66,7 @@ def create_shipment():
 
     new_shipment = Shipment(
         user_id=user.id,
-        user_email=user_email_from_payload, # Pass the explicitly handled email
+        user_email=user_email_from_payload,
         shipment_id_str=generate_shipment_id_str(db.session, Shipment),
         status=status,
         tracking_history=tracking_history,
@@ -80,7 +76,7 @@ def create_shipment():
         package_length_cm=shipment_data.get('package_length_cm', 0),
         package_width_cm=shipment_data.get('package_width_cm', 0),
         package_height_cm=shipment_data.get('package_height_cm', 0),
-        **shipment_data # shipment_data no longer contains user_email
+        **shipment_data
     )
     db.session.add(new_shipment)
     db.session.commit()
@@ -388,4 +384,6 @@ def delete_saved_address(address_id):
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
     
+    
+
     
