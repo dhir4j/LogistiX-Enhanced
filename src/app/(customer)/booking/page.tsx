@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -12,14 +13,16 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, Globe, Truck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "@/hooks/use-session";
 import { useRouter } from "next/navigation";
 import * as z from "zod";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-const domesticShipmentSchema = z.object({
+const bookingSchema = z.object({
+  shipmentType: z.enum(['domestic', 'international']),
   // Sender
   sender_name: z.string().min(3, "Sender name is required"),
   sender_address_line1: z.string().min(5, "Address Line 1 is required"),
@@ -34,17 +37,18 @@ const domesticShipmentSchema = z.object({
   receiver_address_line1: z.string().min(5, "Address Line 1 is required"),
   receiver_address_line2: z.string().optional(),
   receiver_address_city: z.string().min(2, "City is required"),
-  receiver_address_state: z.string().min(2, "State is required"),
-  receiver_address_pincode: z.string().min(6, "A valid 6-digit pincode is required").max(6),
-  receiver_phone: z.string().min(10, "A valid 10-digit phone number is required").max(10),
+  receiver_address_state: z.string().min(2, "State/Province is required"),
+  receiver_address_pincode: z.string().min(5, "Pincode/ZIP is required"),
+  receiver_phone: z.string().min(10, "A valid phone number is required"),
+  receiver_address_country: z.string().min(2, "Country is required"),
   
   // Package
   package_weight_kg: z.coerce.number().min(0.1, "Weight must be at least 0.1 kg"),
   pickup_date: z.date({ required_error: "Pickup date is required" }),
-  service_type: z.string({ required_error: "Service type is required" }),
+  service_type: z.string().optional(),
 });
 
-type DomesticShipmentFormValues = z.infer<typeof domesticShipmentSchema>;
+type ShipmentFormValues = z.infer<typeof bookingSchema>;
 
 
 export default function CustomerBookingPage() {
@@ -54,38 +58,62 @@ export default function CustomerBookingPage() {
     const [priceDetails, setPriceDetails] = useState<{ total_price: number } | null>(null);
     const [isCalculating, setIsCalculating] = useState(false);
     
-    const form = useForm<DomesticShipmentFormValues>({
-        resolver: zodResolver(domesticShipmentSchema),
+    const form = useForm<ShipmentFormValues>({
+        resolver: zodResolver(bookingSchema),
         defaultValues: {
+            shipmentType: "domestic",
             sender_name: "", sender_address_line1: "", sender_address_line2: "", sender_address_city: "",
             sender_address_state: "", sender_address_pincode: "", sender_phone: "",
             receiver_name: "", receiver_address_line1: "", receiver_address_line2: "", receiver_address_city: "",
-            receiver_address_state: "", receiver_address_pincode: "", receiver_phone: "",
+            receiver_address_state: "", receiver_address_pincode: "", receiver_phone: "", receiver_address_country: "India",
             package_weight_kg: 0.5, pickup_date: new Date(), service_type: "Standard",
         },
     });
+
+    const shipmentType = useWatch({ control: form.control, name: "shipmentType" });
 
     useEffect(() => {
         if (!isSessionLoading && !session) {
             router.push('/login');
         }
     }, [session, isSessionLoading, router]);
+    
+     useEffect(() => {
+        // Reset receiver country when switching between domestic/international
+        if (shipmentType === 'domestic') {
+            form.setValue('receiver_address_country', 'India');
+        } else {
+             form.setValue('receiver_address_country', '');
+        }
+        setPriceDetails(null);
+    }, [shipmentType, form.setValue]);
+
 
     const handleCalculatePrice = async () => {
         const values = form.getValues();
-        const { receiver_address_state, package_weight_kg, service_type } = values;
+        const { receiver_address_state, receiver_address_country, package_weight_kg, service_type, shipmentType } = values;
 
-        if (!receiver_address_state || !package_weight_kg || !service_type) {
-             toast({ title: "Missing Information", description: "Please fill in receiver state, weight, and service type to calculate price.", variant: "destructive" });
+        let isReady = false;
+        let url = '';
+        let body = {};
+        
+        if (shipmentType === 'domestic' && receiver_address_state && package_weight_kg && service_type) {
+            isReady = true;
+            url = `${process.env.NEXT_PUBLIC_API_URL}/api/domestic/price`;
+            body = { state: receiver_address_state, weight: package_weight_kg, mode: service_type };
+        } else if (shipmentType === 'international' && receiver_address_country && package_weight_kg) {
+            isReady = true;
+            url = `${process.env.NEXT_PUBLIC_API_URL}/api/international/price`;
+            body = { country: receiver_address_country, weight: package_weight_kg };
+        }
+
+        if (!isReady) {
+             toast({ title: "Missing Information", description: "Please fill in all required fields to calculate the price.", variant: "destructive" });
             return;
         }
         
         setIsCalculating(true);
         setPriceDetails(null);
-
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/api/domestic/price`;
-        const body = { state: receiver_address_state, weight: package_weight_kg, mode: service_type };
-
         try {
             const response = await fetch(url, {
                 method: "POST",
@@ -106,10 +134,9 @@ export default function CustomerBookingPage() {
         }
     };
     
-    const onSubmit = (values: DomesticShipmentFormValues) => {
-        // This is where the booking submission logic would go
+    const onSubmit = (values: ShipmentFormValues) => {
         console.log("Form Submitted", values);
-        toast({ title: "Proceeding to Next Step", description: "Please confirm details to book your shipment." });
+        toast({ title: "Booking Created", description: "Your shipment has been successfully booked." });
     };
 
     if (isSessionLoading || !session) {
@@ -122,9 +149,50 @@ export default function CustomerBookingPage() {
 
     return (
         <div>
-            <h1 className="text-2xl font-bold mb-6">Create a New Domestic Shipment</h1>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                     <FormField
+                        control={form.control}
+                        name="shipmentType"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="grid grid-cols-2 gap-4"
+                                    >
+                                        <FormItem>
+                                            <FormControl>
+                                                <RadioGroupItem value="domestic" className="sr-only" />
+                                            </FormControl>
+                                            <FormLabel className={cn(
+                                                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                                field.value === 'domestic' && "border-primary"
+                                            )}>
+                                                <Truck className="mb-3 h-6 w-6" />
+                                                Domestic
+                                            </FormLabel>
+                                        </FormItem>
+                                        <FormItem>
+                                            <FormControl>
+                                                <RadioGroupItem value="international" className="sr-only" />
+                                            </FormControl>
+                                             <FormLabel className={cn(
+                                                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                                field.value === 'international' && "border-primary"
+                                            )}>
+                                                <Globe className="mb-3 h-6 w-6" />
+                                                International
+                                            </FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+
                     <Card>
                         <CardHeader>
                             <CardTitle>Sender Details</CardTitle>
@@ -154,10 +222,15 @@ export default function CustomerBookingPage() {
                             <FormField name="receiver_address_line2" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Line 2 (Optional)</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             <div className="grid md:grid-cols-3 gap-4">
                                 <FormField name="receiver_address_city" control={form.control} render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="receiver_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="receiver_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State/Province</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode/ZIP</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
-                            <FormField name="receiver_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                             <div className="grid md:grid-cols-2 gap-4">
+                                {shipmentType === 'international' && (
+                                    <FormField name="receiver_address_country" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                )}
+                                <FormField name="receiver_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            </div>
                         </CardContent>
                     </Card>
 
@@ -185,17 +258,19 @@ export default function CustomerBookingPage() {
                                         </Popover>
                                     <FormMessage /></FormItem>
                                 )}/>
-                                <FormField name="service_type" control={form.control} render={({ field }) => (
-                                    <FormItem><FormLabel>Service Type</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                            <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
-                                            <SelectContent>
-                                                <SelectItem value="Standard">Standard</SelectItem>
-                                                <SelectItem value="Express">Express</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    <FormMessage /></FormItem>
-                                )} />
+                                {shipmentType === 'domestic' && (
+                                    <FormField name="service_type" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Service Type</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="Standard">Standard</SelectItem>
+                                                    <SelectItem value="Express">Express</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        <FormMessage /></FormItem>
+                                    )} />
+                                )}
                             </div>
                             <Separator />
                             <div className="flex flex-col items-center gap-4">
@@ -208,7 +283,7 @@ export default function CustomerBookingPage() {
                                         <p className="text-muted-foreground">Estimated Price:</p>
                                         <p className="text-2xl font-bold">₹{priceDetails.total_price.toFixed(2)}</p>
                                          <Button type="submit" size="lg" className="mt-4">
-                                            Proceed to Book
+                                            Create Booking
                                         </Button>
                                     </div>
                                 )}
@@ -221,4 +296,3 @@ export default function CustomerBookingPage() {
     );
 }
 
-    

@@ -65,5 +65,3 @@ export const shipmentBookingSchema = z.object({
 });
 
 export type ShipmentBookingFormValues = z.infer<typeof shipmentBookingSchema>;
-
-    
