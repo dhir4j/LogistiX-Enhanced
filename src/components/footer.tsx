@@ -1,3 +1,4 @@
+
 "use client";
 
 import Image from 'next/image';
@@ -7,7 +8,15 @@ import { usePathname } from 'next/navigation';
 export default function Footer() {
   const pathname = usePathname();
 
-  if (pathname.startsWith('/admin') || pathname.startsWith('/employee')) {
+  const isDashboardPage = pathname.startsWith('/admin') || 
+                          pathname.startsWith('/employee') || 
+                          pathname.startsWith('/dashboard') ||
+                          pathname.startsWith('/my-shipments') ||
+                          pathname.startsWith('/booking') ||
+                          pathname.startsWith('/address-book') ||
+                          pathname.startsWith('/payments');
+
+  if (isDashboardPage) {
     return null;
   }
   
