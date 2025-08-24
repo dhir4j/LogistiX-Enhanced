@@ -36,7 +36,7 @@ class ShipmentCreateSchema(Schema):
     package_height_cm = fields.Float(required=True)
     package_length_cm = fields.Float(required=True)
     pickup_date = fields.Date(required=True)
-    service_type = fields.Str(required=True) # Assuming validation happens elsewhere or isn't strict
+    service_type = fields.Str(required=False, allow_none=True) # Optional now
     user_email = fields.Email(required=True)
 
 class PaymentSubmitSchema(Schema):
@@ -59,4 +59,3 @@ class SavedAddressSchema(Schema):
     class Meta:
         # Fields to show when sending data back to the client
         fields = ("id", "nickname", "name", "address_street", "address_city", "address_state", "address_pincode", "address_country", "phone", "address_type")
-

@@ -22,6 +22,7 @@ def create_shipment():
     data.pop("sender_address_nickname", None)
     data.pop("save_receiver_address", None)
     data.pop("receiver_address_nickname", None)
+    data.pop("shipmentType", None) # Remove shipmentType from data
 
     try:
         shipment_data = schema.load(data)
@@ -377,5 +378,3 @@ def delete_saved_address(address_id):
     db.session.delete(address)
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
-
-    
