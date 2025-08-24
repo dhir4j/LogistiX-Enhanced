@@ -53,7 +53,7 @@ export function AdminPaymentsTable() {
 
     return (
         <div className="bg-background border rounded-lg p-4">
-            <h2 className="text-xl font-semibold mb-4">Payment Requests</h2>
+            <h2 className="text-xl font-semibold mb-4">Customer Payment Requests</h2>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -63,7 +63,7 @@ export function AdminPaymentsTable() {
                         <TableHead>UTR Number</TableHead>
                         <TableHead>Date</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -76,19 +76,26 @@ export function AdminPaymentsTable() {
                             <TableCell>{p.order_id}</TableCell>
                             <TableCell>{p.first_name} {p.last_name}</TableCell>
                             <TableCell>₹{p.amount.toFixed(2)}</TableCell>
-                            <TableCell>{p.utr}</TableCell>
+                            <TableCell className="font-mono">{p.utr}</TableCell>
                             <TableCell>{new Date(p.created_at).toLocaleDateString()}</TableCell>
-                            <TableCell><Badge variant={p.status === 'Approved' ? 'default' : p.status === 'Rejected' ? 'destructive' : 'secondary'}>{p.status}</Badge></TableCell>
-                            <TableCell>
+                            <TableCell><Badge variant={p.status === 'Approved' ? 'default' : p.status === 'Rejected' ? 'destructive' : 'secondary'} className={p.status === 'Approved' ? 'bg-green-600' : ''}>{p.status}</Badge></TableCell>
+                            <TableCell className="text-right">
                                 {p.status === 'Pending' ? (
-                                    <div className="flex gap-2">
-                                        <Button size="sm" onClick={() => handleStatusUpdate(p.id, 'Approved')}>Approve</Button>
+                                    <div className="flex gap-2 justify-end">
+                                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleStatusUpdate(p.id, 'Approved')}>Approve</Button>
                                         <Button size="sm" variant="destructive" onClick={() => handleStatusUpdate(p.id, 'Rejected')}>Reject</Button>
                                     </div>
                                 ) : 'Processed'}
                             </TableCell>
                         </TableRow>
                     ))}
+                     {!isLoading && payments?.length === 0 && (
+                        <TableRow>
+                            <TableCell colSpan={7} className="text-center text-muted-foreground h-24">
+                                No pending payment requests found.
+                            </TableCell>
+                        </TableRow>
+                    )}
                 </TableBody>
             </Table>
         </div>
