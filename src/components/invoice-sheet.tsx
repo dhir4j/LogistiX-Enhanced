@@ -141,7 +141,7 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                             <span>₹{subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
-                            <span className="font-bold">GST (18%):</span>
+                            <span className="font-bold">IGST (18%):</span>
                             <span>₹{tax.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">

@@ -123,7 +123,7 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                                             <td className="p-1 w-2/3">
                                                 <div className="text-center font-bold">6</div>
                                                 <p>TYPE OF SERVICE</p>
-                                                <p className="font-bold text-center">{shipment.service_type.toUpperCase()}</p>
+                                                <p className="font-bold text-center">{shipment.service_type ? shipment.service_type.toUpperCase() : "INTERNATIONAL"}</p>
                                             </td>
                                         </tr>
                                         <tr className="border-b-2 border-black">

@@ -44,7 +44,7 @@ const getStatusIcon = (status: string) => {
         case 'Out for Delivery': return Truck;
         case 'In Transit': return Truck;
         case 'Booked': return PackageCheck;
-        case 'Pending Payment': return PackageCheck;
+        case 'Pending Payment': return CreditCard;
         case 'Cancelled': return CircleAlert;
         default: return Warehouse;
     }
@@ -56,6 +56,7 @@ const getStatusColor = (status: string) => {
         case 'Cancelled': return 'bg-red-500 text-white';
         case 'Out for Delivery':
         case 'In Transit': return 'bg-blue-500 text-white';
+        case 'Pending Payment': return 'bg-orange-500 text-white';
         default: return 'bg-primary text-primary-foreground';
     }
 }
@@ -129,7 +130,8 @@ export default function TrackingResultPage() {
           const result = await response.json();
           if (response.ok) {
               toast({ title: "Success", description: result.message });
-              fetchShipmentDetails(idFromUrl); // Refresh data
+              // Instead of redirecting, just refresh the data to show the pending state.
+              fetchShipmentDetails(idFromUrl); 
           } else {
               toast({ title: "Error", description: result.error || "Failed to submit payment.", variant: "destructive" });
           }
