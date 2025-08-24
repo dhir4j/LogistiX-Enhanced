@@ -47,6 +47,9 @@ class Shipment(db.Model):
     receiver_phone = db.Column(db.String(30), nullable=False)
 
     package_weight_kg = db.Column(db.Numeric(10, 2), nullable=False)
+    package_length_cm = db.Column(db.Numeric(10, 2), nullable=True)
+    package_width_cm = db.Column(db.Numeric(10, 2), nullable=True)
+    package_height_cm = db.Column(db.Numeric(10, 2), nullable=True)
 
     pickup_date = db.Column(db.Date, nullable=False)
     service_type = db.Column(db.String(50), nullable=False)

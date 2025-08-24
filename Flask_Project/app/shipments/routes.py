@@ -77,6 +77,9 @@ def create_shipment():
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
         total_with_tax_18_percent=final_total_price,
+        package_length_cm=shipment_data.get('package_length_cm', 0),
+        package_width_cm=shipment_data.get('package_width_cm', 0),
+        package_height_cm=shipment_data.get('package_height_cm', 0),
         **shipment_data # shipment_data no longer contains user_email
     )
     db.session.add(new_shipment)
