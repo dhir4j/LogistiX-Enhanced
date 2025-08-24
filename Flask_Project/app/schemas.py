@@ -31,9 +31,9 @@ class ShipmentCreateSchema(Schema):
 
     # Package
     package_weight_kg = fields.Float(required=True)
-    package_length_cm = fields.Float(required=False, missing=0.0)
-    package_width_cm = fields.Float(required=False, missing=0.0)
-    package_height_cm = fields.Float(required=False, missing=0.0)
+    package_length_cm = fields.Float(required=False, load_default=0.0)
+    package_width_cm = fields.Float(required=False, load_default=0.0)
+    package_height_cm = fields.Float(required=False, load_default=0.0)
     pickup_date = fields.Date(required=True)
     service_type = fields.Str(required=True)
 
