@@ -191,7 +191,7 @@ export default function TrackingResultPage() {
                         <div className="grid md:grid-cols-2 gap-6 items-center">
                             <div className="flex flex-col items-center justify-center">
                                 <p className="font-semibold mb-2">Scan to Pay</p>
-                                <Image src="/images/upi_qr.png" alt="UPI QR Code" width={200} height={200} data-ai-hint="QR code" />
+                                <Image src="/images/logo/qr_code.png" alt="UPI QR Code" width={200} height={200} data-ai-hint="QR code" />
                                 <p className="text-sm text-muted-foreground mt-2 text-center">Scan with any UPI app like Google Pay, PhonePe, or Paytm.</p>
                             </div>
                             <div className="space-y-4">
