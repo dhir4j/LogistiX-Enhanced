@@ -112,26 +112,32 @@ def get_all_shipments():
     limit = int(request.args.get("limit", 10))
     status = request.args.get("status")
     q = request.args.get("q")
-    query = Shipment.query
+    
+    query = db.session.query(
+        Shipment,
+        User.is_employee
+    ).join(User, Shipment.user_id == User.id)
+
 
     if status:
-        query = query.filter_by(status=status)
+        query = query.filter(Shipment.status == status)
     if q:
         like_q = f"%{q}%"
         query = query.filter(
             or_(
                 Shipment.shipment_id_str.ilike(like_q),
                 Shipment.sender_name.ilike(like_q),
-                Shipment.receiver_name.ilike(like_q)
+                Shipment.receiver_name.ilike(like_q),
+                User.email.ilike(like_q)
             )
         )
     
     total_count = query.count()
     pagination = query.order_by(Shipment.booking_date.desc()).paginate(page=page, per_page=limit, error_out=False)
-    shipments = pagination.items
+    shipments_with_user_type = pagination.items
 
     result = []
-    for s in shipments:
+    for s, is_employee in shipments_with_user_type:
         result.append({
             "id": s.id,
             "shipment_id_str": s.shipment_id_str,
@@ -145,6 +151,7 @@ def get_all_shipments():
             "price_without_tax": float(s.price_without_tax),
             "tax_amount_18_percent": float(s.tax_amount_18_percent),
             "total_with_tax_18_percent": float(s.total_with_tax_18_percent),
+            "user_type": "Employee" if is_employee else "Customer",
         })
     return jsonify({
         "shipments": result,
@@ -489,3 +496,5 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return jsonify({"message": "Employee deleted successfully"}), 200
+
+    

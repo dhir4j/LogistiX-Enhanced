@@ -6,18 +6,18 @@ import { useApi } from '@/hooks/use-api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { MoreHorizontal, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/use-session';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '../ui/textarea';
+import { Badge } from '../ui/badge';
 
 interface Shipment {
     id: number;
@@ -28,6 +28,7 @@ interface Shipment {
     booking_date: string;
     status: string;
     total_with_tax_18_percent: number;
+    user_type: 'Customer' | 'Employee';
 }
 
 interface ShipmentsApiResponse {
@@ -39,8 +40,8 @@ interface ShipmentsApiResponse {
 
 const statusUpdateSchema = z.object({
   status: z.string().min(1, "Status is required."),
-  location: z.string().min(1, "Location is required."),
-  activity: z.string().min(1, "Activity/Comment is required."),
+  location: z.string().optional(),
+  activity: z.string().optional(),
 });
 
 type StatusUpdateFormValues = z.infer<typeof statusUpdateSchema>;
@@ -111,16 +112,17 @@ export function AdminOrdersTable() {
     
     const exportToCSV = () => {
         if (!data?.shipments.length) return;
-        const headers = ["Order ID", "Sender", "Receiver", "Destination", "Date", "Amount", "Status"];
+        const headers = ["Order ID", "Type", "Sender", "Receiver", "Destination", "Date", "Amount", "Status"];
         const rows = data.shipments.map(s => [
             s.shipment_id_str,
+            s.user_type,
             s.sender_name,
             s.receiver_name,
             s.receiver_address_city,
             new Date(s.booking_date).toLocaleDateString(),
             s.total_with_tax_18_percent,
             s.status
-        ].join(','));
+        ].map(field => `"${String(field).replace(/"/g, '""')}"`).join(','));
 
         let csvContent = "data:text/csv;charset=utf-8," 
             + headers.join(",") + "\n" 
@@ -169,6 +171,7 @@ export function AdminOrdersTable() {
                 <TableHeader>
                     <TableRow>
                         <TableHead>Order ID</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>Sender</TableHead>
                         <TableHead>Receiver</TableHead>
                         <TableHead>Destination</TableHead>
@@ -181,13 +184,18 @@ export function AdminOrdersTable() {
                 <TableBody>
                     {isLoading && Array.from({ length: 5 }).map((_, i) => (
                         <TableRow key={i}>
-                            <TableCell colSpan={8}><Skeleton className="h-8 w-full" /></TableCell>
+                            <TableCell colSpan={9}><Skeleton className="h-8 w-full" /></TableCell>
                         </TableRow>
                     ))}
-                    {error && <TableRow><TableCell colSpan={8} className="text-center text-red-500">Failed to load shipments.</TableCell></TableRow>}
+                    {error && <TableRow><TableCell colSpan={9} className="text-center text-red-500">Failed to load shipments.</TableCell></TableRow>}
                     {!isLoading && !error && data?.shipments.map((s) => (
                         <TableRow key={s.id}>
                             <TableCell className="font-medium">{s.shipment_id_str}</TableCell>
+                            <TableCell>
+                                <Badge variant={s.user_type === 'Employee' ? 'default' : 'secondary'} className={s.user_type === 'Employee' ? 'bg-green-100 text-green-800' : ''}>
+                                    {s.user_type === 'Employee' ? 'E' : 'C'}
+                                </Badge>
+                            </TableCell>
                             <TableCell>{s.sender_name}</TableCell>
                             <TableCell>{s.receiver_name}</TableCell>
                             <TableCell>{s.receiver_address_city}</TableCell>
@@ -231,10 +239,10 @@ export function AdminOrdersTable() {
                                 </FormItem>
                             )}/>
                             <FormField control={form.control} name="location" render={({ field }) => (
-                                <FormItem><FormLabel>Location</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Location</FormLabel><FormControl><Input {...field} placeholder="Optional" /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <FormField control={form.control} name="activity" render={({ field }) => (
-                                <FormItem><FormLabel>Activity / Comment</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem>
+                                <FormItem><FormLabel>Activity / Comment</FormLabel><FormControl><Textarea {...field} placeholder="Optional" /></FormControl><FormMessage /></FormItem>
                             )}/>
                             <Button type="submit" disabled={form.formState.isSubmitting}>
                                 {form.formState.isSubmitting ? "Updating..." : "Update Status"}

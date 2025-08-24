@@ -62,6 +62,7 @@ def create_shipment():
 
     new_shipment = Shipment(
         user_id=user.id,
+        user_email=user.email,
         shipment_id_str=generate_shipment_id_str(db.session, Shipment),
         status=status,
         tracking_history=tracking_history,
@@ -378,3 +379,5 @@ def delete_saved_address(address_id):
     db.session.delete(address)
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
+
+    

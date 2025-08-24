@@ -5,7 +5,7 @@ import { useApi } from "@/hooks/use-api";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "../ui/skeleton";
-import { User, Package, CreditCard } from "lucide-react";
+import { User, Package, CreditCard, Wallet } from "lucide-react";
 
 interface UserDetails {
     user: {
@@ -14,6 +14,8 @@ interface UserDetails {
         last_name: string;
         email: string;
         created_at: string;
+        balance?: number;
+        is_employee?: boolean;
     };
     shipments: {
         id: number;
@@ -56,6 +58,12 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
                     <div><strong>Name:</strong> {user.first_name} {user.last_name}</div>
                     <div><strong>Email:</strong> {user.email}</div>
                     <div><strong>Joined:</strong> {new Date(user.created_at).toLocaleDateString()}</div>
+                    {user.is_employee && (
+                         <div>
+                            <strong>Balance:</strong> 
+                            <span className="font-bold ml-2">₹{user.balance?.toFixed(2)}</span>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
 
@@ -121,3 +129,5 @@ export default function AdminUserDetails({ userId }: { userId: string }) {
         </div>
     );
 }
+
+    
