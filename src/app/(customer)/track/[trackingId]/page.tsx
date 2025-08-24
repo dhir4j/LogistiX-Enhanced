@@ -130,8 +130,8 @@ export default function TrackingResultPage() {
           const result = await response.json();
           if (response.ok) {
               toast({ title: "Success", description: result.message });
-              // Instead of redirecting, just refresh the data to show the pending state.
-              fetchShipmentDetails(idFromUrl); 
+              // Re-fetch shipment details to update the status on the page
+              await fetchShipmentDetails(idFromUrl); 
           } else {
               toast({ title: "Error", description: result.error || "Failed to submit payment.", variant: "destructive" });
           }
