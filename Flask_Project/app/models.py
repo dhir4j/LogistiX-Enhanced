@@ -101,5 +101,3 @@ class SavedAddress(db.Model):
     phone = db.Column(db.String(30), nullable=False)
 
     __table_args__ = (db.UniqueConstraint('user_id', 'nickname', 'address_type', name='_user_nickname_type_uc'),)
-
-    
