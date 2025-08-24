@@ -63,10 +63,10 @@ export default function LoginPage() {
         return;
       }
       
-      if (result.user?.isAdmin) {
+      if (result.user?.isAdmin || result.user?.isEmployee) {
          toast({
           title: "Login Role Error",
-          description: "This is a customer login page. Admins must log in via the employee portal.",
+          description: "This is a customer login page. Staff must log in via the employee portal.",
           variant: "destructive",
         });
         return;
