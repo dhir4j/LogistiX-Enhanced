@@ -28,6 +28,13 @@ export default function MobileNav({ navLinks }: MobileNavProps) {
         router.push('/');
     }
 
+    const getDashboardHref = () => {
+        if (!session) return '/login';
+        if (session.isAdmin) return '/admin/dashboard';
+        if (session.isEmployee) return '/employee/dashboard';
+        return '/dashboard';
+    }
+
     return (
         <div className="lg:hidden">
             <Sheet>
@@ -42,8 +49,8 @@ export default function MobileNav({ navLinks }: MobileNavProps) {
                         <SheetTitle>
                             <SheetClose asChild>
                                 <Link href="/" className="flex items-center space-x-2">
-                                    <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={40} height={40} />
-                                    <span className="font-bold text-lg font-headline">HK SPEED COURIERS</span>
+                                    <Image src="/images/logo/logo.png" alt="RS SWIFT COURIERS Logo" width={40} height={40} />
+                                    <span className="font-bold text-lg font-headline">RS SWIFT COURIERS</span>
                                 </Link>
                             </SheetClose>
                         </SheetTitle>
@@ -66,7 +73,7 @@ export default function MobileNav({ navLinks }: MobileNavProps) {
                                 session ? (
                                     <div className="flex flex-col space-y-2">
                                         <SheetClose asChild>
-                                            <Button asChild variant="default" className="w-full"><Link href="/dashboard"><UserCircle className='mr-2' /> Dashboard</Link></Button>
+                                            <Button asChild variant="default" className="w-full"><Link href={getDashboardHref()}><UserCircle className='mr-2' /> Dashboard</Link></Button>
                                         </SheetClose>
                                         <SheetClose asChild>
                                             <Button variant="outline" className="w-full" onClick={handleLogout}><LogOut className='mr-2' /> Logout</Button>
