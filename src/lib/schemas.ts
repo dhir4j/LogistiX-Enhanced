@@ -29,9 +29,16 @@ export const contactSchema = z.object({
 });
 
 const dimensionSchema = z.preprocess(
-    (val) => (String(val).trim() === '' ? undefined : val),
+    (val) => (String(val).trim() === '' ? 0 : val),
     z.coerce.number({ invalid_type_error: "Must be a number" }).min(0).optional().default(0)
 );
+
+const goodsSchema = z.object({
+    description: z.string().min(1, "Description is required"),
+    quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
+    hsn_code: z.string().optional(),
+    value: z.coerce.number().min(0, "Value cannot be negative"),
+});
 
 export const shipmentBookingSchema = z.object({
     shipmentType: z.enum(['domestic', 'international']),
@@ -62,12 +69,21 @@ export const shipmentBookingSchema = z.object({
     package_length_cm: dimensionSchema,
     pickup_date: z.date({ required_error: "Pickup date is required" }),
     service_type: z.string().min(1, "Service type is required").optional(),
+    goods: z.array(goodsSchema).min(1, "At least one item is required."),
 }).refine(data => !data.save_sender_address || (data.save_sender_address && data.sender_address_nickname && data.sender_address_nickname.length > 1), {
     message: "Nickname is required to save sender address",
     path: ["sender_address_nickname"],
 }).refine(data => !data.save_receiver_address || (data.save_receiver_address && data.receiver_address_nickname && data.receiver_address_nickname.length > 1), {
     message: "Nickname is required to save receiver address",
     path: ["receiver_address_nickname"],
+}).refine(data => {
+    if (data.shipmentType === 'international') {
+        return data.package_weight_kg <= 30;
+    }
+    return true;
+}, {
+    message: "International shipments cannot exceed 30 kg.",
+    path: ["package_weight_kg"],
 });
 
 export type ShipmentBookingFormValues = z.infer<typeof shipmentBookingSchema>;

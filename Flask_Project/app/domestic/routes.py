@@ -46,9 +46,18 @@ def get_state_alias(state):
 
 def get_price(mode: str, state_name: str, weight_kg: float) -> dict:
     mode = mode.lower()
+    
+    # Map frontend service types to backend pricing tiers
+    if mode == "by road" or mode == "by train":
+        price_tier = "standard"
+    elif mode == "by air":
+        price_tier = "express"
+    else: # Default/fallback
+        price_tier = "standard"
+
     dest_state = get_state_alias(state_name)
     rates = STATE_RATE.get(dest_state, STATE_RATE["maharashtra"])
-    per_kg_price = rates.get(mode, rates["standard"])
+    per_kg_price = rates.get(price_tier, rates["standard"])
     
     weight_int = max(1, math.ceil(weight_kg))
     total_price = per_kg_price * weight_int

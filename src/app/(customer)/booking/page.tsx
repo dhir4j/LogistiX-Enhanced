@@ -2,7 +2,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +13,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, Globe, Truck, BookUser } from "lucide-react";
+import { CalendarIcon, Loader2, Globe, Truck, BookUser, PlusCircle, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { useSession } from "@/hooks/use-session";
@@ -70,11 +70,19 @@ export default function CustomerBookingPage() {
             package_width_cm: '', 
             package_height_cm: '',
             package_length_cm: '',
-            pickup_date: new Date(), service_type: "Standard",
+            pickup_date: new Date(), 
+            service_type: "By Road",
+            goods: [{ description: "", quantity: 1, hsn_code: "", value: 0 }],
         },
     });
 
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: "goods"
+    });
+
     const shipmentType = useWatch({ control: form.control, name: "shipmentType" });
+    const packageWeightKg = useWatch({ control: form.control, name: "package_weight_kg" });
     const watchedPriceFields = useWatch({ control: form.control, name: ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type", "shipmentType"] });
     const watchSaveSender = useWatch({ control: form.control, name: "save_sender_address" });
     const watchSaveReceiver = useWatch({ control: form.control, name: "save_receiver_address" });
@@ -89,7 +97,7 @@ export default function CustomerBookingPage() {
      useEffect(() => {
         if (shipmentType === 'domestic') {
             form.setValue('receiver_address_country', 'India');
-            form.setValue('service_type', 'Standard');
+            form.setValue('service_type', 'By Road');
         } else {
              form.setValue('receiver_address_country', '');
              form.setValue('service_type', 'International Express');
@@ -398,6 +406,31 @@ export default function CustomerBookingPage() {
                         </CardContent>
                     </Card>
 
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Goods Details</CardTitle>
+                            <CardDescription>Enter the details for each item in the shipment.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            {fields.map((item, index) => (
+                                <div key={item.id} className="grid grid-cols-12 gap-4 items-end border-b pb-4">
+                                    <div className="col-span-5"><FormField control={form.control} name={`goods.${index}.description`} render={({ field }) => ( <FormItem><FormLabel>Description</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/></div>
+                                    <div className="col-span-2"><FormField control={form.control} name={`goods.${index}.quantity`} render={({ field }) => ( <FormItem><FormLabel>Quantity</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/></div>
+                                    <div className="col-span-2"><FormField control={form.control} name={`goods.${index}.hsn_code`} render={({ field }) => ( <FormItem><FormLabel>HSN Code</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/></div>
+                                    <div className="col-span-2"><FormField control={form.control} name={`goods.${index}.value`} render={({ field }) => ( <FormItem><FormLabel>Value (₹)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/></div>
+                                    <div className="col-span-1">
+                                        {index > 0 && <Button type="button" variant="destructive" size="icon" onClick={() => remove(index)}><Trash2 className="h-4 w-4" /></Button>}
+                                    </div>
+                                </div>
+                            ))}
+                             <FormMessage>{form.formState.errors.goods?.message}</FormMessage>
+                            <Button type="button" variant="outline" size="sm" onClick={() => append({ description: "", quantity: 1, hsn_code: "", value: 0 })}>
+                                <PlusCircle className="mr-2 h-4 w-4" />Add Item
+                            </Button>
+                        </CardContent>
+                    </Card>
+
+
                     <Card>
                         <CardHeader>
                             <CardTitle>Package & Service</CardTitle>
@@ -433,8 +466,9 @@ export default function CustomerBookingPage() {
                                             <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
                                                 <SelectContent>
-                                                    <SelectItem value="Standard">Standard</SelectItem>
-                                                    <SelectItem value="Express">Express</SelectItem>
+                                                    <SelectItem value="By Road">By Road</SelectItem>
+                                                    <SelectItem value="By Air">By Air</SelectItem>
+                                                    <SelectItem value="By Train" disabled={packageWeightKg < 5}>By Train (Min 5kg)</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         <FormMessage /></FormItem>
