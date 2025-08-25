@@ -43,7 +43,7 @@ class ShipmentCreateSchema(Schema):
     package_height_cm = fields.Float(required=True)
     pickup_date = fields.Date(required=True)
     service_type = fields.Str(required=True, allow_none=True)
-    goods = fields.List(fields.Nested(GoodsSchema()), required=True)
+    goods = fields.List(fields.Nested(GoodsSchema), required=True)
 
 
     # Optional fields for saving addresses
@@ -77,3 +77,4 @@ class SavedAddressSchema(Schema):
 
     class Meta:
         fields = ("id", "nickname", "name", "address_street", "address_city", "address_state", "address_pincode", "address_country", "phone", "address_type")
+
