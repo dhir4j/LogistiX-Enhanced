@@ -70,3 +70,9 @@
     @apply text-[105%];
   }
 }
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+}
