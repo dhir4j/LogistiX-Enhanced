@@ -174,7 +174,10 @@ export default function EmployeeBookingPage() {
             ...values,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
             user_email: session.email,
-            final_total_price_with_tax: priceDetails.total_price
+            final_total_price_with_tax: priceDetails.total_price,
+            package_length_cm: values.package_length_cm,
+            package_width_cm: values.package_width_cm,
+            package_height_cm: values.package_height_cm,
         };
 
         try {

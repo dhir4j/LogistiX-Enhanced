@@ -163,8 +163,11 @@ export default function CustomerBookingPage() {
             ...values,
             user_email: session.email,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
-            final_total_price_with_tax: priceDetails.total_price
-        }
+            final_total_price_with_tax: priceDetails.total_price,
+            package_length_cm: values.package_length_cm,
+            package_width_cm: values.package_width_cm,
+            package_height_cm: values.package_height_cm,
+        };
 
         try {
             const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments`, {
