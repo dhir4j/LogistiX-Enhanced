@@ -14,6 +14,11 @@ from app import create_app, db
 app = create_app()
 
 with app.app_context():
+    print("This script will reset your database. All existing data will be lost.")
+    if input("Do you want to continue? (y/n): ").lower() != 'y':
+        print("Aborted.")
+        sys.exit(0)
+
     print("Dropping all existing tables...")
     try:
         db.drop_all()

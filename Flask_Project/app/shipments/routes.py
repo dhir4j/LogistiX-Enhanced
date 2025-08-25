@@ -35,8 +35,9 @@ def _create_shipment_record(user, shipment_data, final_total_price):
     }]
     
     # Sanitize data for model creation, removing extra fields
-    model_data = {k: v for k, v in shipment_data.items() if k in ShipmentCreateSchema().fields and hasattr(Shipment, k)}
+    model_data = {k: v for k, v in shipment_data.items() if hasattr(Shipment, k)}
     
+    # This is the fix: Remove user_email from the dictionary before unpacking it.
     if 'user_email' in model_data:
         del model_data['user_email']
 
@@ -83,7 +84,7 @@ def create_domestic_shipment():
 
     user = User.query.filter_by(email=user_email_from_payload).first()
     if not user:
-        return jsonify({"error": "User not found"}), 400
+        return jsonify({"error": "User not found"}), 404
 
     final_total_price = data.get("final_total_price_with_tax")
     if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
@@ -111,7 +112,7 @@ def create_international_shipment():
 
     user = User.query.filter_by(email=user_email_from_payload).first()
     if not user:
-        return jsonify({"error": "User not found"}), 400
+        return jsonify({"error": "User not found"}), 404
 
     final_total_price = data.get("final_total_price_with_tax")
     if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
@@ -490,3 +491,4 @@ def handle_customer_address_item(address_id):
         return jsonify({"message": "Address deleted"}), 200
 
       
+
