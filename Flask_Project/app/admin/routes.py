@@ -285,7 +285,7 @@ def update_payment_status(payment_id):
 
 
     db.session.commit()
-    return jsonify({"message": f"Payment {newStatus.lower()} successfully"}), 200
+    return jsonify({"message": f"Payment {new_status.lower()} successfully"}), 200
 
 @admin_bp.route("/users", methods=["GET"])
 @admin_required
