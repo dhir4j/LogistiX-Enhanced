@@ -65,8 +65,11 @@ export default function EmployeeBookingPage() {
             receiver_name: "", receiver_address_street: "", receiver_address_city: "",
             receiver_address_state: "", receiver_address_pincode: "", receiver_address_country: "India",
             receiver_phone: "", save_receiver_address: false, receiver_address_nickname: "",
-            package_weight_kg: 0.5, package_width_cm: 10, package_height_cm: 10,
-            package_length_cm: 10, pickup_date: new Date(), service_type: "Standard",
+            package_weight_kg: 0.5, 
+            package_width_cm: '', 
+            package_height_cm: '',
+            package_length_cm: '',
+            pickup_date: new Date(), service_type: "Standard",
         },
     });
 
@@ -395,9 +398,9 @@ export default function EmployeeBookingPage() {
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
                                 <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
                                 <FormField name="pickup_date" control={form.control} render={({ field }) => (

@@ -28,6 +28,11 @@ export const contactSchema = z.object({
   message: z.string().min(10, { message: "Message must be at least 10 characters." }),
 });
 
+const dimensionSchema = z.preprocess(
+    (val) => (String(val).trim() === '' ? undefined : val),
+    z.coerce.number({ invalid_type_error: "Must be a number" }).min(0).optional().default(0)
+);
+
 export const shipmentBookingSchema = z.object({
     shipmentType: z.enum(['domestic', 'international']),
     // Sender
@@ -52,9 +57,9 @@ export const shipmentBookingSchema = z.object({
     receiver_address_nickname: z.string().optional(),
     // Package
     package_weight_kg: z.coerce.number().min(0.1, "Weight must be at least 0.1 kg"),
-    package_width_cm: z.coerce.number().min(1, "Width must be at least 1 cm"),
-    package_height_cm: z.coerce.number().min(1, "Height must be at least 1 cm"),
-    package_length_cm: z.coerce.number().min(1, "Length must be at least 1 cm"),
+    package_width_cm: dimensionSchema,
+    package_height_cm: dimensionSchema,
+    package_length_cm: dimensionSchema,
     pickup_date: z.date({ required_error: "Pickup date is required" }),
     service_type: z.string().min(1, "Service type is required").optional(),
 }).refine(data => !data.save_sender_address || (data.save_sender_address && data.sender_address_nickname && data.sender_address_nickname.length > 1), {
