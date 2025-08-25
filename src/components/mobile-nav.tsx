@@ -49,8 +49,8 @@ export default function MobileNav({ navLinks }: MobileNavProps) {
                         <SheetTitle>
                             <SheetClose asChild>
                                 <Link href="/" className="flex items-center space-x-2">
-                                    <Image src="/images/logo/logo.png" alt="RS SWIFT COURIERS Logo" width={40} height={40} />
-                                    <span className="font-bold text-lg font-headline">RS SWIFT COURIERS</span>
+                                    <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={40} height={40} />
+                                    <span className="font-bold text-lg font-headline">HK SPEED COURIERS</span>
                                 </Link>
                             </SheetClose>
                         </SheetTitle>

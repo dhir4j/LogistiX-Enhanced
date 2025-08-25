@@ -90,7 +90,7 @@ export default function Header() {
           <Link href="/" className="mr-6 flex items-center space-x-2">
             <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS Logo" width={50} height={50} className="h-12 w-auto" />
             <span className="font-bold font-headline text-2xl sm:inline-block">
-              RS SWIFT COURIERS
+              HK SPEED COURIERS
             </span>
           </Link>
         </div>

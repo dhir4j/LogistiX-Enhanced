@@ -1,3 +1,4 @@
+
 "use client";
 
 import { SidebarProvider, Sidebar, SidebarHeader, SidebarTrigger, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarFooter, SidebarInset } from "@/components/ui/sidebar";
@@ -55,7 +56,7 @@ export default function CustomerDashboardLayout({
             <Image src="/images/logo/logo.png" alt="Logo" width={40} height={40} />
             <div className="flex flex-col">
               <h2 className="text-lg font-semibold">Customer Section</h2>
-              <p className="text-xs text-muted-foreground">RS SWIFT COURIERS</p>
+              <p className="text-xs text-muted-foreground">HK SPEED COURIERS</p>
             </div>
           </div>
         </SidebarHeader>
