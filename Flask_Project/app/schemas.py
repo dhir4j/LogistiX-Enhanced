@@ -28,6 +28,8 @@ class ShipmentCreateSchema(Schema):
     receiver_address_state = fields.Str(required=True)
     receiver_address_pincode = fields.Str(required=True)
     receiver_phone = fields.Str(required=True)
+    receiver_address_country = fields.Str(required=True)
+
 
     # Package
     package_weight_kg = fields.Float(required=True)

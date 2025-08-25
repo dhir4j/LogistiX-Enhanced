@@ -159,6 +159,10 @@ export default function CustomerBookingPage() {
 
         setIsSubmitting(true);
 
+        const apiEndpoint = values.shipmentType === 'domestic' 
+            ? '/api/shipments/domestic' 
+            : '/api/shipments/international';
+
         const payload = {
             ...values,
             user_email: session.email,
@@ -170,7 +174,7 @@ export default function CustomerBookingPage() {
         };
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${apiEndpoint}`, {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload)

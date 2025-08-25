@@ -170,18 +170,18 @@ export default function EmployeeBookingPage() {
         if (values.save_sender_address) await saveAddress('sender');
         if (values.save_receiver_address) await saveAddress('receiver');
 
+        const isDomestic = values.receiver_address_country.toLowerCase() === 'india';
+        const apiEndpoint = isDomestic ? '/api/shipments/domestic' : '/api/shipments/international';
+
         const payload = {
             ...values,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
             user_email: session.email,
             final_total_price_with_tax: priceDetails.total_price,
-            package_length_cm: values.package_length_cm,
-            package_width_cm: values.package_width_cm,
-            package_height_cm: values.package_height_cm,
         };
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/shipments`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}${apiEndpoint}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -319,12 +319,12 @@ export default function EmployeeBookingPage() {
                         <Card className="sticky top-20">
                             <CardHeader><CardTitle>Package & Service</CardTitle></CardHeader>
                             <CardContent className="space-y-4">
-                                 <div className="grid grid-cols-2 gap-4">
-                                     <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                     <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                     <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                     <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                 </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                    <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                </div>
                                 <div className="grid md:grid-cols-2 gap-4">
                                     <FormField name="pickup_date" control={form.control} render={({ field }) => (
                                         <FormItem className="flex flex-col"><FormLabel>Pickup Date</FormLabel>

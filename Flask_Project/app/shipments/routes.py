@@ -4,46 +4,19 @@ from app.models import Shipment, User, PaymentRequest, BalanceCode, SavedAddress
 from app.extensions import db
 from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema, SavedAddressSchema
 from app.utils import generate_shipment_id_str
-from datetime import datetime, time
+from datetime import datetime
 from sqlalchemy import func, exc
 from decimal import Decimal
 
 shipments_bp = Blueprint("shipments", __name__, url_prefix="/api")
 
-@shipments_bp.route("/shipments", methods=["POST"])
-def create_shipment():
-    schema = ShipmentCreateSchema()
-    data = request.get_json()
-
-    user_email_from_payload = data.pop("user_email", None)
-    if not user_email_from_payload:
-        return jsonify({"error": "user_email is a required field"}), 400
-
-    final_total_price = data.pop("final_total_price_with_tax", None)
-    
-    # Explicitly pop fields not in the schema before loading
-    data.pop("save_sender_address", None)
-    data.pop("sender_address_nickname", None)
-    data.pop("save_receiver_address", None)
-    data.pop("receiver_address_nickname", None)
-    data.pop("shipmentType", None)
-
-    try:
-        shipment_data = schema.load(data)
-    except Exception as e:
-        return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
-
-    user = User.query.filter_by(email=user_email_from_payload).first()
-    if not user:
-        return jsonify({"error": "User not found"}), 404
-        
-    if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
-        return jsonify({"error": "Valid final_total_price_with_tax is required"}), 400
-    
+def _create_shipment_record(user, shipment_data, final_total_price):
     price_without_tax = round(Decimal(str(final_total_price)) / Decimal('1.18'), 2)
     tax_amount = Decimal(str(final_total_price)) - price_without_tax
+    
+    status = "Pending Payment"
+    tracking_activity = "Shipment created. Awaiting payment confirmation."
 
-    # Employee balance logic
     if user.is_employee:
         final_price_decimal = Decimal(str(final_total_price))
         if user.balance >= final_price_decimal:
@@ -51,10 +24,7 @@ def create_shipment():
             status = "Booked"
             tracking_activity = "Shipment booked and paid with employee balance."
         else:
-            return jsonify({"error": "Insufficient balance to book shipment."}), 402
-    else: # Customer flow
-        status = "Pending Payment"
-        tracking_activity = "Shipment created. Awaiting payment confirmation."
+            return {"error": "Insufficient balance to book shipment."}, 402
 
     now_iso = datetime.utcnow().isoformat()
     tracking_history = [{
@@ -66,7 +36,7 @@ def create_shipment():
 
     new_shipment = Shipment(
         user_id=user.id,
-        user_email=user_email_from_payload,
+        user_email=user.email,
         shipment_id_str=generate_shipment_id_str(db.session, Shipment),
         status=status,
         tracking_history=tracking_history,
@@ -80,7 +50,7 @@ def create_shipment():
     
     shipment_data['pickup_date'] = shipment_data['pickup_date'].isoformat()
 
-    return jsonify({
+    return {
         "shipment_id_str": new_shipment.shipment_id_str,
         "message": "Shipment initiated successfully." if status == "Booked" else "Shipment initiated successfully. Please complete payment.",
         "data": {
@@ -93,7 +63,65 @@ def create_shipment():
             "status": new_shipment.status,
             "tracking_history": new_shipment.tracking_history
         }
-    }), 201
+    }, 201
+
+
+@shipments_bp.route("/shipments/domestic", methods=["POST"])
+def create_domestic_shipment():
+    schema = ShipmentCreateSchema()
+    data = request.get_json()
+
+    user_email_from_payload = data.pop("user_email", None)
+    if not user_email_from_payload:
+        return jsonify({"error": "user_email is a required field"}), 400
+
+    user = User.query.filter_by(email=user_email_from_payload).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    final_total_price = data.pop("final_total_price_with_tax", None)
+    if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
+        return jsonify({"error": "Valid final_total_price_with_tax is required"}), 400
+    
+    data['receiver_address_country'] = 'India'
+    data.pop("shipmentType", None)
+
+    try:
+        shipment_data = schema.load(data)
+    except Exception as e:
+        return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
+    
+    response, status_code = _create_shipment_record(user, shipment_data, final_total_price)
+    return jsonify(response), status_code
+
+
+@shipments_bp.route("/shipments/international", methods=["POST"])
+def create_international_shipment():
+    schema = ShipmentCreateSchema()
+    data = request.get_json()
+
+    user_email_from_payload = data.pop("user_email", None)
+    if not user_email_from_payload:
+        return jsonify({"error": "user_email is a required field"}), 400
+
+    user = User.query.filter_by(email=user_email_from_payload).first()
+    if not user:
+        return jsonify({"error": "User not found"}), 404
+
+    final_total_price = data.pop("final_total_price_with_tax", None)
+    if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
+        return jsonify({"error": "Valid final_total_price_with_tax is required"}), 400
+
+    data.pop("shipmentType", None)
+
+    try:
+        shipment_data = schema.load(data)
+    except Exception as e:
+        return jsonify({"error": "Invalid shipment details", "details": e.messages}), 400
+
+    response, status_code = _create_shipment_record(user, shipment_data, final_total_price)
+    return jsonify(response), status_code
+
 
 @shipments_bp.route("/payments", methods=["POST"])
 def submit_payment():
