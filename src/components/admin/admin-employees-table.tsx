@@ -25,6 +25,7 @@ interface User {
     email: string;
     created_at: string;
     shipment_count: number;
+    balance: number;
 }
 
 interface UsersApiResponse {
@@ -205,18 +206,19 @@ export function AdminEmployeesTable() {
                         <TableHead>Email</TableHead>
                         <TableHead>Joined</TableHead>
                         <TableHead>Shipments</TableHead>
+                        <TableHead>Balance</TableHead>
                         <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {isLoading ? (
                         Array.from({ length: 5 }).map((_, i) => (
-                            <TableRow key={i}><TableCell colSpan={5}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
+                            <TableRow key={i}><TableCell colSpan={6}><Skeleton className="h-8 w-full" /></TableCell></TableRow>
                         ))
                     ) : error ? (
-                        <TableRow><TableCell colSpan={5} className="text-center text-red-500 py-10">Failed to load employees.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={6} className="text-center text-red-500 py-10">Failed to load employees.</TableCell></TableRow>
                     ) : data?.users.length === 0 ? (
-                        <TableRow><TableCell colSpan={5} className="text-center text-muted-foreground py-10">No employees found.</TableCell></TableRow>
+                        <TableRow><TableCell colSpan={6} className="text-center text-muted-foreground py-10">No employees found.</TableCell></TableRow>
                     ) : (
                         data?.users.map((user) => (
                             <TableRow key={user.id}>
@@ -224,6 +226,7 @@ export function AdminEmployeesTable() {
                                 <TableCell>{user.email}</TableCell>
                                 <TableCell>{new Date(user.created_at).toLocaleDateString()}</TableCell>
                                 <TableCell>{user.shipment_count}</TableCell>
+                                <TableCell>₹{user.balance.toFixed(2)}</TableCell>
                                 <TableCell className="text-right space-x-2">
                                      <Button asChild variant="outline" size="sm">
                                         <Link href={`/admin/users/${user.id}`}>

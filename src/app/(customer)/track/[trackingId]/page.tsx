@@ -72,6 +72,8 @@ export default function TrackingResultPage() {
   const [isLoading, setIsLoading] = useState(!!idFromUrl);
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
+  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
+
 
   const fetchShipmentDetails = async (id: string) => {
       if (!id) {
@@ -130,8 +132,7 @@ export default function TrackingResultPage() {
           const result = await response.json();
           if (response.ok) {
               toast({ title: "Success", description: result.message });
-              // Re-fetch shipment details to update the status on the page
-              await fetchShipmentDetails(idFromUrl); 
+              setPaymentSubmitted(true);
           } else {
               toast({ title: "Error", description: result.error || "Failed to submit payment.", variant: "destructive" });
           }
@@ -174,7 +175,7 @@ export default function TrackingResultPage() {
             </Card>
         )}
 
-        {shipmentDetails && shipmentDetails.status === "Pending Payment" && (
+        {shipmentDetails && shipmentDetails.status === "Pending Payment" && !paymentSubmitted && (
             <Card>
                 <CardHeader>
                     <CardTitle>Complete Your Payment</CardTitle>
@@ -226,6 +227,16 @@ export default function TrackingResultPage() {
                 </CardContent>
             </Card>
         )}
+
+        {paymentSubmitted && (
+             <Card>
+                <CardHeader className="text-center">
+                    <CardTitle>Payment Under Review</CardTitle>
+                    <CardDescription>Thank you for submitting your payment details. An administrator will verify it shortly, and your shipment status will be updated to 'Booked'.</CardDescription>
+                </CardHeader>
+            </Card>
+        )}
+
 
         {shipmentDetails && (
         <Card>

@@ -285,7 +285,7 @@ def update_payment_status(payment_id):
 
 
     db.session.commit()
-    return jsonify({"message": f"Payment {new_status.lower()} successfully"}), 200
+    return jsonify({"message": f"Payment {newStatus.lower()} successfully"}), 200
 
 @admin_bp.route("/users", methods=["GET"])
 @admin_required
@@ -366,7 +366,8 @@ def get_user_details(user_id):
         "first_name": user.first_name,
         "last_name": user.last_name,
         "email": user.email,
-        "created_at": user.created_at.isoformat()
+        "created_at": user.created_at.isoformat(),
+        "is_employee": user.is_employee,
     }
 
     if user.is_employee:
@@ -447,7 +448,8 @@ def get_all_employees():
             "last_name": user.last_name,
             "email": user.email,
             "created_at": user.created_at.isoformat(),
-            "shipment_count": len(user.shipments)
+            "shipment_count": len(user.shipments),
+            "balance": float(user.balance)
         })
 
     return jsonify({
