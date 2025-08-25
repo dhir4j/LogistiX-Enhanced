@@ -118,9 +118,12 @@ def get_all_shipments():
         User.is_employee
     ).join(User, Shipment.user_id == User.id)
 
-
-    if status:
+    # By default, do not show shipments that are pending payment
+    if not status or status.lower() == 'all':
+        query = query.filter(Shipment.status != 'Pending Payment')
+    elif status:
         query = query.filter(Shipment.status == status)
+
     if q:
         like_q = f"%{q}%"
         query = query.filter(
