@@ -35,8 +35,11 @@ def _create_shipment_record(user, shipment_data, final_total_price):
     }]
     
     # Sanitize data for model creation, removing extra fields
-    model_data = {k: v for k, v in shipment_data.items() if k in ShipmentCreateSchema().fields}
-
+    model_data = {k: v for k, v in shipment_data.items() if k in ShipmentCreateSchema().fields and hasattr(Shipment, k)}
+    # The user_email is in shipment_data and will be passed via model_data, so we don't pass it explicitly.
+    # However, the form also includes other fields not on the model, like 'shipmentType', so we filter them out.
+    if 'user_email' in model_data:
+        del model_data['user_email']
 
     new_shipment = Shipment(
         user_id=user.id,
@@ -55,12 +58,12 @@ def _create_shipment_record(user, shipment_data, final_total_price):
     shipment_data['pickup_date'] = shipment_data['pickup_date'].isoformat()
 
     return {
-        "shipment_id_str": new_shipment.shipment_id_str,
         "message": "Shipment initiated successfully." if status == "Booked" else "Shipment initiated successfully. Please complete payment.",
         "data": {
             **shipment_data,
             "id": new_shipment.id,
             "user_email": new_shipment.user_email,
+            "shipment_id_str": new_shipment.shipment_id_str,
             "price_without_tax": float(new_shipment.price_without_tax),
             "tax_amount_18_percent": float(new_shipment.tax_amount_18_percent),
             "total_with_tax_18_percent": float(new_shipment.total_with_tax_18_percent),
@@ -485,3 +488,5 @@ def handle_customer_address_item(address_id):
         db.session.delete(address)
         db.session.commit()
         return jsonify({"message": "Address deleted"}), 200
+
+      
