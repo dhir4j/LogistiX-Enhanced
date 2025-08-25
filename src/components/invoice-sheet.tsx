@@ -12,11 +12,13 @@ interface InvoiceSheetProps {
         sender_address_city: string;
         sender_address_state: string;
         sender_address_pincode: string;
+        sender_address_country: string;
         receiver_name: string;
         receiver_address_street: string;
         receiver_address_city: string;
         receiver_address_state: string;
         receiver_address_pincode: string;
+        receiver_address_country: string;
         price_without_tax: number;
         tax_amount_18_percent: number;
         total_with_tax_18_percent: number;
@@ -102,12 +104,14 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                         <p className="font-bold">{shipment.sender_name}</p>
                         <p>{shipment.sender_address_street},</p>
                         <p>{shipment.sender_address_city}, {shipment.sender_address_state} - {shipment.sender_address_pincode}</p>
+                        <p>{shipment.sender_address_country}</p>
                     </div>
                     <div>
                         <h3 className="font-bold mb-2 underline">SHIP TO:</h3>
                         <p className="font-bold">{shipment.receiver_name}</p>
                         <p>{shipment.receiver_address_street},</p>
                         <p>{shipment.receiver_address_city}, {shipment.receiver_address_state} - {shipment.receiver_address_pincode}</p>
+                        <p>{shipment.receiver_address_country}</p>
                     </div>
                 </div>
 
@@ -156,16 +160,6 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                     <p><span className="font-bold">Amount in words:</span> {totalInWords}</p>
                 </div>
                 
-                {/* Bank Details */}
-                 <div className="pb-4 border-b border-gray-400">
-                    <h3 className="font-bold mb-2 underline">Bank Details:</h3>
-                    <p><span className="font-bold">Bank Name:</span> HDFC BANK</p>
-                    <p><span className="font-bold">Account Name:</span> HK SPEED COURIERS PRIVATE LIMITED</p>
-                    <p><span className="font-bold">Account No:</span> 50200088100032</p>
-                    <p><span className="font-bold">IFSC Code:</span> HDFC0000213</p>
-                </div>
-
-
                 {/* Footer */}
                 <div className="text-center pt-4">
                     <p className="font-bold">This is a computer-generated invoice.</p>
