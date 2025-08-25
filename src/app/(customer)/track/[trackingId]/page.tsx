@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft, Loader2, Download, FileText, CircleAlert, Landmark, CreditCard, QrCode } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { cn } from "@/lib/utils";
 import Link from 'next/link';
 import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
@@ -36,6 +36,7 @@ interface ShipmentDetails {
     status: string;
     tracking_history: TrackingHistory[];
     total_with_tax_18_percent: number;
+    payment_status: 'Pending' | 'Approved' | 'Rejected' | null;
 }
 
 const getStatusIcon = (status: string) => {
@@ -72,8 +73,6 @@ export default function TrackingResultPage() {
   const [isLoading, setIsLoading] = useState(!!idFromUrl);
   const [error, setError] = useState<string | null>(null);
   const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
-  const [paymentSubmitted, setPaymentSubmitted] = useState(false);
-
 
   const fetchShipmentDetails = async (id: string) => {
       if (!id) {
@@ -132,7 +131,8 @@ export default function TrackingResultPage() {
           const result = await response.json();
           if (response.ok) {
               toast({ title: "Success", description: result.message });
-              setPaymentSubmitted(true);
+              // Refetch shipment details to get the new payment_status
+              fetchShipmentDetails(shipmentDetails.shipment_id_str);
           } else {
               toast({ title: "Error", description: result.error || "Failed to submit payment.", variant: "destructive" });
           }
@@ -142,6 +142,9 @@ export default function TrackingResultPage() {
           setIsSubmittingPayment(false);
       }
   }
+
+  const showPaymentForm = shipmentDetails?.status === 'Pending Payment' && !shipmentDetails.payment_status;
+  const showPaymentPendingReview = shipmentDetails?.status === 'Pending Payment' && shipmentDetails.payment_status === 'Pending';
 
 
   return (
@@ -175,7 +178,7 @@ export default function TrackingResultPage() {
             </Card>
         )}
 
-        {shipmentDetails && shipmentDetails.status === "Pending Payment" && !paymentSubmitted && (
+        {showPaymentForm && (
             <Card>
                 <CardHeader>
                     <CardTitle>Complete Your Payment</CardTitle>
@@ -228,7 +231,7 @@ export default function TrackingResultPage() {
             </Card>
         )}
 
-        {paymentSubmitted && (
+        {showPaymentPendingReview && (
              <Card>
                 <CardHeader className="text-center">
                     <CardTitle>Payment Under Review</CardTitle>
@@ -291,3 +294,5 @@ export default function TrackingResultPage() {
     </div>
   );
 }
+
+    

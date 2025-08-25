@@ -11,11 +11,6 @@ from decimal import Decimal
 shipments_bp = Blueprint("shipments", __name__, url_prefix="/api")
 
 def _create_shipment_record(user, shipment_data, final_total_price):
-    # Retrieve optional fields with defaults
-    package_length = shipment_data.pop('package_length_cm', 0.0)
-    package_width = shipment_data.pop('package_width_cm', 0.0)
-    package_height = shipment_data.pop('package_height_cm', 0.0)
-
     price_without_tax = round(Decimal(str(final_total_price)) / Decimal('1.18'), 2)
     tax_amount = Decimal(str(final_total_price)) - price_without_tax
     
@@ -48,9 +43,6 @@ def _create_shipment_record(user, shipment_data, final_total_price):
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
         total_with_tax_18_percent=final_total_price,
-        package_length_cm=package_length,
-        package_width_cm=package_width,
-        package_height_cm=package_height,
         **shipment_data
     )
     db.session.add(new_shipment)
@@ -70,9 +62,6 @@ def _create_shipment_record(user, shipment_data, final_total_price):
             "total_with_tax_18_percent": float(new_shipment.total_with_tax_18_percent),
             "status": new_shipment.status,
             "tracking_history": new_shipment.tracking_history,
-            "package_length_cm": float(package_length),
-            "package_width_cm": float(package_width),
-            "package_height_cm": float(package_height),
         }
     }, 201
 
@@ -88,7 +77,7 @@ def create_domestic_shipment():
 
     user = User.query.filter_by(email=user_email_from_payload).first()
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"error": "User not found"}), 400
 
     final_total_price = data.pop("final_total_price_with_tax", None)
     if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
@@ -117,7 +106,7 @@ def create_international_shipment():
 
     user = User.query.filter_by(email=user_email_from_payload).first()
     if not user:
-        return jsonify({"error": "User not found"}), 404
+        return jsonify({"error": "User not found"}), 400
 
     final_total_price = data.pop("final_total_price_with_tax", None)
     if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
@@ -222,6 +211,10 @@ def get_shipment_detail(shipment_id_str):
     if not shipment:
         return jsonify({"error": "Shipment not found"}), 404
 
+    # Check for an associated payment request
+    payment_request = PaymentRequest.query.filter_by(shipment_id=shipment.id).first()
+    payment_status = payment_request.status if payment_request else None
+
     return jsonify({
         "id": shipment.id,
         "shipment_id_str": shipment.shipment_id_str,
@@ -251,6 +244,7 @@ def get_shipment_detail(shipment_id_str):
         "tax_amount_18_percent": float(shipment.tax_amount_18_percent),
         "total_with_tax_18_percent": float(shipment.total_with_tax_18_percent),
         "tracking_history": shipment.tracking_history,
+        "payment_status": payment_status,
     }), 200
 
 @shipments_bp.route("/user/payments", methods=["GET"])
@@ -427,3 +421,6 @@ def delete_saved_address(address_id):
 
     
 
+
+
+    
