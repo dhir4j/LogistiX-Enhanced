@@ -420,6 +420,7 @@ export default function EmployeeBookingPage() {
                                     </div>
                                 </div>
                             ))}
+                             <FormMessage>{form.formState.errors.goods?.message}</FormMessage>
                             <Button type="button" variant="outline" size="sm" onClick={() => append({ description: "", quantity: 1, hsn_code: "", value: 0 })}>
                                 <PlusCircle className="mr-2 h-4 w-4" />Add Item
                             </Button>
