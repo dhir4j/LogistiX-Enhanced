@@ -118,13 +118,14 @@ export default function CustomerBookingPage() {
             isReady = true;
             url = `${process.env.NEXT_PUBLIC_API_URL}/api/domestic/price`;
             body = { state: receiver_address_state, weight: package_weight_kg, mode: service_type };
-        } else if (shipmentType === 'international' && receiver_address_country && package_weight_kg > 0) {
+        } else if (shipmentType === 'international' && receiver_address_country && package_weight_kg > 0 && package_weight_kg <= 30) {
             isReady = true;
             url = `${process.env.NEXT_PUBLIC_API_URL}/api/international/price`;
             body = { country: receiver_address_country, weight: package_weight_kg };
         }
 
         if (!isReady) {
+            setPriceDetails(null);
             return;
         }
         
@@ -469,9 +470,9 @@ export default function CustomerBookingPage() {
                                             <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
                                                 <SelectContent>
-                                                    <SelectItem value="By Road">By Road</SelectItem>
-                                                    <SelectItem value="By Air">By Air</SelectItem>
-                                                    <SelectItem value="By Train" disabled={packageWeightKg < 5}>By Train (Min 5kg)</SelectItem>
+                                                    <SelectItem value="By Road">Road</SelectItem>
+                                                    <SelectItem value="By Air">Air</SelectItem>
+                                                    {packageWeightKg < 5 && <SelectItem value="By Train">Express</SelectItem>}
                                                 </SelectContent>
                                             </Select>
                                         <FormMessage /></FormItem>

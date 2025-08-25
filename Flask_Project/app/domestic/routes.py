@@ -52,8 +52,8 @@ def get_price(mode: str, state_name: str, weight_kg: float) -> dict:
         price_tier = "standard"
     elif mode == "by air":
         price_tier = "express"
-    else: # Default/fallback
-        price_tier = "standard"
+    else: # Default/fallback for express or any other mode
+        price_tier = "express"
 
     dest_state = get_state_alias(state_name)
     rates = STATE_RATE.get(dest_state, STATE_RATE["maharashtra"])

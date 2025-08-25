@@ -82,7 +82,7 @@ export const shipmentBookingSchema = z.object({
     }
     return true;
 }, {
-    message: "International shipments cannot exceed 30 kg.",
+    message: "Maximum allowed weight is 30 kg",
     path: ["package_weight_kg"],
 });
 
