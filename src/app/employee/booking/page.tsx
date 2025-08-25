@@ -91,20 +91,27 @@ export default function EmployeeBookingPage() {
     }, [shipmentType, form.setValue]);
 
     const handleGetPrice = async () => {
-        const { receiver_address_state, receiver_address_country, package_weight_kg, service_type } = form.getValues();
-        const isDomestic = receiver_address_country?.toLowerCase() === "india";
+        const { receiver_address_state, receiver_address_country, package_weight_kg, service_type, shipmentType } = form.getValues();
         
-        if (isDomestic && !receiver_address_state) return;
-        if (!isDomestic && !receiver_address_country) return;
-        if (!package_weight_kg || package_weight_kg <= 0) return;
+        let isReady = false;
+        let url = '';
+        let body = {};
+        
+        if (shipmentType === 'domestic' && receiver_address_state && package_weight_kg > 0 && service_type) {
+            isReady = true;
+            url = `${process.env.NEXT_PUBLIC_API_URL}/api/domestic/price`;
+            body = { state: receiver_address_state, weight: package_weight_kg, mode: service_type };
+        } else if (shipmentType === 'international' && receiver_address_country && package_weight_kg > 0) {
+            isReady = true;
+            url = `${process.env.NEXT_PUBLIC_API_URL}/api/international/price`;
+            body = { country: receiver_address_country, weight: package_weight_kg };
+        }
+
+
+        if (!isReady) return;
 
         setIsCalculating(true);
         setPriceDetails(null);
-        
-        const url = `${process.env.NEXT_PUBLIC_API_URL}/api${isDomestic ? "/domestic/price" : "/international/price"}`;
-        const body = isDomestic 
-            ? { state: receiver_address_state, weight: package_weight_kg, mode: service_type }
-            : { country: receiver_address_country, weight: package_weight_kg };
 
         try {
             const response = await fetch(url, {
@@ -130,7 +137,7 @@ export default function EmployeeBookingPage() {
             handleGetPrice();
         }, 500); // Debounce API calls
         return () => clearTimeout(timer);
-    }, [watchedPriceFields, form.getValues]);
+    }, [watchedPriceFields]);
 
     const saveAddress = async (type: 'sender' | 'receiver') => {
         const values = form.getValues();
@@ -202,8 +209,8 @@ export default function EmployeeBookingPage() {
             });
             const result = await response.json();
             if(response.ok) {
-                toast({ title: "Booking Successful", description: `Shipment ${result.shipment_id_str} has been created.` });
-                router.push(`/employee/awb-tracking?id=${result.shipment_id_str}`);
+                toast({ title: "Booking Successful", description: `Shipment ${result.data.shipment_id_str} has been created.` });
+                router.push(`/employee/awb-tracking?id=${result.data.shipment_id_str}`);
                 form.reset();
                 setPriceDetails(null);
             } else {
@@ -354,7 +361,19 @@ export default function EmployeeBookingPage() {
                                 <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode/ZIP</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
                             <div className="grid md:grid-cols-2 gap-4">
-                                <FormField name="receiver_address_country" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField 
+                                  name="receiver_address_country" 
+                                  control={form.control} 
+                                  render={({ field }) => ( 
+                                    <FormItem>
+                                      <FormLabel>Country</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} disabled={shipmentType === 'domestic'} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem> 
+                                  )}
+                                />
                                 <FormField name="receiver_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
                             <Separator />
@@ -375,7 +394,7 @@ export default function EmployeeBookingPage() {
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                                <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
@@ -404,6 +423,16 @@ export default function EmployeeBookingPage() {
                                             <SelectContent>
                                                 <SelectItem value="Standard">Standard</SelectItem>
                                                 <SelectItem value="Express">Express</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    <FormMessage /></FormItem>
+                                )} />}
+                                {shipmentType === 'international' && <FormField name="service_type" control={form.control} render={({ field }) => (
+                                    <FormItem><FormLabel>Service Type</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="International Express">International Express</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     <FormMessage /></FormItem>

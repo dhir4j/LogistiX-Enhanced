@@ -87,7 +87,6 @@ export default function CustomerBookingPage() {
     }, [session, isSessionLoading, router]);
     
      useEffect(() => {
-        // Reset receiver country when switching between domestic/international
         if (shipmentType === 'domestic') {
             form.setValue('receiver_address_country', 'India');
         } else {
@@ -145,7 +144,7 @@ export default function CustomerBookingPage() {
             handleCalculatePrice();
         }, 500); // Debounce API calls
         return () => clearTimeout(timer);
-    }, [watchedPriceFields, form.getValues]);
+    }, [watchedPriceFields]);
     
     const onSubmit = async (values: ShipmentFormValues) => {
         if (!priceDetails) {
@@ -168,9 +167,6 @@ export default function CustomerBookingPage() {
             user_email: session.email,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
             final_total_price_with_tax: priceDetails.total_price,
-            package_length_cm: values.package_length_cm,
-            package_width_cm: values.package_width_cm,
-            package_height_cm: values.package_height_cm,
         };
 
         try {
@@ -183,8 +179,8 @@ export default function CustomerBookingPage() {
             const result = await response.json();
 
             if (response.ok) {
-                toast({ title: "Booking Successful", description: `Shipment ${result.shipment_id_str} has been created.` });
-                router.push(`/track/${result.shipment_id_str}`);
+                toast({ title: "Booking Successful", description: `Shipment ${result.data.shipment_id_str} has been created.` });
+                router.push(`/track/${result.data.shipment_id_str}`);
             } else {
                  toast({ title: "Booking Failed", description: result.error || "An unknown error occurred.", variant: "destructive" });
             }
@@ -281,9 +277,19 @@ export default function CustomerBookingPage() {
                                 <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode/ZIP</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
                              <div className="grid md:grid-cols-2 gap-4">
-                                {shipmentType === 'international' && (
-                                    <FormField name="receiver_address_country" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                )}
+                                <FormField 
+                                  name="receiver_address_country" 
+                                  control={form.control} 
+                                  render={({ field }) => ( 
+                                    <FormItem>
+                                      <FormLabel>Country</FormLabel>
+                                      <FormControl>
+                                        <Input {...field} disabled={shipmentType === 'domestic'} />
+                                      </FormControl>
+                                      <FormMessage />
+                                    </FormItem> 
+                                  )}
+                                />
                                 <FormField name="receiver_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
                         </CardContent>
@@ -295,8 +301,13 @@ export default function CustomerBookingPage() {
                             <CardDescription>Provide details about the package and choose a service.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                             <div className="grid md:grid-cols-2 gap-4">
+                             <div className="grid md:grid-cols-4 gap-4">
                                 <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" step="0.1" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
                                 <FormField name="pickup_date" control={form.control} render={({ field }) => (
                                     <FormItem className="flex flex-col"><FormLabel>Pickup Date</FormLabel>
                                         <Popover><PopoverTrigger asChild>
@@ -326,11 +337,18 @@ export default function CustomerBookingPage() {
                                         <FormMessage /></FormItem>
                                     )} />
                                 )}
-                            </div>
-                             <div className="grid md:grid-cols-3 gap-4">
-                                <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                {shipmentType === 'international' && (
+                                    <FormField name="service_type" control={form.control} render={({ field }) => (
+                                        <FormItem><FormLabel>Service Type</FormLabel>
+                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="International Express">International Express</SelectItem>
+                                                </SelectContent>
+                                            </Select>
+                                        <FormMessage /></FormItem>
+                                    )} />
+                                )}
                             </div>
                             <Separator />
                             <div className="flex flex-col items-center gap-4">
