@@ -50,6 +50,8 @@ class Shipment(db.Model):
     package_length_cm = db.Column(db.Numeric(10, 2), nullable=False)
     package_width_cm = db.Column(db.Numeric(10, 2), nullable=False)
     package_height_cm = db.Column(db.Numeric(10, 2), nullable=False)
+    
+    goods_details = db.Column(JSONB, default=list)
 
     pickup_date = db.Column(db.Date, nullable=False)
     service_type = db.Column(db.String(50), nullable=False)

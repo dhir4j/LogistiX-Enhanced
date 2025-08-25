@@ -6,6 +6,13 @@ import { useParams } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import InvoiceSheet from '@/components/invoice-sheet';
 
+interface GoodsDetail {
+    description: string;
+    quantity: number;
+    hsn_code: string;
+    value: number;
+}
+
 interface ShipmentDetails {
     shipment_id_str: string;
     booking_date: string;
@@ -24,6 +31,7 @@ interface ShipmentDetails {
     price_without_tax: number;
     tax_amount_18_percent: number;
     total_with_tax_18_percent: number;
+    goods_details: GoodsDetail[];
 }
 
 

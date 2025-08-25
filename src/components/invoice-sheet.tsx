@@ -3,6 +3,13 @@
 
 import Image from 'next/image';
 
+interface GoodsDetail {
+    description: string;
+    quantity: number;
+    hsn_code: string;
+    value: number;
+}
+
 interface InvoiceSheetProps {
     shipment: {
         shipment_id_str: string;
@@ -22,6 +29,7 @@ interface InvoiceSheetProps {
         price_without_tax: number;
         tax_amount_18_percent: number;
         total_with_tax_18_percent: number;
+        goods_details: GoodsDetail[];
     };
 }
 
@@ -69,6 +77,8 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
     const tax = shipment.tax_amount_18_percent;
     const total = shipment.total_with_tax_18_percent;
     const totalInWords = toWords(total);
+    const goods = shipment.goods_details || [{ description: 'Courier Service Charge', quantity: 1, value: subtotal, hsn_code: '' }];
+
 
     return (
         <div className="p-6 bg-white text-black font-sans text-xs">
@@ -120,28 +130,30 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                     <thead>
                         <tr className="bg-gray-200">
                             <th className="p-2">#</th>
-                            <th className="p-2">Description</th>
-                            <th className="p-2 text-right">Quantity</th>
-                            <th className="p-2 text-right">Rate (₹)</th>
-                            <th className="p-2 text-right">Amount (₹)</th>
+                            <th className="p-2">Description of Goods</th>
+                            <th className="p-2 text-right">Qty</th>
+                            <th className="p-2 text-right">HSN Code</th>
+                            <th className="p-2 text-right">Value (₹)</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <tr className="border-b">
-                            <td className="p-2">1</td>
-                            <td className="p-2">Courier Service Charge for Shipment #{shipment.shipment_id_str}</td>
-                            <td className="p-2 text-right">1</td>
-                            <td className="p-2 text-right">{subtotal.toFixed(2)}</td>
-                            <td className="p-2 text-right">{subtotal.toFixed(2)}</td>
-                        </tr>
+                         {goods.map((item, index) => (
+                            <tr key={index} className="border-b">
+                                <td className="p-2">{index + 1}</td>
+                                <td className="p-2">{item.description}</td>
+                                <td className="p-2 text-right">{item.quantity}</td>
+                                <td className="p-2 text-right">{item.hsn_code || 'N/A'}</td>
+                                <td className="p-2 text-right">{item.value.toFixed(2)}</td>
+                            </tr>
+                        ))}
                     </tbody>
                 </table>
                 
-                {/* Totals */}
-                <div className="flex justify-end">
+                 {/* Totals */}
+                <div className="flex justify-end pt-4">
                     <div className="w-1/2 space-y-2">
-                        <div className="flex justify-between">
-                            <span className="font-bold">Subtotal:</span>
+                         <div className="flex justify-between">
+                            <span className="font-bold">Freight Charge:</span>
                             <span>₹{subtotal.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between">
@@ -149,19 +161,19 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                             <span>₹{tax.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between font-bold text-lg border-t pt-2 mt-2">
-                            <span>Total:</span>
+                            <span>Total Invoice Value:</span>
                             <span>₹{total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
                 
                 {/* Amount in Words */}
-                <div className="pb-4 border-b border-gray-400">
+                <div className="pb-4 border-t border-gray-400 mt-4 pt-4">
                     <p><span className="font-bold">Amount in words:</span> {totalInWords}</p>
                 </div>
                 
                 {/* Footer */}
-                <div className="text-center pt-4">
+                <div className="text-center pt-4 border-t border-gray-400">
                     <p className="font-bold">This is a computer-generated invoice.</p>
                     <p>Thank you for your business!</p>
                 </div>

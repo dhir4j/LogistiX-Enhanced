@@ -36,8 +36,7 @@ def _create_shipment_record(user, shipment_data, final_total_price):
     
     # Sanitize data for model creation, removing extra fields
     model_data = {k: v for k, v in shipment_data.items() if k in ShipmentCreateSchema().fields and hasattr(Shipment, k)}
-    # The user_email is in shipment_data and will be passed via model_data, so we don't pass it explicitly.
-    # However, the form also includes other fields not on the model, like 'shipmentType', so we filter them out.
+    
     if 'user_email' in model_data:
         del model_data['user_email']
 
@@ -249,6 +248,7 @@ def get_shipment_detail(shipment_id_str):
         "total_with_tax_18_percent": float(shipment.total_with_tax_18_percent),
         "tracking_history": shipment.tracking_history,
         "payment_status": payment_status,
+        "goods_details": shipment.goods_details,
     }), 200
 
 @shipments_bp.route("/user/payments", methods=["GET"])
