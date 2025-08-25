@@ -217,6 +217,9 @@ export default function CustomerBookingPage() {
             user_email: session.email,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
             final_total_price_with_tax: priceDetails.total_price,
+            package_length_cm: values.package_length_cm || 0,
+            package_width_cm: values.package_width_cm || 0,
+            package_height_cm: values.package_height_cm || 0,
         };
 
         try {
@@ -475,7 +478,7 @@ export default function CustomerBookingPage() {
                                     )} />
                                 )}
                                 {shipmentType === 'international' && (
-                                    <FormField name="service_type" control={form.control} render={({ field }) => (
+                                     <FormField name="service_type" control={form.control} render={({ field }) => (
                                         <FormItem><FormLabel>Service Type</FormLabel>
                                             <Select onValueChange={field.onChange} value={field.value}>
                                                 <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
@@ -515,5 +518,3 @@ export default function CustomerBookingPage() {
         </div>
     );
 }
-
-    

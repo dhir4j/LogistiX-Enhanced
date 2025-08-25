@@ -212,6 +212,9 @@ export default function EmployeeBookingPage() {
             user_email: session.email,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
             final_total_price_with_tax: priceDetails.total_price,
+            package_length_cm: values.package_length_cm || 0,
+            package_width_cm: values.package_width_cm || 0,
+            package_height_cm: values.package_height_cm || 0,
         };
 
         try {
@@ -505,5 +508,3 @@ export default function EmployeeBookingPage() {
         </div>
     );
 }
-
-    
