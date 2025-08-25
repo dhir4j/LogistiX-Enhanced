@@ -43,6 +43,9 @@ const bookingSchema = z.object({
   
   // Package
   package_weight_kg: z.coerce.number().min(0.1, "Weight must be at least 0.1 kg"),
+  package_length_cm: z.coerce.number().min(1, "Length must be at least 1 cm"),
+  package_width_cm: z.coerce.number().min(1, "Width must be at least 1 cm"),
+  package_height_cm: z.coerce.number().min(1, "Height must be at least 1 cm"),
   pickup_date: z.date({ required_error: "Pickup date is required" }),
   service_type: z.string().optional(),
 });
@@ -66,7 +69,11 @@ export default function CustomerBookingPage() {
             sender_address_state: "", sender_address_pincode: "", sender_phone: "",
             receiver_name: "", receiver_address_street: "", receiver_address_city: "",
             receiver_address_state: "", receiver_address_pincode: "", receiver_phone: "", receiver_address_country: "India",
-            package_weight_kg: 0.5, pickup_date: new Date(), service_type: "Standard",
+            package_weight_kg: 0.5,
+            package_length_cm: 10,
+            package_width_cm: 10,
+            package_height_cm: 10,
+            pickup_date: new Date(), service_type: "Standard",
         },
     });
 
@@ -313,6 +320,11 @@ export default function CustomerBookingPage() {
                                     )} />
                                 )}
                             </div>
+                             <div className="grid md:grid-cols-3 gap-4">
+                                <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            </div>
                             <Separator />
                             <div className="flex flex-col items-center gap-4">
                                 {isCalculating && (
@@ -341,5 +353,3 @@ export default function CustomerBookingPage() {
         </div>
     );
 }
-
-    

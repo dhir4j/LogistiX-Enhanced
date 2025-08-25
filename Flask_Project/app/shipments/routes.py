@@ -73,9 +73,6 @@ def create_shipment():
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
         total_with_tax_18_percent=final_total_price,
-        package_length_cm=shipment_data.get('package_length_cm', 0),
-        package_width_cm=shipment_data.get('package_width_cm', 0),
-        package_height_cm=shipment_data.get('package_height_cm', 0),
         **shipment_data
     )
     db.session.add(new_shipment)
@@ -205,6 +202,9 @@ def get_shipment_detail(shipment_id_str):
         "receiver_address_country": shipment.receiver_address_country,
         "receiver_phone": shipment.receiver_phone,
         "package_weight_kg": float(shipment.package_weight_kg),
+        "package_length_cm": float(shipment.package_length_cm),
+        "package_width_cm": float(shipment.package_width_cm),
+        "package_height_cm": float(shipment.package_height_cm),
         "booking_date": shipment.booking_date.isoformat(),
         "service_type": shipment.service_type,
         "status": shipment.status,
