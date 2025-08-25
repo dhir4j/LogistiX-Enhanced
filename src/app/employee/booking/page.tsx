@@ -14,7 +14,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2, BookUser } from "lucide-react";
+import { CalendarIcon, Loader2, BookUser, Globe, Truck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { shipmentBookingSchema } from "@/lib/schemas";
 import type { ShipmentBookingFormValues } from "@/lib/schemas";
@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogClose, DialogDescription } from "@/components/ui/dialog";
 import { useApi } from "@/hooks/use-api";
 import { Checkbox } from "@/components/ui/checkbox";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 interface PriceResponse {
     total_price: number;
@@ -51,13 +52,13 @@ export default function EmployeeBookingPage() {
     const [isCalculating, setIsCalculating] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
     
-    // Separate API calls for sender and receiver addresses
     const { data: senderAddresses, mutate: mutateSenderAddresses } = useApi<SavedAddress[]>('/api/employee/addresses?type=sender');
     const { data: receiverAddresses, mutate: mutateReceiverAddresses } = useApi<SavedAddress[]>('/api/employee/addresses?type=receiver');
     
     const form = useForm<ShipmentBookingFormValues>({
         resolver: zodResolver(shipmentBookingSchema),
         defaultValues: {
+            shipmentType: "domestic",
             sender_name: "", sender_address_street: "", sender_address_city: "",
             sender_address_state: "", sender_address_pincode: "", sender_address_country: "India",
             sender_phone: "", save_sender_address: false, sender_address_nickname: "",
@@ -69,10 +70,10 @@ export default function EmployeeBookingPage() {
         },
     });
 
-    const watchedPriceFields = useWatch({ 
-        control: form.control, 
-        name: ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type"] 
-    });
+    const shipmentType = useWatch({ control: form.control, name: "shipmentType" });
+    const watchedPriceFields = useWatch({ control: form.control, name: ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type", "shipmentType"] });
+    const watchSaveSender = useWatch({ control: form.control, name: "save_sender_address" });
+    const watchSaveReceiver = useWatch({ control: form.control, name: "save_receiver_address" });
 
     useEffect(() => {
         if (!isSessionLoading && !session) {
@@ -80,9 +81,18 @@ export default function EmployeeBookingPage() {
         }
     }, [session, isSessionLoading, router]);
 
+    useEffect(() => {
+        if (shipmentType === 'domestic') {
+            form.setValue('receiver_address_country', 'India');
+        } else {
+             form.setValue('receiver_address_country', '');
+        }
+        setPriceDetails(null);
+    }, [shipmentType, form.setValue]);
+
     const handleGetPrice = async () => {
         const { receiver_address_state, receiver_address_country, package_weight_kg, service_type } = form.getValues();
-        const isDomestic = receiver_address_country.toLowerCase() === "india";
+        const isDomestic = receiver_address_country?.toLowerCase() === "india";
         
         if (isDomestic && !receiver_address_state) return;
         if (!isDomestic && !receiver_address_country) return;
@@ -116,7 +126,10 @@ export default function EmployeeBookingPage() {
     };
     
     useEffect(() => {
-        handleGetPrice();
+        const timer = setTimeout(() => {
+            handleGetPrice();
+        }, 500); // Debounce API calls
+        return () => clearTimeout(timer);
     }, [watchedPriceFields, form.getValues]);
 
     const saveAddress = async (type: 'sender' | 'receiver') => {
@@ -169,14 +182,15 @@ export default function EmployeeBookingPage() {
         
         if (values.save_sender_address) await saveAddress('sender');
         if (values.save_receiver_address) await saveAddress('receiver');
-
-        const isDomestic = values.receiver_address_country.toLowerCase() === 'india';
-        const apiEndpoint = isDomestic ? '/api/shipments/domestic' : '/api/shipments/international';
+        
+        const apiEndpoint = values.shipmentType === 'domestic'
+            ? '/api/shipments/domestic'
+            : '/api/shipments/international';
 
         const payload = {
             ...values,
-            pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
             user_email: session.email,
+            pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
             final_total_price_with_tax: priceDetails.total_price,
         };
 
@@ -189,6 +203,7 @@ export default function EmployeeBookingPage() {
             const result = await response.json();
             if(response.ok) {
                 toast({ title: "Booking Successful", description: `Shipment ${result.shipment_id_str} has been created.` });
+                router.push(`/employee/awb-tracking?id=${result.shipment_id_str}`);
                 form.reset();
                 setPriceDetails(null);
             } else {
@@ -200,10 +215,6 @@ export default function EmployeeBookingPage() {
             setIsSubmitting(false);
         }
     };
-    
-    const isDomestic = useWatch({ control: form.control, name: "receiver_address_country" })?.toLowerCase() === 'india';
-    const watchSaveSender = useWatch({ control: form.control, name: "save_sender_address" });
-    const watchSaveReceiver = useWatch({ control: form.control, name: "save_receiver_address" });
 
     const applyAddress = (address: SavedAddress, type: 'sender' | 'receiver') => {
         form.setValue(`${type}_name`, address.name);
@@ -252,111 +263,154 @@ export default function EmployeeBookingPage() {
         );
     }
 
-
     return (
-        <div className="flex-1 p-4 sm:p-6 bg-gray-100/50">
-        <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-                <div className="grid lg:grid-cols-3 gap-6">
-                    {/* Main Form Section */}
-                    <div className="lg:col-span-2 space-y-6">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
+        <div className="w-full p-4 sm:p-6">
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+                    <FormField
+                        control={form.control}
+                        name="shipmentType"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                                <FormControl>
+                                    <RadioGroup
+                                        onValueChange={field.onChange}
+                                        defaultValue={field.value}
+                                        className="grid grid-cols-2 gap-4"
+                                    >
+                                        <FormItem>
+                                            <FormControl>
+                                                <RadioGroupItem value="domestic" className="sr-only" />
+                                            </FormControl>
+                                            <FormLabel className={cn(
+                                                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                                field.value === 'domestic' && "border-primary"
+                                            )}>
+                                                <Truck className="mb-3 h-6 w-6" />
+                                                Domestic
+                                            </FormLabel>
+                                        </FormItem>
+                                        <FormItem>
+                                            <FormControl>
+                                                <RadioGroupItem value="international" className="sr-only" />
+                                            </FormControl>
+                                             <FormLabel className={cn(
+                                                "flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground cursor-pointer",
+                                                field.value === 'international' && "border-primary"
+                                            )}>
+                                                <Globe className="mb-3 h-6 w-6" />
+                                                International
+                                            </FormLabel>
+                                        </FormItem>
+                                    </RadioGroup>
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )}
+                    />
+                    
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div className="space-y-1">
                                 <CardTitle>Sender Details</CardTitle>
-                                <AddressBookDialog type="sender" addresses={senderAddresses} />
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <FormField name="sender_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="sender_address_street" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <div className="grid md:grid-cols-3 gap-4">
-                                    <FormField name="sender_address_city" control={form.control} render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="sender_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="sender_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                </div>
-                                <FormField name="sender_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <Separator />
-                                <FormField control={form.control} name="save_sender_address" render={({ field }) => (
-                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to sender book</FormLabel></div>
-                                    </FormItem>
-                                )}/>
-                                {watchSaveSender && <FormField name="sender_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Head Office" /></FormControl><FormMessage /></FormItem> )}/>}
+                                <CardDescription>Enter the address where the shipment will be picked up from.</CardDescription>
+                            </div>
+                            <AddressBookDialog type="sender" addresses={senderAddresses} />
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <FormField name="sender_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            <FormField name="sender_address_street" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <FormField name="sender_address_city" control={form.control} render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="sender_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="sender_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            </div>
+                            <FormField name="sender_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            <Separator />
+                            <FormField control={form.control} name="save_sender_address" render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                                <div className="space-y-1 leading-none"><FormLabel>Save this address to sender book</FormLabel></div>
+                                </FormItem>
+                            )}/>
+                            {watchSaveSender && <FormField name="sender_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Head Office" /></FormControl><FormMessage /></FormItem> )}/>}
+                        </CardContent>
+                    </Card>
 
-                            </CardContent>
-                        </Card>
-                         <Card>
-                            <CardHeader className="flex flex-row items-center justify-between">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between">
+                            <div className="space-y-1">
                                 <CardTitle>Receiver Details</CardTitle>
-                                <AddressBookDialog type="receiver" addresses={receiverAddresses} />
-                            </CardHeader>
-                            <CardContent className="space-y-4">
-                                <FormField name="receiver_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <FormField name="receiver_address_street" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                <div className="grid md:grid-cols-3 gap-4">
-                                    <FormField name="receiver_address_city" control={form.control} render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                     <FormField name="receiver_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State/Province</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode/ZIP</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                </div>
-                                 <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField name="receiver_address_country" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="receiver_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                </div>
-                                <Separator />
-                                <FormField control={form.control} name="save_receiver_address" render={({ field }) => (
-                                    <FormItem className="flex flex-row items-start space-x-3 space-y-0">
-                                    <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
-                                    <div className="space-y-1 leading-none"><FormLabel>Save this address to receiver book</FormLabel></div>
-                                    </FormItem>
-                                )}/>
-                                {watchSaveReceiver && <FormField name="receiver_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Warehouse" /></FormControl><FormMessage /></FormItem> )}/>}
-                            </CardContent>
-                        </Card>
-                    </div>
+                                <CardDescription>Enter the destination address for the shipment.</CardDescription>
+                            </div>
+                            <AddressBookDialog type="receiver" addresses={receiverAddresses} />
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <FormField name="receiver_name" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Full Name</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            <FormField name="receiver_address_street" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address</FormLabel><FormControl><Textarea {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            <div className="grid md:grid-cols-3 gap-4">
+                                <FormField name="receiver_address_city" control={form.control} render={({ field }) => ( <FormItem><FormLabel>City</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                 <FormField name="receiver_address_state" control={form.control} render={({ field }) => ( <FormItem><FormLabel>State/Province</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="receiver_address_pincode" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Pincode/ZIP</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <FormField name="receiver_address_country" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Country</FormLabel><FormControl><Input {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="receiver_phone" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Phone</FormLabel><FormControl><Input type="tel" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            </div>
+                            <Separator />
+                            <FormField control={form.control} name="save_receiver_address" render={({ field }) => (
+                                <FormItem className="flex flex-row items-start space-x-3 space-y-0">
+                                <FormControl><Checkbox checked={field.value} onCheckedChange={field.onChange} /></FormControl>
+                                <div className="space-y-1 leading-none"><FormLabel>Save this address to receiver book</FormLabel></div>
+                                </FormItem>
+                            )}/>
+                            {watchSaveReceiver && <FormField name="receiver_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Warehouse" /></FormControl><FormMessage /></FormItem> )}/>}
+                        </CardContent>
+                    </Card>
 
-                    {/* Pricing and Action Section */}
-                    <div className="lg:col-span-1 space-y-6">
-                        <Card className="sticky top-20">
-                            <CardHeader><CardTitle>Package & Service</CardTitle></CardHeader>
-                            <CardContent className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                    <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
-                                </div>
-                                <div className="grid md:grid-cols-2 gap-4">
-                                    <FormField name="pickup_date" control={form.control} render={({ field }) => (
-                                        <FormItem className="flex flex-col"><FormLabel>Pickup Date</FormLabel>
-                                            <Popover><PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button variant={"outline"} className={cn("w-full justify-start pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
-                                                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() -1))} />
-                                            </PopoverContent>
-                                            </Popover>
-                                        <FormMessage /></FormItem>
-                                    )}/>
-                                    {isDomestic && <FormField name="service_type" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Service Type</FormLabel>
-                                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="Standard">Standard</SelectItem>
-                                                    <SelectItem value="Express">Express</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        <FormMessage /></FormItem>
-                                    )} />}
-                                </div>
-                            </CardContent>
-                             <CardHeader><CardTitle>Price & Book</CardTitle></CardHeader>
-                             <CardContent className="space-y-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Package, Service & Price</CardTitle>
+                            <CardDescription>Provide package details, choose a service, and confirm the price.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                                <FormField name="package_weight_kg" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Weight (kg)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_length_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Length (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                                <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" {...field} /></FormControl><FormMessage /></FormItem> )}/>
+                            </div>
+                            <div className="grid md:grid-cols-2 gap-4">
+                                <FormField name="pickup_date" control={form.control} render={({ field }) => (
+                                    <FormItem className="flex flex-col"><FormLabel>Pickup Date</FormLabel>
+                                        <Popover><PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button variant={"outline"} className={cn("w-full justify-start pl-3 text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date(new Date().setDate(new Date().getDate() -1))} />
+                                        </PopoverContent>
+                                        </Popover>
+                                    <FormMessage /></FormItem>
+                                )}/>
+                                {shipmentType === 'domestic' && <FormField name="service_type" control={form.control} render={({ field }) => (
+                                    <FormItem><FormLabel>Service Type</FormLabel>
+                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                            <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
+                                            <SelectContent>
+                                                <SelectItem value="Standard">Standard</SelectItem>
+                                                <SelectItem value="Express">Express</SelectItem>
+                                            </SelectContent>
+                                        </Select>
+                                    <FormMessage /></FormItem>
+                                )} />}
+                            </div>
+                            <Separator />
+                            <div className="flex flex-col items-center gap-4">
                                 {(isCalculating) && (
                                     <div className="flex items-center justify-center text-muted-foreground">
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -364,35 +418,24 @@ export default function EmployeeBookingPage() {
                                     </div>
                                 )}
                                 {priceDetails && !isCalculating && (
-                                    <div className="space-y-2 text-sm">
-                                        <Separator />
-                                        <div className="flex justify-between"><span>Service:</span> <span className="font-medium">{isDomestic ? priceDetails.mode : "International Express"}</span></div>
-                                        <div className="flex justify-between"><span>Weight:</span> <span className="font-medium">{priceDetails.rounded_weight} kg</span></div>
-                                        <Separator />
-                                        <div className="flex justify-between font-bold text-lg">
-                                            <span>Total Price:</span>
-                                            <span>₹{priceDetails.total_price.toFixed(2)}</span>
-                                        </div>
-                                         <p className="text-xs text-muted-foreground pt-2">This price is inclusive of all taxes and fees. Employee balance will be used for payment.</p>
+                                    <div className="text-center w-full">
+                                        <div className="text-muted-foreground">Estimated Price:</div>
+                                        <div className="text-3xl font-bold my-2">₹{priceDetails.total_price.toFixed(2)}</div>
+                                         <p className="text-xs text-muted-foreground pb-4">This price is inclusive of all taxes and fees. Employee balance will be used for payment.</p>
+                                        <Button type="submit" size="lg" className="w-full max-w-xs" disabled={!priceDetails || isSubmitting || isCalculating}>
+                                            {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                                            {isSubmitting ? "Booking..." : "Book Shipment"}
+                                        </Button>
                                     </div>
                                 )}
                                 {!priceDetails && !isCalculating && (
-                                    <p className="text-sm text-muted-foreground text-center">Fill in destination and weight details to see the price.</p>
+                                    <p className="text-sm text-muted-foreground text-center p-4">Fill in destination and weight details to see the price.</p>
                                 )}
-                             </CardContent>
-                             <CardContent>
-                                <Button type="submit" size="lg" className="w-full h-12 text-lg" disabled={!priceDetails || isSubmitting || isCalculating}>
-                                    {isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                                    {isSubmitting ? "Booking..." : "Book Shipment"}
-                                </Button>
-                             </CardContent>
-                        </Card>
-                    </div>
-                </div>
-            </form>
-        </Form>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </form>
+            </Form>
         </div>
     );
 }
-
-    

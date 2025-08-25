@@ -29,6 +29,7 @@ export const contactSchema = z.object({
 });
 
 export const shipmentBookingSchema = z.object({
+    shipmentType: z.enum(['domestic', 'international']),
     // Sender
     sender_name: z.string().min(3, "Sender name is required"),
     sender_address_street: z.string().min(5, "Sender address is required"),
