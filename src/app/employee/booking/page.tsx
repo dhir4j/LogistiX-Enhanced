@@ -87,8 +87,10 @@ export default function EmployeeBookingPage() {
     useEffect(() => {
         if (shipmentType === 'domestic') {
             form.setValue('receiver_address_country', 'India');
+            form.setValue('service_type', 'Standard');
         } else {
              form.setValue('receiver_address_country', '');
+             form.setValue('service_type', 'International Express');
         }
         setPriceDetails(null);
     }, [shipmentType, form.setValue]);
@@ -421,7 +423,7 @@ export default function EmployeeBookingPage() {
                                 )}/>
                                 {shipmentType === 'domestic' && <FormField name="service_type" control={form.control} render={({ field }) => (
                                     <FormItem><FormLabel>Service Type</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
                                             <SelectContent>
                                                 <SelectItem value="Standard">Standard</SelectItem>
@@ -432,7 +434,7 @@ export default function EmployeeBookingPage() {
                                 )} />}
                                 {shipmentType === 'international' && <FormField name="service_type" control={form.control} render={({ field }) => (
                                     <FormItem><FormLabel>Service Type</FormLabel>
-                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
                                             <SelectContent>
                                                 <SelectItem value="International Express">International Express</SelectItem>
@@ -471,3 +473,5 @@ export default function EmployeeBookingPage() {
         </div>
     );
 }
+
+    
