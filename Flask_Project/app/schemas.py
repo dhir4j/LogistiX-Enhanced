@@ -11,6 +11,12 @@ class LoginSchema(Schema):
     email = fields.Email(required=True)
     password = fields.Str(required=True)
 
+class GoodsSchema(Schema):
+    description = fields.Str(required=True)
+    quantity = fields.Int(required=True)
+    hsn_code = fields.Str(allow_none=True)
+    value = fields.Float(required=True)
+
 class ShipmentCreateSchema(Schema):
     # Sender
     sender_name = fields.Str(required=True)
@@ -37,6 +43,8 @@ class ShipmentCreateSchema(Schema):
     package_height_cm = fields.Float(required=True)
     pickup_date = fields.Date(required=True)
     service_type = fields.Str(required=True, allow_none=True)
+    goods = fields.List(fields.Nested(GoodsSchema()), required=True)
+
 
     # Optional fields for saving addresses
     save_sender_address = fields.Bool(load_default=False)
