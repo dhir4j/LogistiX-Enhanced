@@ -34,8 +34,11 @@ def _create_shipment_record(user, shipment_data, final_total_price):
         "activity": tracking_activity
     }]
     
+    # Extract goods details before sanitizing the rest of the data
+    goods_details = shipment_data.pop('goods', [])
+
     # Sanitize data for model creation, removing extra fields
-    model_data = {k: v for k, v in shipment_data.items() if hasattr(Shipment, k)}
+    model_data = {k: v for k, v in shipment_data.items() if hasattr(Shipment, k) and k != 'goods_details'}
     
     # This is the fix: Remove user_email from the dictionary before unpacking it.
     if 'user_email' in model_data:
@@ -50,6 +53,7 @@ def _create_shipment_record(user, shipment_data, final_total_price):
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
         total_with_tax_18_percent=final_total_price,
+        goods_details=goods_details, # Correctly assign goods_details
         **model_data
     )
     db.session.add(new_shipment)
@@ -69,6 +73,7 @@ def _create_shipment_record(user, shipment_data, final_total_price):
             "total_with_tax_18_percent": float(new_shipment.total_with_tax_18_percent),
             "status": new_shipment.status,
             "tracking_history": new_shipment.tracking_history,
+            "goods_details": new_shipment.goods_details,
         }
     }, 201
 
@@ -492,3 +497,4 @@ def handle_customer_address_item(address_id):
 
       
 
+    
