@@ -101,7 +101,7 @@ export default function EmployeeBookingPage() {
              form.setValue('service_type', 'International Express');
         }
         setPriceDetails(null);
-    }, [shipmentType, form.setValue]);
+    }, [shipmentType, form]);
 
     const handleGetPrice = async () => {
         const { receiver_address_state, receiver_address_country, package_weight_kg, service_type, shipmentType } = form.getValues();
@@ -466,7 +466,7 @@ export default function EmployeeBookingPage() {
                                             <SelectContent>
                                                 <SelectItem value="By Road">Road</SelectItem>
                                                 <SelectItem value="By Air">Air</SelectItem>
-                                                {packageWeightKg < 5 && <SelectItem value="By Train">Express</SelectItem>}
+                                                <SelectItem value="By Train" disabled={packageWeightKg > 4.9}>Express (Under 5kg)</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     <FormMessage /></FormItem>
