@@ -30,14 +30,24 @@ class ShipmentCreateSchema(Schema):
     receiver_phone = fields.Str(required=True)
     receiver_address_country = fields.Str(required=True)
 
-
     # Package
     package_weight_kg = fields.Float(required=True)
     package_length_cm = fields.Float(required=True)
     package_width_cm = fields.Float(required=True)
     package_height_cm = fields.Float(required=True)
     pickup_date = fields.Date(required=True)
-    service_type = fields.Str(required=True)
+    service_type = fields.Str(required=True, allow_none=True)
+
+    # Optional fields for saving addresses
+    save_sender_address = fields.Bool(load_default=False)
+    sender_address_nickname = fields.Str(allow_none=True)
+    save_receiver_address = fields.Bool(load_default=False)
+    receiver_address_nickname = fields.Str(allow_none=True)
+    
+    # Extra fields from form that are not part of the model
+    shipmentType = fields.Str(allow_none=True)
+    user_email = fields.Email(required=True)
+    final_total_price_with_tax = fields.Float(required=True)
 
 
 class PaymentSubmitSchema(Schema):
@@ -48,7 +58,7 @@ class PaymentSubmitSchema(Schema):
 class SavedAddressSchema(Schema):
     id = fields.Int(dump_only=True)
     address_type = fields.Str(required=True, validate=validate.OneOf(["sender", "receiver"]))
-    nickname = fields.Str(required=True)
+    nickname = fields.Str(required=True, validate=validate.Length(min=2))
     name = fields.Str(required=True)
     address_street = fields.Str(required=True)
     address_city = fields.Str(required=True)
@@ -58,7 +68,4 @@ class SavedAddressSchema(Schema):
     phone = fields.Str(required=True)
 
     class Meta:
-        # Fields to show when sending data back to the client
         fields = ("id", "nickname", "name", "address_street", "address_city", "address_state", "address_pincode", "address_country", "phone", "address_type")
-    
-    

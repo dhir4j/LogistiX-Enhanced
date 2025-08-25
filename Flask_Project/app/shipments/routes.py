@@ -33,6 +33,10 @@ def _create_shipment_record(user, shipment_data, final_total_price):
         "location": shipment_data["sender_address_city"],
         "activity": tracking_activity
     }]
+    
+    # Sanitize data for model creation, removing extra fields
+    model_data = {k: v for k, v in shipment_data.items() if k in ShipmentCreateSchema().fields}
+
 
     new_shipment = Shipment(
         user_id=user.id,
@@ -43,7 +47,7 @@ def _create_shipment_record(user, shipment_data, final_total_price):
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
         total_with_tax_18_percent=final_total_price,
-        **shipment_data
+        **model_data
     )
     db.session.add(new_shipment)
     db.session.commit()
@@ -71,7 +75,7 @@ def create_domestic_shipment():
     schema = ShipmentCreateSchema()
     data = request.get_json()
 
-    user_email_from_payload = data.pop("user_email", None)
+    user_email_from_payload = data.get("user_email")
     if not user_email_from_payload:
         return jsonify({"error": "user_email is a required field"}), 400
 
@@ -79,13 +83,12 @@ def create_domestic_shipment():
     if not user:
         return jsonify({"error": "User not found"}), 400
 
-    final_total_price = data.pop("final_total_price_with_tax", None)
+    final_total_price = data.get("final_total_price_with_tax")
     if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
         return jsonify({"error": "Valid final_total_price_with_tax is required"}), 400
     
     data['receiver_address_country'] = 'India'
-    data.pop("shipmentType", None)
-
+    
     try:
         shipment_data = schema.load(data)
     except Exception as e:
@@ -100,7 +103,7 @@ def create_international_shipment():
     schema = ShipmentCreateSchema()
     data = request.get_json()
 
-    user_email_from_payload = data.pop("user_email", None)
+    user_email_from_payload = data.get("user_email")
     if not user_email_from_payload:
         return jsonify({"error": "user_email is a required field"}), 400
 
@@ -108,11 +111,9 @@ def create_international_shipment():
     if not user:
         return jsonify({"error": "User not found"}), 400
 
-    final_total_price = data.pop("final_total_price_with_tax", None)
+    final_total_price = data.get("final_total_price_with_tax")
     if final_total_price is None or not isinstance(final_total_price, (int, float)) or final_total_price <= 0:
         return jsonify({"error": "Valid final_total_price_with_tax is required"}), 400
-
-    data.pop("shipmentType", None)
 
     try:
         shipment_data = schema.load(data)
@@ -349,9 +350,9 @@ def get_day_end_stats():
     }), 200
 
 
-# Address Book Endpoints
+# --- Employee Address Book ---
 @shipments_bp.route("/employee/addresses", methods=["POST"])
-def add_saved_address():
+def add_employee_saved_address():
     user_email = request.headers.get("X-User-Email")
     if not user_email:
         return jsonify({"error": "User not found"}), 404
@@ -380,7 +381,7 @@ def add_saved_address():
     return jsonify(schema.dump(new_address)), 201
 
 @shipments_bp.route("/employee/addresses", methods=["GET"])
-def get_saved_addresses():
+def get_employee_saved_addresses():
     user_email = request.headers.get("X-User-Email")
     if not user_email:
         return jsonify({"error": "User not found"}), 404
@@ -400,7 +401,7 @@ def get_saved_addresses():
     return jsonify(schema.dump(addresses)), 200
 
 @shipments_bp.route("/employee/addresses/<int:address_id>", methods=["DELETE"])
-def delete_saved_address(address_id):
+def delete_employee_saved_address(address_id):
     user_email = request.headers.get("X-User-Email")
     if not user_email:
         return jsonify({"error": "User not found"}), 404
@@ -417,10 +418,70 @@ def delete_saved_address(address_id):
     db.session.commit()
     return jsonify({"message": "Address deleted"}), 200
     
+# --- Customer Address Book ---
+@shipments_bp.route("/customer/addresses", methods=["POST", "GET"])
+def handle_customer_addresses():
+    user_email = request.headers.get("X-User-Email")
+    if not user_email:
+        return jsonify({"error": "User authentication required."}), 401
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return jsonify({"error": "User not found."}), 404
     
+    if request.method == 'POST':
+        schema = SavedAddressSchema()
+        try:
+            address_data = schema.load(request.get_json())
+        except Exception as e:
+            return jsonify({"error": "Invalid address data", "details": e.messages}), 400
 
+        new_address = SavedAddress(user_id=user.id, **address_data)
+        try:
+            db.session.add(new_address)
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return jsonify({"error": f"An address with the nickname '{address_data['nickname']}' already exists."}), 409
+        return jsonify(schema.dump(new_address)), 201
     
+    if request.method == 'GET':
+        address_type = request.args.get('type')
+        query = SavedAddress.query.filter_by(user_id=user.id)
+        if address_type in ['sender', 'receiver']:
+            query = query.filter_by(address_type=address_type)
+        addresses = query.order_by(SavedAddress.nickname).all()
+        schema = SavedAddressSchema(many=True)
+        return jsonify(schema.dump(addresses)), 200
 
+@shipments_bp.route("/customer/addresses/<int:address_id>", methods=["PUT", "DELETE"])
+def handle_customer_address_item(address_id):
+    user_email = request.headers.get("X-User-Email")
+    if not user_email:
+        return jsonify({"error": "User authentication required."}), 401
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return jsonify({"error": "User not found."}), 404
 
+    address = SavedAddress.query.filter_by(id=address_id, user_id=user.id).first_or_404()
 
-    
+    if request.method == 'PUT':
+        schema = SavedAddressSchema()
+        try:
+            address_data = schema.load(request.get_json())
+        except Exception as e:
+            return jsonify({"error": "Invalid address data", "details": e.messages}), 400
+        
+        for key, value in address_data.items():
+            setattr(address, key, value)
+        
+        try:
+            db.session.commit()
+        except exc.IntegrityError:
+            db.session.rollback()
+            return jsonify({"error": f"An address with the nickname '{address_data['nickname']}' already exists."}), 409
+        return jsonify(schema.dump(address)), 200
+
+    if request.method == 'DELETE':
+        db.session.delete(address)
+        db.session.commit()
+        return jsonify({"message": "Address deleted"}), 200

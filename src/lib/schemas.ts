@@ -57,10 +57,10 @@ export const shipmentBookingSchema = z.object({
     package_length_cm: z.coerce.number().min(1, "Length must be at least 1 cm"),
     pickup_date: z.date({ required_error: "Pickup date is required" }),
     service_type: z.string().min(1, "Service type is required").optional(),
-}).refine(data => !data.save_sender_address || (data.save_sender_address && data.sender_address_nickname), {
+}).refine(data => !data.save_sender_address || (data.save_sender_address && data.sender_address_nickname && data.sender_address_nickname.length > 1), {
     message: "Nickname is required to save sender address",
     path: ["sender_address_nickname"],
-}).refine(data => !data.save_receiver_address || (data.save_receiver_address && data.receiver_address_nickname), {
+}).refine(data => !data.save_receiver_address || (data.save_receiver_address && data.receiver_address_nickname && data.receiver_address_nickname.length > 1), {
     message: "Nickname is required to save receiver address",
     path: ["receiver_address_nickname"],
 });
