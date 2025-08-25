@@ -77,7 +77,11 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
     const tax = shipment.tax_amount_18_percent;
     const total = shipment.total_with_tax_18_percent;
     const totalInWords = toWords(total);
-    const goods = shipment.goods_details || [{ description: 'Courier Service Charge', quantity: 1, value: subtotal, hsn_code: '' }];
+    const goods = shipment.goods_details && shipment.goods_details.length > 0
+        ? shipment.goods_details 
+        : [{ description: 'Courier Service Charge', quantity: 1, value: subtotal, hsn_code: '' }];
+    
+    const goodsTotalValue = goods.reduce((acc, item) => acc + item.value, 0);
 
 
     return (
@@ -152,6 +156,10 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                  {/* Totals */}
                 <div className="flex justify-end pt-4">
                     <div className="w-1/2 space-y-2">
+                         <div className="flex justify-between">
+                            <span className="font-bold">Goods Value:</span>
+                            <span>₹{goodsTotalValue.toFixed(2)}</span>
+                        </div>
                          <div className="flex justify-between">
                             <span className="font-bold">Freight Charge:</span>
                             <span>₹{subtotal.toFixed(2)}</span>
