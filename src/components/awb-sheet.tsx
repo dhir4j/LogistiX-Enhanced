@@ -51,15 +51,18 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                 <div className="flex border-b-2 border-black">
                     {/* Logo Section */}
                     <div className="w-1/4 p-2 flex flex-col justify-center border-r-2 border-black">
-                        <Image 
-                            src="/images/logo/logo.png" 
-                            alt="HK Speed Couriers Logo" 
-                            width={42} 
-                            height={21} 
-                            className="mb-1 h-auto" 
-                        />
-                        <p className="text-[7px] font-semibold">www.hkspeedcouriers.com</p>
-                        <p className="text-[7px] font-semibold">info@hkspeedcouriers.com</p>
+                        <div className="mb-1 w-full flex justify-center">
+                            <Image 
+                                src="/images/logo/logo.png" 
+                                alt="HK Speed Couriers Logo" 
+                                width={60} 
+                                height={30} 
+                                className="h-auto max-w-full object-contain" 
+                                style={{ maxHeight: '30px', width: 'auto' }}
+                            />
+                        </div>
+                        <p className="text-[7px] font-semibold text-center">www.hkspeedcouriers.com</p>
+                        <p className="text-[7px] font-semibold text-center">info@hkspeedcouriers.com</p>
                     </div>
                     
                     {/* Center Section */}
