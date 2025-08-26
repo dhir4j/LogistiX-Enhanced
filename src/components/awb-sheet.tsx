@@ -1,7 +1,15 @@
+
 "use client";
 
 import Barcode from 'react-barcode';
 import Image from 'next/image';
+
+interface GoodsDetail {
+    description: string;
+    quantity: number;
+    hsn_code: string;
+    value: number;
+}
 
 interface AwbSheetProps {
     shipment: {
@@ -28,15 +36,17 @@ interface AwbSheetProps {
         package_length_cm: number;
         package_width_cm: number;
         package_height_cm: number;
+        goods_details: GoodsDetail[];
     };
 }
 
 export default function AwbSheet({ shipment }: AwbSheetProps) {
     const today = new Date(shipment.booking_date);
     const date = today.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const goods = shipment.goods_details && shipment.goods_details.length > 0 ? shipment.goods_details : [];
 
     return (
-        <div className="p-2 bg-white text-black font-mono text-[8px] leading-tight max-w-full overflow-hidden">
+        <div className="p-2 bg-white text-black font-mono text-[10px] leading-tight max-w-full overflow-hidden">
             <div className="border-2 border-black">
                 {/* Header */}
                 <div className="flex border-b-2 border-black">
@@ -45,12 +55,12 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         <Image 
                             src="/images/logo/logo.png" 
                             alt="HK Speed Couriers Logo" 
-                            width={60} 
-                            height={30} 
-                            className="mb-1 h-8 w-auto" 
+                            width={42} 
+                            height={21} 
+                            className="mb-1 h-auto" 
                         />
-                        <p className="text-[6px] font-semibold">www.hkspeedcouriers.com</p>
-                        <p className="text-[6px] font-semibold">info@hkspeedcouriers.com</p>
+                        <p className="text-[7px] font-semibold">www.hkspeedcouriers.com</p>
+                        <p className="text-[7px] font-semibold">info@hkspeedcouriers.com</p>
                     </div>
                     
                     {/* Center Section */}
@@ -83,7 +93,7 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         {/* Section 1 - Account */}
                         <div className="flex border-b-2 border-black">
                             <div className="w-1/3 border-r-2 border-black p-1 text-center">
-                                <div className="font-bold text-xs mb-1">1</div>
+                                <div className="font-bold text-base mb-1">1</div>
                                 <p className="font-bold">ACCOUNT</p>
                                 <p className="break-all">{shipment.user_email.split('@')[0].toUpperCase()}</p>
                             </div>
@@ -93,7 +103,7 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         </div>
 
                         {/* Sender Details */}
-                        <div className="border-b-2 border-black p-1 text-[7px]">
+                        <div className="border-b-2 border-black p-1">
                             <div className="mb-1">
                                 <span className="font-bold">COMPANY NAME: </span>{shipment.sender_name}
                             </div>
@@ -113,9 +123,9 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         {/* Section 2 - Customer Ref */}
                         <div className="flex border-b-2 border-black">
                             <div className="w-1/2 border-r-2 border-black p-1">
-                                <div className="font-bold text-xs text-center mb-1">2</div>
+                                <div className="font-bold text-base text-center mb-1">2</div>
                                 <p className="font-bold">CUSTOMER REF</p>
-                                <p className="text-[7px] break-all">{shipment.sender_name}</p>
+                                <p className="break-all">{shipment.sender_name}</p>
                             </div>
                             <div className="w-1/2 p-1">
                                 <p className="font-bold">ALT REFERENCE</p>
@@ -124,10 +134,10 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
 
                         {/* Section 3 - Shipper's Agreement */}
                         <div className="p-1">
-                            <div className="font-bold text-xs text-center mb-1">3</div>
+                            <div className="font-bold text-base text-center mb-1">3</div>
                             <p className="font-bold mb-1">SHIPPER'S AGREEMENT AND SIGNATURE</p>
-                            <p className="text-[7px] mb-2">Received for HK Speed Couriers</p>
-                            <div className="flex justify-between text-[7px]">
+                            <p className="mb-2">Received for HK Speed Couriers</p>
+                            <div className="flex justify-between">
                                 <span>DATE: {date}</span>
                                 <span>TIME: A.M/P.M</span>
                             </div>
@@ -139,19 +149,19 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         {/* Section 4 & 6 */}
                         <div className="flex border-b-2 border-black">
                             <div className="w-1/2 border-r-2 border-black p-1 text-center">
-                                <div className="font-bold text-xs mb-1">4</div>
+                                <div className="font-bold text-base mb-1">4</div>
                                 <p className="font-bold">TO RECEIVER</p>
                             </div>
                             <div className="w-1/2 p-1 text-center">
-                                <div className="font-bold text-xs mb-1">6</div>
-                                <p className="font-bold">TYPE OF SERVICE</p>
+                                <div className="font-bold text-base mb-1">6</div>
+                                <p className="font-bold text-[10px]">TYPE OF SERVICE</p>
                                 <p className="font-bold text-sm">{shipment.service_type ? shipment.service_type.toUpperCase() : "INTERNATIONAL"}</p>
                             </div>
                         </div>
 
                         {/* Receiver Details & Description */}
-                        <div className="flex border-b-2 border-black min-h-[120px]">
-                            <div className="w-1/2 border-r-2 border-black p-1 text-[7px]">
+                        <div className="flex border-b-2 border-black min-h-[140px]">
+                            <div className="w-1/2 border-r-2 border-black p-1">
                                 <div className="mb-1">
                                     <span className="font-bold">COMPANY NAME: </span>{shipment.receiver_name}
                                 </div>
@@ -170,7 +180,10 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                             </div>
                             <div className="w-1/2 p-1">
                                 <p className="font-bold mb-2">DESCRIPTION OF CONTENTS</p>
-                                <div className="h-8 border-b border-gray-300 mb-2"></div>
+                                {goods.map((item, index) => (
+                                    <p key={index} className="truncate">{item.quantity} x {item.description}</p>
+                                ))}
+                                <div className="h-8 border-b border-gray-300 mb-2 mt-4"></div>
                                 <p className="font-bold mb-2">SPECIAL INSTRUCTION</p>
                                 <div className="h-8"></div>
                             </div>
@@ -179,58 +192,57 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         {/* Section 5 & 7 */}
                         <div className="flex border-b-2 border-black">
                             <div className="w-1/2 border-r-2 border-black p-1">
-                                <div className="font-bold text-xs text-center mb-1">5</div>
-                                <p className="font-bold text-[7px] mb-1">DUTIES/TAXES/VALUE/CODE NOS.</p>
-                                <p className="font-bold text-[7px] mb-1">VALUE DECLARED FOR CUSTOMS PURPOSE:</p>
-                                <p className="text-[7px]">Amount: {shipment.total_with_tax_18_percent.toFixed(2)} Currency: INR</p>
+                                <div className="font-bold text-base text-center mb-1">5</div>
+                                <p className="font-bold mb-1">DUTIES/TAXES/VALUE/CODE NOS.</p>
+                                <p className="font-bold mb-1">VALUE DECLARED FOR CUSTOMS PURPOSE:</p>
+                                <p>Amount: {shipment.total_with_tax_18_percent.toFixed(2)} Currency: INR</p>
                             </div>
                             <div className="w-1/2 p-1 text-center">
-                                <div className="font-bold text-xs mb-1">7</div>
+                                <div className="font-bold text-base mb-1">7</div>
                                 <p className="font-bold mb-1">SIZE & WEIGHT</p>
-                                <p className="text-[7px]">NO. OF PCS: 1</p>
-                                <p className="text-[7px]">TOTAL WEIGHT: {shipment.package_weight_kg.toFixed(3)}</p>
+                                <p>NO. OF PCS: {goods.reduce((acc, item) => acc + item.quantity, 0)}</p>
+                                <p>TOTAL WEIGHT: {shipment.package_weight_kg.toFixed(3)}</p>
                             </div>
                         </div>
 
                         {/* Bottom Section */}
-                        <div className="flex min-h-[100px]">
+                        <div className="flex min-h-[115px]">
                             <div className="w-1/2 border-r-2 border-black p-1">
-                                <p className="font-bold text-[7px] mb-2">CODE NOS/VAT/GST/HS NOS. ECT FOR CLEARANCE/DUTIES</p>
-                                <table className="w-full border border-black text-[6px] mb-2">
+                                <p className="font-bold mb-2">CODE NOS/VAT/GST/HS NOS. ECT FOR CLEARANCE/DUTIES</p>
+                                <table className="w-full border border-black mb-2">
                                     <thead>
                                         <tr className="border-b border-black">
-                                            <th className="border-r border-black p-0.5 w-1/3">1</th>
-                                            <th className="border-r border-black p-0.5 w-1/3">DESCRIPTION</th>
-                                            <th className="p-0.5 w-1/3">CODE NO.</th>
+                                            <th className="border-r border-black p-0.5 w-1/4">QTY</th>
+                                            <th className="border-r border-black p-0.5 w-1/2">DESCRIPTION</th>
+                                            <th className="p-0.5 w-1/4">CODE NO.</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        <tr className="border-b border-black">
-                                            <td className="border-r border-black p-0.5 h-3"></td>
-                                            <td className="border-r border-black p-0.5"></td>
-                                            <td className="p-0.5"></td>
-                                        </tr>
-                                        <tr>
-                                            <td className="border-r border-black p-0.5 h-3"></td>
-                                            <td className="border-r border-black p-0.5"></td>
-                                            <td className="p-0.5"></td>
-                                        </tr>
+                                        {goods.slice(0, 2).map((item, index) => (
+                                            <tr key={index} className={index === 0 ? "border-b border-black" : ""}>
+                                                <td className="border-r border-black p-0.5 h-3 text-center">{item.quantity}</td>
+                                                <td className="border-r border-black p-0.5 truncate">{item.description}</td>
+                                                <td className="p-0.5 text-center">{item.hsn_code}</td>
+                                            </tr>
+                                        ))}
+                                        {goods.length < 2 && <tr className={goods.length === 1 ? "" : "border-b border-black"}><td className="border-r border-black p-0.5 h-3"></td><td className="border-r border-black p-0.5"></td><td className="p-0.5"></td></tr>}
+                                        {goods.length < 1 && <tr><td className="border-r border-black p-0.5 h-3"></td><td className="border-r border-black p-0.5"></td><td className="p-0.5"></td></tr>}
                                     </tbody>
                                 </table>
-                                <p className="text-[6px] text-center">All customs duties/taxes payable by consignee</p>
+                                <p className="text-[7px] text-center">All customs duties/taxes payable by consignee</p>
                             </div>
                             <div className="w-1/2 p-1">
                                 <p className="font-bold mb-2">PROOF OF DELIVERY</p>
-                                <p className="text-[7px] mb-2">SIGNATURE: ____________________</p>
-                                <p className="text-[7px] mb-2">NAME: _______________________</p>
-                                <p className="text-[7px]">DATE: __/__/____ TIME: __:__ A.M/P.M</p>
+                                <p className="mb-2">SIGNATURE: ____________________</p>
+                                <p className="mb-2">NAME: _______________________</p>
+                                <p>DATE: __/__/____ TIME: __:__ A.M/P.M</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 {/* Terms & Conditions */}
-                <div className="border-t-2 border-black p-1 text-[6px]">
+                <div className="border-t-2 border-black p-1 text-[7px]">
                     <p className="font-bold">Terms & Condition:</p>
                     <p>1) Maximum liability for lost shipment $100 or invoice value whichever lower.</p>
                     <p>2) Insurance available at additional cost.</p>
@@ -240,3 +252,4 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
         </div>
     );
 }
+
