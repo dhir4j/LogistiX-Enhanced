@@ -50,15 +50,16 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                 {/* Header */}
                 <div className="flex border-b-2 border-black">
                     {/* Logo Section */}
-                    <div className="w-1/4 p-2 flex flex-col justify-center border-r-2 border-black">
-                        <div className="mb-1 w-full flex justify-center">
+                    <div className="w-1/4 p-1 flex flex-col justify-center border-r-2 border-black">
+                        <div className="mb-1 w-full flex justify-center overflow-visible">
                             <Image 
                                 src="/images/logo/logo.png" 
                                 alt="HK Speed Couriers Logo" 
-                                width={60} 
-                                height={30} 
-                                className="h-auto max-w-full object-contain" 
-                                style={{ maxHeight: '30px', width: 'auto' }}
+                                width={80} 
+                                height={40} 
+                                className="h-auto object-contain" 
+                                style={{ maxHeight: '40px', maxWidth: 'none', width: 'auto' }}
+                                priority
                             />
                         </div>
                         <p className="text-[7px] font-semibold text-center">www.hkspeedcouriers.com</p>
@@ -207,7 +208,7 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                                 <div className="font-bold text-base mb-1">7</div>
                                 <p className="font-bold mb-1">SIZE & WEIGHT</p>
                                 <p>NO. OF PCS: {goods.reduce((acc, item) => acc + item.quantity, 0)}</p>
-                                <p>TOTAL WEIGHT: {shipment.package_weight_kg.toFixed(3)}</p>
+                                <p>TOTAL WEIGHT: {shipment.package_weight_kg.toFixed(3)} KG</p>
                             </div>
                         </div>
 
