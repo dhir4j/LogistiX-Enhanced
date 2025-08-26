@@ -50,15 +50,19 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                 {/* Header */}
                 <div className="flex border-b-2 border-black">
                     {/* Logo Section */}
-                    <div className="w-1/4 p-1 flex flex-col justify-center border-r-2 border-black">
-                        <div className="mb-1 w-full flex justify-center overflow-visible">
+                    <div className="w-1/4 p-1 flex flex-col justify-center border-r-2 border-black relative overflow-visible">
+                        <div className="mb-1 w-full flex justify-center">
                             <Image 
                                 src="/images/logo/logo.png" 
                                 alt="HK Speed Couriers Logo" 
-                                width={80} 
-                                height={40} 
+                                width={100} 
+                                height={50} 
                                 className="h-auto object-contain" 
-                                style={{ maxHeight: '40px', maxWidth: 'none', width: 'auto' }}
+                                style={{ 
+                                    maxHeight: '35px', 
+                                    width: 'auto',
+                                    maxWidth: '120px'
+                                }}
                                 priority
                             />
                         </div>
