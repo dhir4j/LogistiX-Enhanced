@@ -1,4 +1,3 @@
-
 "use client";
 
 import Barcode from 'react-barcode';
@@ -180,12 +179,16 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                             </div>
                             <div className="w-1/2 p-1">
                                 <p className="font-bold mb-2">DESCRIPTION OF CONTENTS</p>
-                                {goods.map((item, index) => (
-                                    <p key={index} className="truncate">{item.quantity} x {item.description}</p>
-                                ))}
-                                <div className="h-8 border-b border-gray-300 mb-2 mt-4"></div>
+                                <div className="space-y-1 mb-4">
+                                    {goods.map((item, index) => (
+                                        <div key={index} className="text-[9px] leading-normal">
+                                            {item.quantity} x {item.description}
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="border-b border-gray-300 mb-2"></div>
                                 <p className="font-bold mb-2">SPECIAL INSTRUCTION</p>
-                                <div className="h-8"></div>
+                                <div className="h-6"></div>
                             </div>
                         </div>
 
@@ -209,24 +212,36 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         <div className="flex min-h-[115px]">
                             <div className="w-1/2 border-r-2 border-black p-1">
                                 <p className="font-bold mb-2">CODE NOS/VAT/GST/HS NOS. ECT FOR CLEARANCE/DUTIES</p>
-                                <table className="w-full border border-black mb-2">
+                                <table className="w-full border border-black mb-2 border-collapse">
                                     <thead>
                                         <tr className="border-b border-black">
-                                            <th className="border-r border-black p-0.5 w-1/4">QTY</th>
-                                            <th className="border-r border-black p-0.5 w-1/2">DESCRIPTION</th>
-                                            <th className="p-0.5 w-1/4">CODE NO.</th>
+                                            <th className="border-r border-black p-1 w-1/4 text-[8px] font-bold bg-white">QTY</th>
+                                            <th className="border-r border-black p-1 w-1/2 text-[8px] font-bold bg-white">DESCRIPTION</th>
+                                            <th className="p-1 w-1/4 text-[8px] font-bold bg-white">CODE NO.</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {goods.slice(0, 2).map((item, index) => (
                                             <tr key={index} className={index === 0 ? "border-b border-black" : ""}>
-                                                <td className="border-r border-black p-0.5 h-3 text-center">{item.quantity}</td>
-                                                <td className="border-r border-black p-0.5 truncate">{item.description}</td>
-                                                <td className="p-0.5 text-center">{item.hsn_code}</td>
+                                                <td className="border-r border-black p-1 h-5 text-center text-[8px] align-middle">{item.quantity}</td>
+                                                <td className="border-r border-black p-1 text-[8px] align-middle">{item.description.substring(0, 15)}</td>
+                                                <td className="p-1 text-center text-[8px] align-middle">{item.hsn_code}</td>
                                             </tr>
                                         ))}
-                                        {goods.length < 2 && <tr className={goods.length === 1 ? "" : "border-b border-black"}><td className="border-r border-black p-0.5 h-3"></td><td className="border-r border-black p-0.5"></td><td className="p-0.5"></td></tr>}
-                                        {goods.length < 1 && <tr><td className="border-r border-black p-0.5 h-3"></td><td className="border-r border-black p-0.5"></td><td className="p-0.5"></td></tr>}
+                                        {goods.length < 2 && (
+                                            <tr className={goods.length === 1 ? "" : "border-b border-black"}>
+                                                <td className="border-r border-black p-1 h-5 text-[8px] align-middle"></td>
+                                                <td className="border-r border-black p-1 text-[8px] align-middle"></td>
+                                                <td className="p-1 text-[8px] align-middle"></td>
+                                            </tr>
+                                        )}
+                                        {goods.length < 1 && (
+                                            <tr>
+                                                <td className="border-r border-black p-1 h-5 text-[8px] align-middle"></td>
+                                                <td className="border-r border-black p-1 text-[8px] align-middle"></td>
+                                                <td className="p-1 text-[8px] align-middle"></td>
+                                            </tr>
+                                        )}
                                     </tbody>
                                 </table>
                                 <p className="text-[7px] text-center">All customs duties/taxes payable by consignee</p>
@@ -252,4 +267,3 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
         </div>
     );
 }
-
