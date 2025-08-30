@@ -9,6 +9,8 @@ def price_calculator():
     try:
         data = request.get_json()
         state = data.get("state")
+        city = data.get("city")
+
         # The frontend sends 'Express', 'Air Cargo', 'Surface Cargo', so we map them
         mode_map = {
             "Express": "express",
@@ -20,10 +22,10 @@ def price_calculator():
         
         weight = float(data.get("weight", 0))
 
-        if not all([state, mode, weight > 0]):
-            return jsonify({"error": "state, mode, and positive weight are required"}), 400
+        if not all([state, city, mode, weight > 0]):
+            return jsonify({"error": "state, city, mode, and positive weight are required"}), 400
 
-        result = calculate_domestic_price(state, mode, weight)
+        result = calculate_domestic_price(state_name=state, city_name=city, mode=mode, weight_kg=weight)
         
         if "error" in result:
              return jsonify(result), 400

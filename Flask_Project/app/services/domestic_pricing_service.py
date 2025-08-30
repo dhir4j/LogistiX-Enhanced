@@ -17,23 +17,34 @@ def _load_json_data(filename):
 DOMESTIC_ZONES = _load_json_data('domestic.json')
 DOMESTIC_PRICES = _load_json_data('dom_prices.json')
 
-def calculate_domestic_price(state_name: str, mode: str, weight_kg: float):
+def calculate_domestic_price(state_name: str, city_name: str, mode: str, weight_kg: float):
     """
     Calculates domestic shipping price based on state, mode, and weight.
+    It prioritizes checking the city first for metro areas.
     """
     if not DOMESTIC_ZONES or not DOMESTIC_PRICES:
         return {"error": "Pricing data could not be loaded."}
 
-    # 1. FIND COLUMN NUMBER (ZONE)
+    # 1. FIND COLUMN NUMBER (ZONE) - City first, then State
     selected_column = None
-    state_name_lower = state_name.lower()
-    for column, states in DOMESTIC_ZONES.items():
-        if any(s.lower() == state_name_lower for s in states):
+    destination_lower = city_name.lower()
+
+    # Check city first
+    for column, locations in DOMESTIC_ZONES.items():
+        if any(loc.lower() == destination_lower for loc in locations):
             selected_column = column
             break
+    
+    # If city not found, check state
+    if not selected_column:
+        destination_lower = state_name.lower()
+        for column, locations in DOMESTIC_ZONES.items():
+            if any(loc.lower() == destination_lower for loc in locations):
+                selected_column = column
+                break
             
     if not selected_column:
-        return {"error": f"The state '{state_name}' is not currently serviced."}
+        return {"error": f"The destination '{city_name}, {state_name}' is not currently serviced."}
 
     # 2. SELECT PRICING RULES
     rules = DOMESTIC_PRICES.get(selected_column)
