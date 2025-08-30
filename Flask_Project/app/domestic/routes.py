@@ -1,3 +1,4 @@
+
 from flask import Blueprint, request, jsonify
 from app.services.domestic_pricing_service import calculate_domestic_price
 
@@ -27,8 +28,8 @@ def price_calculator():
         if "error" in result:
              return jsonify(result), 400
 
-        # Apply 30% discount as before
-        final_price_with_tax = round(result["price"] * 1.18 * 0.7, 2)
+        # Apply 18% GST
+        final_price_with_tax = round(result["price"] * 1.18, 2)
 
         return jsonify({
             "destination_state": state.title(),
