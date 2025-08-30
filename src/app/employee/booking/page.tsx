@@ -464,9 +464,9 @@ export default function EmployeeBookingPage() {
                                                 <Select onValueChange={field.onChange} value={field.value}>
                                                     <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
                                                     <SelectContent>
-                                                        <SelectItem value="Road">By Road</SelectItem>
-                                                        <SelectItem value="Air">By Air</SelectItem>
-                                                        <SelectItem value="Train" disabled={packageWeightKg < 5}>By Train</SelectItem>
+                                                        <SelectItem value="Express" disabled={packageWeightKg > 5}>Express</SelectItem>
+                                                        <SelectItem value="Air Cargo">Air Cargo</SelectItem>
+                                                        <SelectItem value="Surface Cargo">Surface Cargo</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             <FormMessage /></FormItem>
