@@ -70,7 +70,7 @@ export default function EmployeeBookingPage() {
             package_height_cm: '',
             package_length_cm: '',
             pickup_date: new Date(),
-            service_type: "By Road",
+            service_type: "surface",
             goods: [{ description: "", quantity: 1, hsn_code: "", value: 0 }],
         },
     });
@@ -95,7 +95,7 @@ export default function EmployeeBookingPage() {
     useEffect(() => {
         if (shipmentType === 'domestic') {
             form.setValue('receiver_address_country', 'India');
-            form.setValue('service_type', 'By Road');
+            form.setValue('service_type', 'surface');
         } else {
              form.setValue('receiver_address_country', '');
              form.setValue('service_type', 'International Express');
@@ -464,9 +464,9 @@ export default function EmployeeBookingPage() {
                                         <Select onValueChange={field.onChange} value={field.value}>
                                             <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
                                             <SelectContent>
-                                                <SelectItem value="By Road">Road</SelectItem>
-                                                <SelectItem value="By Air">Air</SelectItem>
-                                                <SelectItem value="By Train" disabled={packageWeightKg > 4.9}>Express (Under 5kg)</SelectItem>
+                                                <SelectItem value="surface">Road</SelectItem>
+                                                <SelectItem value="air">Air</SelectItem>
+                                                <SelectItem value="express" disabled={packageWeightKg > 4.9}>Express (Under 5kg)</SelectItem>
                                             </SelectContent>
                                         </Select>
                                     <FormMessage /></FormItem>
