@@ -71,7 +71,7 @@ export default function CustomerBookingPage() {
             package_height_cm: '',
             package_length_cm: '',
             pickup_date: new Date(), 
-            service_type: "Surface Cargo",
+            service_type: undefined,
             goods: [{ description: "", quantity: 1, hsn_code: "", value: 0 }],
         },
     });
@@ -83,9 +83,18 @@ export default function CustomerBookingPage() {
 
     const shipmentType = useWatch({ control: form.control, name: "shipmentType" });
     const packageWeightKg = useWatch({ control: form.control, name: "package_weight_kg" });
-    const watchedPriceFields = useWatch({ control: form.control, name: ["receiver_address_country", "receiver_address_state", "package_weight_kg", "service_type", "shipmentType"] });
-    const watchSaveSender = useWatch({ control: form.control, name: "save_sender_address" });
-    const watchSaveReceiver = useWatch({ control: form.control, name: "save_receiver_address" });
+    const watchedFields = useWatch({ control: form.control });
+
+    useEffect(() => {
+        setPriceDetails(null);
+        form.setValue('service_type', undefined);
+        if (shipmentType === 'domestic') {
+            form.setValue('receiver_address_country', 'India');
+        } else {
+             form.setValue('receiver_address_country', '');
+             form.setValue('service_type', 'International Express');
+        }
+    }, [shipmentType, form]);
 
 
     useEffect(() => {
@@ -94,30 +103,18 @@ export default function CustomerBookingPage() {
         }
     }, [session, isSessionLoading, router]);
     
-     useEffect(() => {
-        if (shipmentType === 'domestic') {
-            form.setValue('receiver_address_country', 'India');
-            form.setValue('service_type', 'Surface Cargo');
-        } else {
-             form.setValue('receiver_address_country', '');
-             form.setValue('service_type', 'International Express');
-        }
-        setPriceDetails(null);
-    }, [shipmentType, form]);
-
-
     const handleCalculatePrice = async () => {
         const values = form.getValues();
-        const { receiver_address_state, receiver_address_country, package_weight_kg, service_type, shipmentType } = values;
+        const { receiver_address_city, receiver_address_state, receiver_address_country, package_weight_kg, service_type, shipmentType } = values;
 
         let isReady = false;
         let url = '';
         let body = {};
         
-        if (shipmentType === 'domestic' && receiver_address_state && package_weight_kg > 0 && service_type) {
+        if (shipmentType === 'domestic' && (receiver_address_city || receiver_address_state) && package_weight_kg > 0 && service_type) {
             isReady = true;
             url = `${process.env.NEXT_PUBLIC_API_URL}/api/domestic/price`;
-            body = { state: receiver_address_state, weight: package_weight_kg, mode: service_type };
+            body = { city: receiver_address_city, state: receiver_address_state, weight: package_weight_kg, mode: service_type };
         } else if (shipmentType === 'international' && receiver_address_country && package_weight_kg > 0 && package_weight_kg <= 30) {
             isReady = true;
             url = `${process.env.NEXT_PUBLIC_API_URL}/api/international/price`;
@@ -125,7 +122,7 @@ export default function CustomerBookingPage() {
         }
 
         if (!isReady) {
-            setPriceDetails(null);
+            toast({ title: "Missing Details", description: "Please fill all required receiver, weight, and service details to get a price.", variant: "destructive" });
             return;
         }
         
@@ -140,6 +137,7 @@ export default function CustomerBookingPage() {
             const data = await response.json();
             if (response.ok) {
                 setPriceDetails(data);
+                toast({ title: "Price Calculated", description: `Estimated price is ₹${data.total_price.toFixed(2)}.` });
             } else {
                 toast({ title: "Pricing Error", description: data.error || "Could not calculate price.", variant: "destructive" });
             }
@@ -150,12 +148,10 @@ export default function CustomerBookingPage() {
         }
     };
     
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            handleCalculatePrice();
-        }, 500); // Debounce API calls
-        return () => clearTimeout(timer);
-    }, [watchedPriceFields]);
+     useEffect(() => {
+        // Reset price if any dependent field changes
+        setPriceDetails(null);
+    }, [watchedFields]);
 
     const saveAddress = async (type: 'sender' | 'receiver') => {
         const values = form.getValues();
@@ -363,7 +359,7 @@ export default function CustomerBookingPage() {
                                 <div className="space-y-1 leading-none"><FormLabel>Save this address to sender book</FormLabel></div>
                                 </FormItem>
                             )}/>
-                            {watchSaveSender && <FormField name="sender_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. My Home" /></FormControl><FormMessage /></FormItem> )}/>}
+                            {form.watch("save_sender_address") && <FormField name="sender_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. My Home" /></FormControl><FormMessage /></FormItem> )}/>}
                         </CardContent>
                     </Card>
                     
@@ -406,7 +402,7 @@ export default function CustomerBookingPage() {
                                 <div className="space-y-1 leading-none"><FormLabel>Save this address to receiver book</FormLabel></div>
                                 </FormItem>
                             )}/>
-                            {watchSaveReceiver && <FormField name="receiver_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Friend's House" /></FormControl><FormMessage /></FormItem> )}/>}
+                            {form.watch("save_receiver_address") && <FormField name="receiver_address_nickname" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Address Nickname</FormLabel><FormControl><Input {...field} placeholder="e.g. Friend's House" /></FormControl><FormMessage /></FormItem> )}/>}
                         </CardContent>
                     </Card>
 
@@ -447,7 +443,7 @@ export default function CustomerBookingPage() {
                                 <FormField name="package_width_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Width (cm)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                                 <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
-                            <div className="grid md:grid-cols-2 gap-4">
+                            <div className="grid md:grid-cols-2 gap-4 items-end">
                                 <FormField name="pickup_date" control={form.control} render={({ field }) => (
                                     <FormItem className="flex flex-col"><FormLabel>Pickup Date</FormLabel>
                                         <Popover><PopoverTrigger asChild>
@@ -465,37 +461,44 @@ export default function CustomerBookingPage() {
                                     <FormMessage /></FormItem>
                                 )}/>
                                 {shipmentType === 'domestic' && (
-                                    <FormField name="service_type" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Service Type</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value}>
-                                                <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="Surface Cargo">Surface Cargo</SelectItem>
-                                                    <SelectItem value="Air Cargo">Air Cargo</SelectItem>
-                                                    <SelectItem value="Express" disabled={packageWeightKg > 4.9}>Express</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        <FormMessage /></FormItem>
-                                    )} />
+                                     <div className="flex items-end gap-2">
+                                        <FormField name="service_type" control={form.control} render={({ field }) => (
+                                            <FormItem className="flex-grow"><FormLabel>Service Type</FormLabel>
+                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="Road">By Road</SelectItem>
+                                                        <SelectItem value="Air">By Air</SelectItem>
+                                                        <SelectItem value="Train" disabled={packageWeightKg < 5}>By Train</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            <FormMessage /></FormItem>
+                                        )} />
+                                        <Button type="button" onClick={handleCalculatePrice} disabled={isCalculating}>
+                                            {isCalculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Calculate Price"}
+                                        </Button>
+                                    </div>
                                 )}
                                 {shipmentType === 'international' && (
-                                     <FormField name="service_type" control={form.control} render={({ field }) => (
-                                        <FormItem><FormLabel>Service Type</FormLabel>
-                                            <Select onValueChange={field.onChange} value={field.value}>
-                                                <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="International Express">International Express</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        <FormMessage /></FormItem>
-                                    )} />
+                                     <div className="flex items-end gap-2">
+                                        <FormField name="service_type" control={form.control} render={({ field }) => (
+                                            <FormItem className="flex-grow"><FormLabel>Service Type</FormLabel>
+                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select service" /></SelectTrigger></FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="International Express">International Express</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            <FormMessage /></FormItem>
+                                        )} />
+                                         <Button type="button" onClick={handleCalculatePrice} disabled={isCalculating}>
+                                            {isCalculating ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : "Calculate Price"}
+                                        </Button>
+                                     </div>
                                 )}
                             </div>
                             <Separator />
                             <div className="flex flex-col items-center gap-4">
-                                {isCalculating && (
-                                    <div className="flex items-center text-muted-foreground"><Loader2 className="mr-2 h-4 w-4 animate-spin" />Calculating price...</div>
-                                )}
                                 {priceDetails && !isCalculating && (
                                     <div className="text-center w-full">
                                         <div className="text-muted-foreground">Estimated Price:</div>
@@ -508,7 +511,7 @@ export default function CustomerBookingPage() {
                                 )}
                                  {!priceDetails && !isCalculating && (
                                     <div className="text-center text-muted-foreground p-4">
-                                        <p>Please fill in all the required details to get a price estimate.</p>
+                                        <p>Please fill in all the required details and click "Calculate Price" to get an estimate.</p>
                                     </div>
                                 )}
                             </div>
