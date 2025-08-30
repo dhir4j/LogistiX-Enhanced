@@ -1,3 +1,4 @@
+
 import json
 import math
 import os
@@ -48,36 +49,43 @@ def calculate_domestic_price(state_name: str, mode: str, weight_kg: float):
     elif mode == "surface" and weight_kg < 5:
         weight_kg = 5
     
-    # 4. DETERMINE PRICING BAND
+    # 4. DETERMINE PRICING BAND and CALCULATE PRICE
     band = None
+    price = 0
+    rounded_weight_for_display = original_weight
+
     if mode == "express":
-        rounded_weight = math.ceil(weight_kg)
+        rounded_weight = math.ceil(original_weight)
         if rounded_weight <= 1: band = "1"
         elif rounded_weight <= 2: band = "2"
         elif rounded_weight <= 3: band = "3"
         elif rounded_weight <= 4: band = "4"
         else: band = "5"
+        
+        price = pricing_table.get(band)
+        rounded_weight_for_display = rounded_weight
+
     elif mode in ["air", "surface"]:
-        # For air/surface, weight is already normalized
-        rounded_weight = weight_kg 
-        if rounded_weight < 5: band = "<5"
-        elif rounded_weight < 10: band = "<10"
-        elif rounded_weight < 25: band = "<25"
-        elif rounded_weight < 50: band = "<50"
+        # For air/surface, weight is already normalized for calculation
+        if weight_kg < 5: band = "<5"
+        elif weight_kg < 10: band = "<10"
+        elif weight_kg < 25: band = "<25"
+        elif weight_kg < 50: band = "<50"
         else: band = ">50"
+        
+        rate_per_kg = pricing_table.get(band)
+        if rate_per_kg is not None:
+            price = rate_per_kg * weight_kg
+        else:
+            price = None
+        rounded_weight_for_display = weight_kg
     
-    if not band:
-        return {"error": "Could not determine pricing band."}
-
-    # 5. LOOKUP PRICE
-    price = pricing_table.get(band)
-
     if price is None:
         return {"error": f"Pricing not available for the calculated weight band in {state_name}."}
 
-    # 6. RETURN PRICE
+    # 5. RETURN PRICE
     return {
         "price": price,
         "zone": selected_column,
-        "rounded_weight": rounded_weight if mode in ["air", "surface"] else math.ceil(original_weight)
+        "rounded_weight": rounded_weight_for_display
     }
