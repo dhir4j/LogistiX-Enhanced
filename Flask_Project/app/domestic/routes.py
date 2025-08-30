@@ -9,11 +9,11 @@ def price_calculator():
     try:
         data = request.get_json()
         state = data.get("state")
-        # The frontend sends 'By Road', 'By Air', 'By Train', so we map them
+        # The frontend sends 'Express', 'Air Cargo', 'Surface Cargo', so we map them
         mode_map = {
-            "By Road": "surface",
-            "By Air": "air",
-            "By Train": "express"
+            "Express": "express",
+            "Air Cargo": "air",
+            "Surface Cargo": "surface"
         }
         frontend_mode = data.get("mode")
         mode = mode_map.get(frontend_mode)
