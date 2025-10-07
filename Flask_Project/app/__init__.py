@@ -6,6 +6,7 @@ from .shipments.routes import shipments_bp
 from .admin.routes import admin_bp
 from .domestic.routes import domestic_bp
 from .international.routes import international_bp
+from .reconciliation.routes import reconciliation_bp
 from config import config
 
 def create_app(env="development"):
@@ -97,6 +98,7 @@ def create_app(env="development"):
     app.register_blueprint(admin_bp)
     app.register_blueprint(domestic_bp)
     app.register_blueprint(international_bp)
+    app.register_blueprint(reconciliation_bp)
 
     # Global error handler
     @app.errorhandler(422)
