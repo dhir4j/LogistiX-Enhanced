@@ -14,10 +14,10 @@ def create_app(env="development"):
     app.config.from_object(config[env])
 
     db.init_app(app)
-    # Correctly initialize CORS to allow all API requests from configured origins
+    # Correctly initialize CORS to allow all API requests from any origin
     cors.init_app(
         app,
-        resources={r"/api/*": {"origins": app.config.get("CORS_ORIGINS", "*")}},
+        resources={r"/api/*": {"origins": "*"}},
         supports_credentials=True,
         allow_headers=["Content-Type", "X-User-Email"],
         expose_headers=["Content-Type", "X-User-Email"]
