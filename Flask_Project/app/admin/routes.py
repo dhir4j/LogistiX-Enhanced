@@ -32,7 +32,6 @@ def generate_code(length=8):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
 
 @admin_bp.route("/create-invoice-from-payment", methods=["POST"])
-@admin_required
 def create_invoice_from_payment():
     data = request.get_json()
     if not data:
@@ -44,11 +43,13 @@ def create_invoice_from_payment():
     if not transaction or not order:
         return jsonify({"error": "Missing 'transaction' or 'order' data"}), 400
 
-    # Find the admin user to associate the shipment with
-    admin_user = User.query.filter_by(email=request.headers.get("X-User-Email")).first()
+    # Find the admin user to associate the shipment with.
+    # Since authentication is removed, we hardcode the default admin email.
+    admin_user = User.query.filter_by(email="dhillon@logistix.com").first()
     if not admin_user:
-         # This should not happen due to the decorator, but as a fallback.
-        return jsonify({"error": "Admin user not found"}), 404
+        # Fallback in case the default admin is not found.
+        # This should be created via the add_admin.py script.
+        return jsonify({"error": "Default admin user 'dhillon@logistix.com' not found. Please run the add_admin.py script."}), 404
 
     try:
         total_price = Decimal(transaction.get("amount"))
