@@ -9,6 +9,7 @@ import random
 from werkzeug.security import generate_password_hash
 from functools import wraps
 from decimal import Decimal, InvalidOperation
+from app.utils import generate_shipment_id_str
 
 admin_bp = Blueprint("admin", __name__, url_prefix="/api/admin")
 
@@ -29,6 +30,100 @@ def admin_required(f):
 
 def generate_code(length=8):
     return ''.join(random.choices(string.ascii_uppercase + string.digits, k=length))
+
+@admin_bp.route("/create-invoice-from-payment", methods=["POST"])
+@admin_required
+def create_invoice_from_payment():
+    data = request.get_json()
+    if not data:
+        return jsonify({"error": "Invalid JSON payload"}), 400
+
+    transaction = data.get("transaction")
+    order = data.get("order")
+
+    if not transaction or not order:
+        return jsonify({"error": "Missing 'transaction' or 'order' data"}), 400
+
+    # Find the admin user to associate the shipment with
+    admin_user = User.query.filter_by(email=request.headers.get("X-User-Email")).first()
+    if not admin_user:
+         # This should not happen due to the decorator, but as a fallback.
+        return jsonify({"error": "Admin user not found"}), 404
+
+    try:
+        total_price = Decimal(transaction.get("amount"))
+        price_without_tax = total_price / Decimal("1.18")
+        tax_amount = total_price - price_without_tax
+
+        now_iso = datetime.utcnow().isoformat()
+        
+        new_shipment = Shipment(
+            user_id=admin_user.id,
+            user_email=admin_user.email,
+            shipment_id_str=generate_shipment_id_str(db.session, Shipment),
+            
+            # Using transaction/order data for sender/receiver
+            sender_name=transaction.get("name", "N/A"),
+            sender_address_street=order.get("source", "N/A"),
+            sender_address_city=order.get("source", "N/A"),
+            sender_address_state="N/A",
+            sender_address_pincode="N/A",
+            sender_address_country="India",
+            sender_phone="N/A",
+
+            receiver_name="N/A",
+            receiver_address_street=order.get("destination", "N/A"),
+            receiver_address_city=order.get("destination", "N/A"),
+            receiver_address_state="N/A",
+            receiver_address_pincode="N/A",
+            receiver_address_country="India",
+            receiver_phone="N/A",
+
+            # Package details
+            package_weight_kg=Decimal(order.get("weight", 0)),
+            package_length_cm=0,
+            package_width_cm=0,
+            package_height_cm=0,
+            
+            # Goods details from transaction
+            goods_details=[{
+                "description": f"Payment via {transaction.get('type', 'N/A')}",
+                "quantity": 1,
+                "value": float(total_price),
+                "hsn_code": "N/A"
+            }],
+
+            # Service and status
+            pickup_date=datetime.strptime(transaction.get("date"), "%Y-%m-%d").date() if transaction.get("date") else datetime.utcnow().date(),
+            service_type="Reconciled",
+            status="Booked",  # Directly set to 'Booked' as it's a paid invoice
+
+            # Pricing
+            price_without_tax=price_without_tax,
+            tax_amount_18_percent=tax_amount,
+            total_with_tax_18_percent=total_price,
+
+            # Tracking history
+            tracking_history=[{
+                "stage": "Booked",
+                "date": now_iso,
+                "location": order.get("source", "N/A"),
+                "activity": f"Shipment booked and paid. UTR: {transaction.get('utr', 'N/A')}"
+            }]
+        )
+
+        db.session.add(new_shipment)
+        db.session.commit()
+
+        return jsonify({
+            "message": "Paid invoice and shipment created successfully.",
+            "shipment_id_str": new_shipment.shipment_id_str,
+        }), 201
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500
+
 
 @admin_bp.route("/balance-codes", methods=["POST"])
 @admin_required
@@ -501,5 +596,8 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return jsonify({"message": "Employee deleted successfully"}), 200
+
+    
+
 
     
