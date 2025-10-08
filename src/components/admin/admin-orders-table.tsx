@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, FileText } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/use-session';
@@ -18,6 +18,7 @@ import * as z from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
+import Link from 'next/link';
 
 interface Shipment {
     id: number;
@@ -178,7 +179,7 @@ export function AdminOrdersTable() {
                         <TableHead>Date</TableHead>
                         <TableHead>Amount</TableHead>
                         <TableHead>Status</TableHead>
-                        <TableHead>Actions</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -202,8 +203,14 @@ export function AdminOrdersTable() {
                             <TableCell>{new Date(s.booking_date).toLocaleDateString()}</TableCell>
                             <TableCell>₹{s.total_with_tax_18_percent.toFixed(2)}</TableCell>
                             <TableCell>{s.status}</TableCell>
-                            <TableCell>
+                            <TableCell className="text-right space-x-2">
                                <Button variant="outline" size="sm" onClick={() => handleOpenUpdateDialog(s)}>Update</Button>
+                               <Button variant="outline" size="sm" asChild>
+                                    <Link href={`/invoice/${s.shipment_id_str}`} target="_blank">
+                                        <FileText className="mr-1 h-3 w-3" />
+                                        Invoice
+                                    </Link>
+                                </Button>
                             </TableCell>
                         </TableRow>
                     ))}
