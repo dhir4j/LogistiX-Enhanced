@@ -20,12 +20,14 @@ interface InvoiceSheetProps {
         sender_address_state: string;
         sender_address_pincode: string;
         sender_address_country: string;
+        sender_phone: string;
         receiver_name: string;
         receiver_address_street: string;
         receiver_address_city: string;
         receiver_address_state: string;
         receiver_address_pincode: string;
         receiver_address_country: string;
+        receiver_phone: string;
         price_without_tax: number;
         tax_amount_18_percent: number;
         total_with_tax_18_percent: number;
@@ -119,6 +121,7 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                         <p>{shipment.sender_address_street},</p>
                         <p>{shipment.sender_address_city}, {shipment.sender_address_state} - {shipment.sender_address_pincode}</p>
                         <p>{shipment.sender_address_country}</p>
+                        <p>Phone: {shipment.sender_phone}</p>
                     </div>
                     <div>
                         <h3 className="font-bold mb-2 underline">SHIP TO:</h3>
@@ -126,6 +129,7 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                         <p>{shipment.receiver_address_street},</p>
                         <p>{shipment.receiver_address_city}, {shipment.receiver_address_state} - {shipment.receiver_address_pincode}</p>
                         <p>{shipment.receiver_address_country}</p>
+                        <p>Phone: {shipment.receiver_phone}</p>
                     </div>
                 </div>
 

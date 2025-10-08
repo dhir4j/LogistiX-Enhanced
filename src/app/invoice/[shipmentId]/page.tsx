@@ -22,12 +22,14 @@ interface ShipmentDetails {
     sender_address_state: string;
     sender_address_pincode: string;
     sender_address_country: string;
+    sender_phone: string;
     receiver_name: string;
     receiver_address_street: string;
     receiver_address_city: string;
     receiver_address_state: string;
     receiver_address_pincode: string;
     receiver_address_country: string;
+    receiver_phone: string;
     price_without_tax: number;
     tax_amount_18_percent: number;
     total_with_tax_18_percent: number;
