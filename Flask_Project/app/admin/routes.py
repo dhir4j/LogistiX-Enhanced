@@ -1,3 +1,4 @@
+
 from flask import Blueprint, request, jsonify
 from app.models import Shipment, User, PaymentRequest, BalanceCode
 from app.extensions import db
@@ -38,11 +39,17 @@ def create_invoice_from_payment():
         return jsonify({"error": "Invalid JSON payload"}), 400
 
     transaction = data.get("transaction")
-    sender_data = data.get("sender")
-    receiver_data = data.get("receiver")
+    order_data = data.get("order") # Get the nested order object
 
-    if not all([transaction, sender_data, receiver_data]):
-        return jsonify({"error": "Missing 'transaction', 'sender', or 'receiver' data"}), 400
+    if not transaction or not order_data:
+        return jsonify({"error": "Missing 'transaction' or 'order' data"}), 400
+    
+    sender_data = order_data.get("sender")
+    receiver_data = order_data.get("receiver")
+
+    if not sender_data or not receiver_data:
+        return jsonify({"error": "Missing 'sender' or 'receiver' data within the 'order' object"}), 400
+
 
     # Find the admin user to associate the shipment with.
     admin_user = User.query.filter_by(email="dhillon@logistix.com").first()
@@ -605,4 +612,5 @@ def delete_employee(employee_id):
 
 
     
+
 
