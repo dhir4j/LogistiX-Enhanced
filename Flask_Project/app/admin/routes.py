@@ -38,50 +38,53 @@ def create_invoice_from_payment():
         return jsonify({"error": "Invalid JSON payload"}), 400
 
     transaction = data.get("transaction")
-    order = data.get("order")
+    sender_data = data.get("sender")
+    receiver_data = data.get("receiver")
 
-    if not transaction or not order:
-        return jsonify({"error": "Missing 'transaction' or 'order' data"}), 400
+    if not all([transaction, sender_data, receiver_data]):
+        return jsonify({"error": "Missing 'transaction', 'sender', or 'receiver' data"}), 400
 
     # Find the admin user to associate the shipment with.
-    # Since authentication is removed, we hardcode the default admin email.
     admin_user = User.query.filter_by(email="dhillon@logistix.com").first()
     if not admin_user:
-        # Fallback in case the default admin is not found.
-        # This should be created via the add_admin.py script.
         return jsonify({"error": "Default admin user 'dhillon@logistix.com' not found. Please run the add_admin.py script."}), 404
 
     try:
         total_price = Decimal(transaction.get("amount"))
         price_without_tax = total_price / Decimal("1.18")
         tax_amount = total_price - price_without_tax
-
         now_iso = datetime.utcnow().isoformat()
         
+        # Combine address lines
+        sender_street = f"{sender_data.get('address_line1', '')} {sender_data.get('address_line2', '')}".strip()
+        receiver_street = f"{receiver_data.get('address_line1', '')} {receiver_data.get('address_line2', '')}".strip()
+
+
         new_shipment = Shipment(
             user_id=admin_user.id,
             user_email=admin_user.email,
             shipment_id_str=generate_shipment_id_str(db.session, Shipment),
             
-            # Using transaction/order data for sender/receiver
-            sender_name=transaction.get("name", "N/A"),
-            sender_address_street=order.get("source", "N/A"),
-            sender_address_city=order.get("source", "N/A"),
-            sender_address_state="N/A",
-            sender_address_pincode="N/A",
-            sender_address_country="India",
-            sender_phone="N/A",
+            # Sender details from the new JSON structure
+            sender_name=sender_data.get("name"),
+            sender_address_street=sender_street,
+            sender_address_city=sender_data.get("city"),
+            sender_address_state=sender_data.get("state"),
+            sender_address_pincode=sender_data.get("pincode"),
+            sender_address_country=sender_data.get("country"),
+            sender_phone=sender_data.get("phone"),
 
-            receiver_name="N/A",
-            receiver_address_street=order.get("destination", "N/A"),
-            receiver_address_city=order.get("destination", "N/A"),
-            receiver_address_state="N/A",
-            receiver_address_pincode="N/A",
-            receiver_address_country="India",
-            receiver_phone="N/A",
+            # Receiver details from the new JSON structure
+            receiver_name=receiver_data.get("name"),
+            receiver_address_street=receiver_street,
+            receiver_address_city=receiver_data.get("city"),
+            receiver_address_state=receiver_data.get("state"),
+            receiver_address_pincode=receiver_data.get("pincode"),
+            receiver_address_country=receiver_data.get("country"),
+            receiver_phone=receiver_data.get("phone"),
 
             # Package details
-            package_weight_kg=Decimal(order.get("weight", 0)),
+            package_weight_kg=Decimal(transaction.get("weight", 0)),
             package_length_cm=0,
             package_width_cm=0,
             package_height_cm=0,
@@ -108,7 +111,7 @@ def create_invoice_from_payment():
             tracking_history=[{
                 "stage": "Booked",
                 "date": now_iso,
-                "location": order.get("source", "N/A"),
+                "location": sender_data.get("city", "N/A"),
                 "activity": f"Shipment booked and paid. UTR: {transaction.get('utr', 'N/A')}"
             }]
         )
@@ -602,3 +605,4 @@ def delete_employee(employee_id):
 
 
     
+

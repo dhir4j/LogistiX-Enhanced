@@ -76,7 +76,7 @@ This endpoint creates a new `Shipment` record with a "Booked" status, using data
 
 ### Request Body
 
-The request body must be a JSON object containing `transaction` and `order` details.
+The request body must be a JSON object containing `transaction`, `sender`, and `receiver` details.
 
 **Example Request:**
 
@@ -85,14 +85,30 @@ The request body must be a JSON object containing `transaction` and `order` deta
   "transaction": {
     "date": "2025-01-15",
     "utr": "390044192516",
-    "name": "DURGESH KUMAR",
     "amount": 500.0,
-    "type": "UPI"
+    "weight": 0.5,
+    "type": "UPI",
+    "payment_status": "completed"
   },
-  "order": {
-    "source": "Mumbai",
-    "destination": "Pune",
-    "weight": 0.5
+  "sender": {
+    "name": "Sanjiv Kumar",
+    "address_line1": "test address 1",
+    "address_line2": "NEAR PUNJAB & SIND BANK",
+    "city": "LUDHIANA",
+    "state": "PUNJAB",
+    "pincode": "141002",
+    "country": "India",
+    "phone": "+91 8544970282"
+  },
+  "receiver": {
+    "name": "DURGESH KUMAR",
+    "address_line1": "Plot No. 45, Sector 21",
+    "address_line2": "Near City Mall",
+    "city": "Pune",
+    "state": "Maharashtra",
+    "pincode": "411001",
+    "country": "India",
+    "phone": "+91 9876543210"
   }
 }
 ```
@@ -117,5 +133,5 @@ Returns a confirmation message and the newly generated unique `shipment_id_str` 
   { "error": "Invalid JSON payload" }
   ```
   ```json
-  { "error": "Missing 'transaction' or 'order' data" }
+  { "error": "Missing 'transaction', 'sender', or 'receiver' data" }
   ```
