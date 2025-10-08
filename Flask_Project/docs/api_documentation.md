@@ -135,3 +135,7 @@ Returns a confirmation message and the newly generated unique `shipment_id_str` 
   ```json
   { "error": "Missing 'transaction', 'sender', or 'receiver' data" }
   ```
+- **`404 Not Found`**: If the default admin user (to associate the shipment with) is not found in the database.
+  ```json
+  { "error": "Default admin user 'dhillon@logistix.com' not found. Please run the add_admin.py script." }
+  ```
