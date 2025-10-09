@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from .service import find_possible_shipments
+from .service import find_possible_shipment
 
 reconciliation_bp = Blueprint("reconciliation", __name__, url_prefix="/api/reconciliation")
 
@@ -12,11 +12,11 @@ def find_destinations():
         return jsonify({"error": "A valid, positive amount is required."}), 400
 
     try:
-        matches = find_possible_shipments(float(amount))
-        if not matches:
-            return jsonify({"message": "No potential shipment matches found for this amount.", "matches": []}), 200
+        best_match = find_possible_shipment(float(amount))
+        if not best_match:
+            return jsonify({"message": "No potential shipment match found for this amount."}), 404
         
-        return jsonify({"matches": matches}), 200
+        return jsonify(best_match), 200
     except Exception as e:
         # In a real app, you'd log the error.
         return jsonify({"error": f"An unexpected error occurred: {str(e)}"}), 500

@@ -1,3 +1,4 @@
+
 import json
 import os
 from decimal import Decimal, ROUND_HALF_UP
@@ -16,48 +17,48 @@ DOMESTIC_ZONES = _load_json_data('domestic.json')
 DOMESTIC_PRICES = _load_json_data('dom_prices.json')
 INTERNATIONAL_PRICES = _load_json_data('pricing.json')
 
-def find_possible_shipments(total_amount_with_tax: float, tolerance: float = 0.01):
+def find_possible_shipment(total_amount_with_tax: float):
     """
-    Finds possible shipment configurations (domestic or international) for a given total amount.
+    Finds the best possible shipment configuration (domestic or international) for a given total amount.
     """
     if total_amount_with_tax < 5000:
-        return _find_domestic_matches(total_amount_with_tax, tolerance)
+        return _find_best_domestic_match(total_amount_with_tax)
     else:
-        return _find_international_matches(total_amount_with_tax, tolerance)
+        return _find_best_international_match(total_amount_with_tax)
 
-def _find_domestic_matches(total_amount: float, tolerance: float):
+def _find_best_domestic_match(total_amount: float):
     if not DOMESTIC_PRICES or not DOMESTIC_ZONES:
-        return []
+        return None
 
-    matches = []
-    # Reverse the GST to find the base price
+    best_match = None
+    min_diff = float('inf')
     base_price = Decimal(str(total_amount)) / Decimal('1.18')
 
-    # Iterate through all zones, modes, and bands
     for zone, prices_by_mode in DOMESTIC_PRICES.items():
         destinations = DOMESTIC_ZONES.get(zone, [])
         for mode, price_table in prices_by_mode.items():
             # --- Handle 'express' mode (fixed prices) ---
             if mode == 'express':
                 for band, price in price_table.items():
-                    if abs(Decimal(str(price)) - base_price) <= Decimal(str(tolerance)):
-                        matches.append({
+                    price = Decimal(str(price))
+                    diff = abs(price - base_price)
+                    if diff < min_diff:
+                        min_diff = diff
+                        best_match = {
                             "type": "Domestic",
                             "destinations": destinations,
                             "mode": mode.title(),
-                            "weight_suggestion": f"Approx. {band} kg",
+                            "weight_suggestion": f"{band} kg",
                             "calculated_base_price": float(price),
-                            "total_price_with_tax": float(Decimal(str(price)) * Decimal('1.18'))
-                        })
-            
+                            "total_price_with_tax": float(price * Decimal('1.18'))
+                        }
+
             # --- Handle 'air' and 'surface' modes (per kg rates) ---
             elif mode in ['air', 'surface']:
                 for band, rate_per_kg in price_table.items():
                     if rate_per_kg > 0:
-                        # Calculate the potential weight
                         potential_weight = float(base_price / Decimal(str(rate_per_kg)))
                         
-                        # Validate if the calculated weight fits in the current band
                         weight_fits_band = False
                         if band == "<5" and 0 < potential_weight < 5: weight_fits_band = True
                         elif band == "<10" and 5 <= potential_weight < 10: weight_fits_band = True
@@ -66,21 +67,25 @@ def _find_domestic_matches(total_amount: float, tolerance: float):
                         elif band == ">50" and potential_weight >= 50: weight_fits_band = True
 
                         if weight_fits_band:
-                             matches.append({
+                            # For per-kg rates, the calculated price is the base price
+                            # so the difference is effectively 0 for this band.
+                            min_diff = 0
+                            best_match = {
                                 "type": "Domestic",
                                 "destinations": destinations,
                                 "mode": mode.title(),
                                 "weight_suggestion": f"{potential_weight:.2f} kg",
                                 "calculated_base_price": float(base_price),
                                 "total_price_with_tax": total_amount
-                            })
-    return matches
+                            }
+    return best_match
 
-def _find_international_matches(total_amount: float, tolerance: float):
+def _find_best_international_match(total_amount: float):
     if not INTERNATIONAL_PRICES:
-        return []
+        return None
 
-    matches = []
+    best_match = None
+    min_diff = float('inf')
     base_price = Decimal(str(total_amount)) / Decimal('1.18')
 
     for country_data in INTERNATIONAL_PRICES:
@@ -93,15 +98,17 @@ def _find_international_matches(total_amount: float, tolerance: float):
             weight_key = str(i)
             if weight_key in country_data and country_data[weight_key]:
                 price = Decimal(str(country_data[weight_key]))
-                if abs(price - base_price) <= Decimal(str(tolerance)):
-                    matches.append({
+                diff = abs(price - base_price)
+                if diff < min_diff:
+                    min_diff = diff
+                    best_match = {
                         "type": "International",
                         "destinations": [country_name],
                         "mode": "Express",
-                        "weight_suggestion": f"Approx. {i} kg",
+                        "weight_suggestion": f"{i} kg",
                         "calculated_base_price": float(price),
                         "total_price_with_tax": float(price * Decimal('1.18'))
-                    })
+                    }
 
         # Check variable weight (> 11kg)
         price_at_11kg = Decimal(str(country_data.get("11", 0)))
@@ -109,19 +116,21 @@ def _find_international_matches(total_amount: float, tolerance: float):
 
         if base_price > price_at_11kg and rate_per_extra_kg > 0:
             extra_cost = base_price - price_at_11kg
+            # Use ceiling to get whole kgs
             extra_kgs = (extra_cost / rate_per_extra_kg).to_integral_value(rounding=ROUND_HALF_UP)
-            total_weight = 11 + int(extra_kgs)
-            
-            # Recalculate price to check if it's a match
-            recalculated_price = price_at_11kg + extra_kgs * rate_per_extra_kg
-            if abs(recalculated_price - base_price) <= Decimal(str(tolerance)):
-                matches.append({
-                    "type": "International",
-                    "destinations": [country_name],
-                    "mode": "Express",
-                    "weight_suggestion": f"Approx. {total_weight} kg",
-                    "calculated_base_price": float(recalculated_price),
-                    "total_price_with_tax": float(recalculated_price * Decimal('1.18'))
-                })
-
-    return matches
+            if extra_kgs > 0:
+                total_weight = 11 + int(extra_kgs)
+                recalculated_price = price_at_11kg + extra_kgs * rate_per_extra_kg
+                diff = abs(recalculated_price - base_price)
+                
+                if diff < min_diff:
+                    min_diff = diff
+                    best_match = {
+                        "type": "International",
+                        "destinations": [country_name],
+                        "mode": "Express",
+                        "weight_suggestion": f"{total_weight} kg",
+                        "calculated_base_price": float(recalculated_price),
+                        "total_price_with_tax": float(recalculated_price * Decimal('1.18'))
+                    }
+    return best_match
