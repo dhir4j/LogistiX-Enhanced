@@ -32,7 +32,7 @@ def find_possible_shipment(total_amount_with_tax: float):
 
 def _find_best_domestic_match(total_amount: float):
     good_matches = []
-    min_diff = float('inf')
+    min_diff = Decimal('inf')
     base_price = Decimal(str(total_amount)) / Decimal('1.18')
 
     # Tolerance for finding "good" matches. e.g., anything within 5 rupees of the best diff.
@@ -79,15 +79,17 @@ def _find_best_domestic_match(total_amount: float):
                     elif band == "<10" and 5 <= potential_weight < 10: weight_fits_band = True
 
                     if weight_fits_band:
-                        diff = abs((Decimal(str(rate_per_kg)) * Decimal(str(potential_weight))) - base_price)
+                        # Use Decimal for diff calculation
+                        calculated_price = Decimal(str(rate_per_kg)) * Decimal(str(potential_weight))
+                        diff = abs(calculated_price - base_price)
                         
                         match = {
                             "type": "Domestic",
                             "destinations": [destinations[0]],
                             "mode": mode.title(),
                             "weight_suggestion": f"{potential_weight:.2f} kg",
-                            "calculated_base_price": float(base_price),
-                            "total_price_with_tax": total_amount,
+                            "calculated_base_price": float(calculated_price),
+                            "total_price_with_tax": float(calculated_price * Decimal('1.18')),
                              "diff": diff
                         }
 
