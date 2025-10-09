@@ -1,142 +1,90 @@
-
-import json
-import os
-from decimal import Decimal, ROUND_HALF_UP
 import random
 
-# --- Load Data ---
-def _load_json_data(filename):
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    json_path = os.path.join(base_dir, '..', 'Data', filename)
-    try:
-        with open(json_path, 'r') as f:
-            return json.load(f)
-    except (IOError, json.JSONDecodeError):
-        return None
+# This new system uses a predefined lookup table for suggestions.
+# It provides more realistic and varied results than reverse-calculating from price lists.
 
-DOMESTIC_ZONES = _load_json_data('domestic.json')
-DOMESTIC_PRICES = _load_json_data('dom_prices.json')
-INTERNATIONAL_PRICES = _load_json_data('pricing.json')
+SUGGESTION_LOOKUP = [
+    {
+        "range": (0, 750),
+        "suggestions": [
+            {"destinations": ["Mumbai"], "weight_suggestion": "1kg", "mode": "Express"},
+            {"destinations": ["Delhi"], "weight_suggestion": "1.5kg", "mode": "Air"},
+            {"destinations": ["Pune"], "weight_suggestion": "1kg", "mode": "Express"},
+            {"destinations": ["Bangalore"], "weight_suggestion": "2kg", "mode": "Air"},
+            {"destinations": ["Chennai"], "weight_suggestion": "1.5kg", "mode": "Surface"},
+            {"destinations": ["Ahmedabad"], "weight_suggestion": "2kg", "mode": "Surface"},
+            {"destinations": ["Jaipur"], "weight_suggestion": "1.5kg", "mode": "Surface"},
+            {"destinations": ["Lucknow"], "weight_suggestion": "2kg", "mode": "Surface"},
+            {"destinations": ["Surat"], "weight_suggestion": "1kg", "mode": "Express"},
+            {"destinations": ["Nagpur"], "weight_suggestion": "1.5kg", "mode": "Surface"},
+            {"destinations": ["Haryana"], "weight_suggestion": "0.5kg", "mode": "Express"},
+            {"destinations": ["Punjab"], "weight_suggestion": "1kg", "mode": "Express"},
+        ]
+    },
+    {
+        "range": (751, 1500),
+        "suggestions": [
+            {"destinations": ["Mumbai"], "weight_suggestion": "5kg", "mode": "Air"},
+            {"destinations": ["Punjab"], "weight_suggestion": "6kg", "mode": "Surface"},
+            {"destinations": ["Odisha"], "weight_suggestion": "2kg", "mode": "Air"},
+            {"destinations": ["Delhi"], "weight_suggestion": "4kg", "mode": "Air"},
+            {"destinations": ["Bangalore"], "weight_suggestion": "5.5kg", "mode": "Air"},
+            {"destinations": ["Kerala"], "weight_suggestion": "3kg", "mode": "Air"},
+            {"destinations.py": ["Rajasthan"], "weight_suggestion": "4.5kg", "mode": "Surface"},
+            {"destinations": ["Gujarat"], "weight_suggestion": "5kg", "mode": "Surface"},
+            {"destinations": ["Kolkata"], "weight_suggestion": "3.5kg", "mode": "Air"},
+            {"destinations": ["Hyderabad"], "weight_suggestion": "4kg", "mode": "Air"},
+        ]
+    },
+    {
+        "range": (1501, 3000),
+        "suggestions": [
+            {"destinations": ["Jammu & Kashmir"], "weight_suggestion": "8kg", "mode": "Surface"},
+            {"destinations": ["Assam"], "weight_suggestion": "10kg", "mode": "Surface"},
+            {"destinations": ["Mumbai"], "weight_suggestion": "12kg", "mode": "Surface"},
+            {"destinations": ["Punjab"], "weight_suggestion": "15kg", "mode": "Surface"},
+            {"destinations": ["Kerala"], "weight_suggestion": "9kg", "mode": "Air"},
+            {"destinations": ["Goa"], "weight_suggestion": "8kg", "mode": "Air"},
+            {"destinations": ["Port Blair"], "weight_suggestion": "7kg", "mode": "Air"},
+            {"destinations": ["Delhi"], "weight_suggestion": "13kg", "mode": "Surface"},
+            {"destinations": ["Bangalore"], "weight_suggestion": "11kg", "mode": "Air"},
+            {"destinations": ["Kolkata"], "weight_suggestion": "10kg", "mode": "Air"},
+        ]
+    },
+    {
+        "range": (3001, float('inf')),
+        "suggestions": [
+            {"destinations": ["UK"], "weight_suggestion": "2kg", "mode": "International"},
+            {"destinations": ["USA"], "weight_suggestion": "1kg", "mode": "International"},
+            {"destinations": ["Canada"], "weight_suggestion": "1kg", "mode": "International"},
+            {"destinations": ["Australia"], "weight_suggestion": "1.5kg", "mode": "International"},
+            {"destinations": ["Germany"], "weight_suggestion": "2.5kg", "mode": "International"},
+            {"destinations": ["Singapore"], "weight_suggestion": "3kg", "mode": "International"},
+            {"destinations": ["UAE"], "weight_suggestion": "4kg", "mode": "International"},
+            {"destinations": ["South Africa"], "weight_suggestion": "1.5kg", "mode": "International"},
+            {"destinations": ["New Zealand"], "weight_suggestion": "1kg", "mode": "International"},
+        ]
+    }
+]
 
-def find_possible_shipment(total_amount_with_tax: float):
+def get_shipment_suggestion(amount: float):
     """
-    Finds the best possible shipment configuration (domestic or international) for a given total amount.
+    Selects a random shipment suggestion from a predefined lookup table based on the amount.
     """
-    if not DOMESTIC_PRICES or not DOMESTIC_ZONES or not INTERNATIONAL_PRICES:
-        return {"error": "Pricing data could not be loaded."}
-        
-    if total_amount_with_tax < 5000:
-        return _find_best_domestic_match(total_amount_with_tax)
-    else:
-        return _find_best_international_match(total_amount_with_tax)
-
-def _find_best_domestic_match(total_amount: float):
-    good_matches = []
-    min_diff = Decimal('inf')
-    base_price = Decimal(str(total_amount)) / Decimal('1.18')
-
-    # Tolerance for finding "good" matches. e.g., anything within 5 rupees of the best diff.
-    TOLERANCE = Decimal('5.0')
-
-    for zone, prices_by_mode in DOMESTIC_PRICES.items():
-        destinations = DOMESTIC_ZONES.get(zone, [])
-        if not destinations:
-            continue
-        
-        for mode, price_table in prices_by_mode.items():
-            if mode == 'express':
-                for band_str, price in price_table.items():
-                    price = Decimal(str(price))
-                    diff = abs(price - base_price)
-                    
-                    match = {
-                        "type": "Domestic",
-                        "destinations": [destinations[0]], # Return only the first destination
-                        "mode": mode.title(),
-                        "weight_suggestion": f"{band_str} kg",
-                        "calculated_base_price": float(price),
-                        "total_price_with_tax": float(price * Decimal('1.18')),
-                        "diff": diff
-                    }
-
-                    if diff < min_diff + TOLERANCE:
-                        if diff < min_diff:
-                            min_diff = diff
-                            # New best match found, clear out older "good" matches that are no longer close enough
-                            good_matches = [m for m in good_matches if m['diff'] < min_diff + TOLERANCE]
-                        good_matches.append(match)
-
-            elif mode in ['air', 'surface']:
-                for band, rate_per_kg in price_table.items():
-                    if rate_per_kg <= 0: continue
-
-                    potential_weight = float(base_price / Decimal(str(rate_per_kg)))
-                    
-                    if potential_weight > 10: continue
-
-                    weight_fits_band = False
-                    if band == "<5" and 0 < potential_weight < 5: weight_fits_band = True
-                    elif band == "<10" and 5 <= potential_weight < 10: weight_fits_band = True
-
-                    if weight_fits_band:
-                        # Use Decimal for diff calculation
-                        calculated_price = Decimal(str(rate_per_kg)) * Decimal(str(potential_weight))
-                        diff = abs(calculated_price - base_price)
-                        
-                        match = {
-                            "type": "Domestic",
-                            "destinations": [destinations[0]],
-                            "mode": mode.title(),
-                            "weight_suggestion": f"{potential_weight:.2f} kg",
-                            "calculated_base_price": float(calculated_price),
-                            "total_price_with_tax": float(calculated_price * Decimal('1.18')),
-                             "diff": diff
-                        }
-
-                        if diff < min_diff + TOLERANCE:
-                            if diff < min_diff:
-                                min_diff = diff
-                                good_matches = [m for m in good_matches if m['diff'] < min_diff + TOLERANCE]
-                            good_matches.append(match)
-
-    if not good_matches:
-        return None
-        
-    # Filter for only the best matches (those within tolerance of the absolute best)
-    best_possible_matches = [m for m in good_matches if m['diff'] <= min_diff + TOLERANCE]
-
-    # Randomly select one from the best possible matches
-    if best_possible_matches:
-        final_match = random.choice(best_possible_matches)
-        del final_match['diff'] # Clean up internal diff value before returning
-        return final_match
-        
+    for item in SUGGESTION_LOOKUP:
+        min_val, max_val = item["range"]
+        if min_val <= amount <= max_val:
+            selected_suggestion = random.choice(item["suggestions"])
+            
+            # Determine type based on amount or explicitly
+            shipment_type = "International" if amount > 3000 else "Domestic"
+            
+            return {
+                "type": shipment_type,
+                "destinations": selected_suggestion["destinations"],
+                "mode": selected_suggestion["mode"],
+                "weight_suggestion": selected_suggestion["weight_suggestion"],
+                "total_price_with_tax": amount, # Return the original amount for display
+            }
+            
     return None
-
-def _find_best_international_match(total_amount: float):
-    best_match = None
-    min_diff = float('inf')
-    base_price = Decimal(str(total_amount)) / Decimal('1.18')
-
-    for country_data in INTERNATIONAL_PRICES:
-        country_name = country_data.get("country")
-        if not country_name:
-            continue
-
-        # Check fixed weight bands (1kg to 10kg as requested)
-        for i in range(1, 11): 
-            weight_key = str(i)
-            if weight_key in country_data and country_data[weight_key]:
-                price = Decimal(str(country_data[weight_key]))
-                diff = abs(price - base_price)
-                if diff < min_diff:
-                    min_diff = diff
-                    best_match = {
-                        "type": "International",
-                        "destinations": [country_name],
-                        "mode": "Express",
-                        "weight_suggestion": f"{i} kg",
-                        "calculated_base_price": float(price),
-                        "total_price_with_tax": float(price * Decimal('1.18'))
-                    }
-    return best_match
