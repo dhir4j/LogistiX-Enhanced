@@ -39,7 +39,7 @@ def create_invoice_from_payment():
         return jsonify({"error": "Invalid JSON payload"}), 400
 
     transaction = data.get("transaction")
-    order_data = data.get("order") # Get the nested order object
+    order_data = data.get("order")
 
     if not transaction or not order_data:
         return jsonify({"error": "Missing 'transaction' or 'order' data"}), 400
@@ -50,29 +50,34 @@ def create_invoice_from_payment():
     if not sender_data or not receiver_data:
         return jsonify({"error": "Missing 'sender' or 'receiver' data within the 'order' object"}), 400
 
-
-    # Find the admin user to associate the shipment with.
     admin_user = User.query.filter_by(email="dhillon@logistix.com").first()
     if not admin_user:
         return jsonify({"error": "Default admin user 'dhillon@logistix.com' not found. Please run the add_admin.py script."}), 404
 
     try:
         total_price = Decimal(transaction.get("amount"))
+        weight_kg = Decimal(transaction.get("weight", 0))
         price_without_tax = total_price / Decimal("1.18")
         tax_amount = total_price - price_without_tax
         now_iso = datetime.utcnow().isoformat()
         
-        # Combine address lines
         sender_street = f"{sender_data.get('address_line1', '')} {sender_data.get('address_line2', '')}".strip()
         receiver_street = f"{receiver_data.get('address_line1', '')} {receiver_data.get('address_line2', '')}".strip()
 
+        # Random descriptions for goods
+        possible_descriptions = [
+            "Paper Goods", "Printed Material", "Sample Documents", 
+            "Commercial Sample", "Marketing Material"
+        ]
+        random_description = random.choice(possible_descriptions)
+        
+        goods_description_with_weight = f"{random_description} ({weight_kg} kg)"
 
         new_shipment = Shipment(
             user_id=admin_user.id,
             user_email=admin_user.email,
             shipment_id_str=generate_shipment_id_str(db.session, Shipment),
             
-            # Sender details from the new JSON structure
             sender_name=sender_data.get("name"),
             sender_address_street=sender_street,
             sender_address_city=sender_data.get("city"),
@@ -81,7 +86,6 @@ def create_invoice_from_payment():
             sender_address_country=sender_data.get("country"),
             sender_phone=sender_data.get("phone"),
 
-            # Receiver details from the new JSON structure
             receiver_name=receiver_data.get("name"),
             receiver_address_street=receiver_street,
             receiver_address_city=receiver_data.get("city"),
@@ -90,36 +94,31 @@ def create_invoice_from_payment():
             receiver_address_country=receiver_data.get("country"),
             receiver_phone=receiver_data.get("phone"),
 
-            # Package details
-            package_weight_kg=Decimal(transaction.get("weight", 0)),
+            package_weight_kg=weight_kg,
             package_length_cm=0,
             package_width_cm=0,
             package_height_cm=0,
             
-            # Goods details from transaction
             goods_details=[{
-                "description": f"Payment via {transaction.get('type', 'N/A')}",
+                "description": goods_description_with_weight,
                 "quantity": 1,
-                "value": float(total_price),
-                "hsn_code": "N/A"
+                "value": float(price_without_tax), # Value is price before tax
+                "hsn_code": "996812" # HSN for courier services
             }],
 
-            # Service and status
             pickup_date=datetime.strptime(transaction.get("date"), "%Y-%m-%d").date() if transaction.get("date") else datetime.utcnow().date(),
             service_type="Reconciled",
-            status="Booked",  # Directly set to 'Booked' as it's a paid invoice
+            status="Booked",
 
-            # Pricing
             price_without_tax=price_without_tax,
             tax_amount_18_percent=tax_amount,
             total_with_tax_18_percent=total_price,
 
-            # Tracking history
             tracking_history=[{
                 "stage": "Booked",
                 "date": now_iso,
                 "location": sender_data.get("city", "N/A"),
-                "activity": f"Shipment booked and paid. UTR: {transaction.get('utr', 'N/A')}"
+                "activity": f"Shipment booked and paid via {transaction.get('type', 'N/A')}. UTR: {transaction.get('utr', 'N/A')}"
             }]
         )
 
@@ -614,3 +613,6 @@ def delete_employee(employee_id):
     
 
 
+
+
+    
