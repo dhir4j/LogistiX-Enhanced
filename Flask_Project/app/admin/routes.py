@@ -2,7 +2,7 @@
 from flask import Blueprint, request, jsonify
 from app.models import Shipment, User, PaymentRequest, BalanceCode
 from app.extensions import db
-from sqlalchemy import or_, func
+from sqlalchemy import or_, func, and_
 from sqlalchemy.orm.attributes import flag_modified
 from datetime import datetime
 import string
@@ -267,6 +267,55 @@ def get_all_shipments():
         "currentPage": page,
         "totalCount": total_count
     }), 200
+
+@admin_bp.route("/shipments/bulk-status-update", methods=["POST"])
+@admin_required
+def bulk_update_shipment_status():
+    data = request.get_json()
+    shipment_ids = data.get("shipment_ids")
+    new_status = data.get("status")
+
+    valid_statuses = ['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled']
+    if not all([shipment_ids, new_status]) or new_status not in valid_statuses:
+        return jsonify({"error": "Invalid payload: shipment_ids and a valid status are required."}), 400
+    
+    if not isinstance(shipment_ids, list) or len(shipment_ids) == 0:
+        return jsonify({"error": "shipment_ids must be a non-empty list."}), 400
+
+    try:
+        updated_count = 0
+        now_iso = datetime.utcnow().isoformat()
+        
+        # Query all shipments at once
+        shipments_to_update = Shipment.query.filter(Shipment.id.in_(shipment_ids)).all()
+
+        for shipment in shipments_to_update:
+            shipment.status = new_status
+            
+            entry = {
+                "stage": new_status,
+                "date": now_iso,
+                "location": "",  # Location is not provided in bulk update
+                "activity": f"Status updated to {new_status} via bulk action.",
+            }
+            
+            history = shipment.tracking_history or []
+            history.append(entry)
+            shipment.tracking_history = history
+            flag_modified(shipment, "tracking_history")
+            updated_count += 1
+
+        db.session.commit()
+
+        return jsonify({
+            "message": f"Successfully updated status for {updated_count} shipments to '{new_status}'.",
+            "updated_count": updated_count
+        }), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": f"An unexpected error occurred during bulk update: {str(e)}"}), 500
+
 
 @admin_bp.route("/shipments/<shipment_id_str>/status", methods=["PUT"])
 @admin_required
@@ -614,5 +663,7 @@ def delete_employee(employee_id):
 
 
 
+
+    
 
     

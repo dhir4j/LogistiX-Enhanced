@@ -1,17 +1,19 @@
 
 "use client";
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useApi } from '@/hooks/use-api';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Download, FileText } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, FileText, X } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/use-session';
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '../ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog"
+
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '../ui/form';
 import { useForm } from 'react-hook-form';
 import * as z from 'zod';
@@ -19,6 +21,8 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
+import { Checkbox } from '../ui/checkbox';
+import { cn } from '@/lib/utils';
 
 interface Shipment {
     id: number;
@@ -55,6 +59,13 @@ export function AdminOrdersTable() {
     const [status, setStatus] = useState("all");
     const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
     const [isUpdateDialogOpen, setUpdateDialogOpen] = useState(false);
+    
+    // Bulk update state
+    const [selectedRows, setSelectedRows] = useState<Record<number, boolean>>({});
+    const [bulkStatus, setBulkStatus] = useState("");
+    const [isBulkConfirmOpen, setBulkConfirmOpen] = useState(false);
+
+
     const { toast } = useToast();
     const { session } = useSession();
 
@@ -73,6 +84,38 @@ export function AdminOrdersTable() {
         resolver: zodResolver(statusUpdateSchema),
     });
 
+    const selectedIds = useMemo(() => Object.entries(selectedRows).filter(([, isSelected]) => isSelected).map(([id]) => Number(id)), [selectedRows]);
+    const isAllVisibleSelected = useMemo(() => {
+        if (!data?.shipments || data.shipments.length === 0) return false;
+        return data.shipments.every(s => selectedRows[s.id]);
+    }, [data, selectedRows]);
+
+    // Keyboard shortcut for select all
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if ((event.metaKey || event.ctrlKey) && event.key === 'a') {
+                event.preventDefault();
+                toggleSelectAll();
+            }
+        };
+        document.addEventListener('keydown', handleKeyDown);
+        return () => document.removeEventListener('keydown', handleKeyDown);
+    }, [isAllVisibleSelected, data]);
+
+
+    const toggleRowSelection = (id: number) => {
+        setSelectedRows(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    const toggleSelectAll = () => {
+        if (isAllVisibleSelected) {
+            setSelectedRows({});
+        } else {
+            const allVisibleIds = data?.shipments.reduce((acc, s) => ({ ...acc, [s.id]: true }), {}) || {};
+            setSelectedRows(allVisibleIds);
+        }
+    };
+
     const handleOpenUpdateDialog = (shipment: Shipment) => {
         setSelectedShipment(shipment);
         form.reset({
@@ -83,7 +126,7 @@ export function AdminOrdersTable() {
         setUpdateDialogOpen(true);
     };
 
-    const handleStatusUpdate = async (values: StatusUpdateFormValues) => {
+    const handleSingleStatusUpdate = async (values: StatusUpdateFormValues) => {
         if (!selectedShipment || !session?.email) {
             toast({ title: "Error", description: "Authentication error or no shipment selected.", variant: "destructive" });
             return;
@@ -111,6 +154,41 @@ export function AdminOrdersTable() {
         }
     };
     
+    const handleBulkStatusUpdate = async () => {
+        if (selectedIds.length === 0 || !bulkStatus) {
+            toast({ title: "Error", description: "No orders selected or no status chosen.", variant: "destructive"});
+            return;
+        }
+         if (!session?.email) {
+            toast({ title: "Error", description: "Authentication error.", variant: "destructive" });
+            return;
+        }
+        
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/shipments/bulk-status-update`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Email': session.email,
+                },
+                body: JSON.stringify({ shipment_ids: selectedIds, status: bulkStatus }),
+            });
+            const result = await response.json();
+            if (response.ok) {
+                toast({ title: "Bulk Update Successful", description: result.message });
+                mutate();
+                setSelectedRows({});
+            } else {
+                 toast({ title: "Bulk Update Failed", description: result.error || "An error occurred.", variant: "destructive" });
+            }
+        } catch (err) {
+             toast({ title: "Error", description: "An unexpected network error occurred.", variant: "destructive" });
+        } finally {
+            setBulkConfirmOpen(false);
+            setBulkStatus("");
+        }
+    }
+
     const exportToCSV = () => {
         if (!data?.shipments.length) return;
         const headers = ["Order ID", "Type", "Sender", "Receiver", "Destination", "Date", "Amount", "Status"];
@@ -139,7 +217,7 @@ export function AdminOrdersTable() {
     };
 
     return (
-        <div className="bg-background border rounded-lg p-4">
+        <div className="bg-background border rounded-lg p-4 relative">
             <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
                     <Input
@@ -153,7 +231,7 @@ export function AdminOrdersTable() {
                             <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Statuses</SelectItem>
+                            <SelectItem value="all">All Booked</SelectItem>
                             <SelectItem value="Pending Payment">Pending Payment</SelectItem>
                             <SelectItem value="Booked">Booked</SelectItem>
                             <SelectItem value="In Transit">In Transit</SelectItem>
@@ -168,54 +246,69 @@ export function AdminOrdersTable() {
                     Export to CSV
                 </Button>
             </div>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Order ID</TableHead>
-                        <TableHead>Type</TableHead>
-                        <TableHead>Sender</TableHead>
-                        <TableHead>Receiver</TableHead>
-                        <TableHead>Destination</TableHead>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Amount</TableHead>
-                        <TableHead>Status</TableHead>
-                        <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {isLoading && Array.from({ length: 5 }).map((_, i) => (
-                        <TableRow key={i}>
-                            <TableCell colSpan={9}><Skeleton className="h-8 w-full" /></TableCell>
+            <div className="overflow-x-auto">
+                <Table>
+                    <TableHeader>
+                        <TableRow>
+                            <TableHead className="w-[40px]">
+                                <Checkbox
+                                    checked={isAllVisibleSelected}
+                                    onCheckedChange={toggleSelectAll}
+                                    aria-label="Select all"
+                                />
+                            </TableHead>
+                            <TableHead>Order ID</TableHead>
+                            <TableHead>Type</TableHead>
+                            <TableHead>Sender</TableHead>
+                            <TableHead>Receiver</TableHead>
+                            <TableHead>Destination</TableHead>
+                            <TableHead>Date</TableHead>
+                            <TableHead>Amount</TableHead>
+                            <TableHead>Status</TableHead>
+                            <TableHead className="text-right">Actions</TableHead>
                         </TableRow>
-                    ))}
-                    {error && <TableRow><TableCell colSpan={9} className="text-center text-red-500">Failed to load shipments.</TableCell></TableRow>}
-                    {!isLoading && !error && data?.shipments.map((s) => (
-                        <TableRow key={s.id}>
-                            <TableCell className="font-medium">{s.shipment_id_str}</TableCell>
-                            <TableCell>
-                                <Badge variant={s.user_type === 'Employee' ? 'default' : 'secondary'} className={s.user_type === 'Employee' ? 'bg-green-100 text-green-800' : ''}>
-                                    {s.user_type === 'Employee' ? 'E' : 'C'}
-                                </Badge>
-                            </TableCell>
-                            <TableCell>{s.sender_name}</TableCell>
-                            <TableCell>{s.receiver_name}</TableCell>
-                            <TableCell>{s.receiver_address_city}</TableCell>
-                            <TableCell>{new Date(s.booking_date).toLocaleDateString()}</TableCell>
-                            <TableCell>₹{s.total_with_tax_18_percent.toFixed(2)}</TableCell>
-                            <TableCell>{s.status}</TableCell>
-                            <TableCell className="text-right space-x-2">
-                               <Button variant="outline" size="sm" onClick={() => handleOpenUpdateDialog(s)}>Update</Button>
-                               <Button variant="outline" size="sm" asChild>
-                                    <Link href={`/invoice/${s.shipment_id_str}`} target="_blank">
-                                        <FileText className="mr-1 h-3 w-3" />
-                                        Invoice
-                                    </Link>
-                                </Button>
-                            </TableCell>
-                        </TableRow>
-                    ))}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {isLoading && Array.from({ length: 10 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell colSpan={10}><Skeleton className="h-8 w-full" /></TableCell>
+                            </TableRow>
+                        ))}
+                        {error && <TableRow><TableCell colSpan={10} className="text-center text-red-500">Failed to load shipments.</TableCell></TableRow>}
+                        {!isLoading && !error && data?.shipments.map((s) => (
+                            <TableRow key={s.id} data-state={selectedRows[s.id] ? "selected" : ""}>
+                                <TableCell>
+                                    <Checkbox
+                                        checked={!!selectedRows[s.id]}
+                                        onCheckedChange={() => toggleRowSelection(s.id)}
+                                        aria-label={`Select row ${s.id}`}
+                                    />
+                                </TableCell>
+                                <TableCell className="font-medium">{s.shipment_id_str}</TableCell>
+                                <TableCell>
+                                    <Badge variant={s.user_type === 'Employee' ? 'default' : 'secondary'} className={cn(s.user_type === 'Employee' ? 'bg-blue-100 text-blue-800' : '')}>
+                                        {s.user_type === 'Employee' ? 'E' : 'C'}
+                                    </Badge>
+                                </TableCell>
+                                <TableCell>{s.sender_name}</TableCell>
+                                <TableCell>{s.receiver_name}</TableCell>
+                                <TableCell>{s.receiver_address_city}</TableCell>
+                                <TableCell>{new Date(s.booking_date).toLocaleDateString()}</TableCell>
+                                <TableCell>₹{s.total_with_tax_18_percent.toFixed(2)}</TableCell>
+                                <TableCell>{s.status}</TableCell>
+                                <TableCell className="text-right space-x-2">
+                                <Button variant="outline" size="sm" onClick={() => handleOpenUpdateDialog(s)}>Update</Button>
+                                <Button variant="outline" size="sm" asChild>
+                                        <Link href={`/invoice/${s.shipment_id_str}`} target="_blank">
+                                            <FileText className="h-4 w-4" />
+                                        </Link>
+                                    </Button>
+                                </TableCell>
+                            </TableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </div>
             <div className="flex items-center justify-end space-x-2 py-4">
                 <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
                     <ChevronLeft className="h-4 w-4 mr-1" /> Previous
@@ -225,14 +318,52 @@ export function AdminOrdersTable() {
                     Next <ChevronRight className="h-4 w-4 ml-1" />
                 </Button>
             </div>
-             <Dialog open={isUpdateDialogOpen} onOpenChange={setUpdateDialogOpen}>
+
+            {/* Bulk Action Bar */}
+            {selectedIds.length > 0 && (
+                <div className="sticky bottom-4 left-0 right-0 p-2 flex justify-center">
+                    <div className="bg-background border rounded-lg shadow-lg flex items-center gap-4 p-3 animate-in fade-in-0 slide-in-from-bottom-5">
+                        <p className="text-sm font-medium">{selectedIds.length} order(s) selected</p>
+                        <Select onValueChange={setBulkStatus}>
+                            <SelectTrigger className="w-[180px]">
+                                <SelectValue placeholder="Select new status..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {statusOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
+                            </SelectContent>
+                        </Select>
+                        <AlertDialog open={isBulkConfirmOpen} onOpenChange={setBulkConfirmOpen}>
+                            <AlertDialogTrigger asChild>
+                                <Button disabled={!bulkStatus}>Update Status</Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                                <AlertDialogHeader>
+                                    <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+                                    <AlertDialogDescription>
+                                        You are about to update the status of {selectedIds.length} shipment(s) to <span className="font-bold">{bulkStatus}</span>. This action cannot be easily undone.
+                                    </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                    <AlertDialogAction onClick={handleBulkStatusUpdate}>Confirm & Update</AlertDialogAction>
+                                </AlertDialogFooter>
+                            </AlertDialogContent>
+                        </AlertDialog>
+                        <Button variant="ghost" size="icon" onClick={() => setSelectedRows({})}>
+                            <X className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
+            )}
+
+            <Dialog open={isUpdateDialogOpen} onOpenChange={setUpdateDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
                         <DialogTitle>Update Shipment: {selectedShipment?.shipment_id_str}</DialogTitle>
                         <DialogDescription>Add a new entry to the tracking history.</DialogDescription>
                     </DialogHeader>
                     <Form {...form}>
-                        <form onSubmit={form.handleSubmit(handleStatusUpdate)} className="space-y-4">
+                        <form onSubmit={form.handleSubmit(handleSingleStatusUpdate)} className="space-y-4">
                             <FormField control={form.control} name="status" render={({ field }) => (
                                 <FormItem>
                                     <FormLabel>New Status</FormLabel>
@@ -251,9 +382,14 @@ export function AdminOrdersTable() {
                             <FormField control={form.control} name="activity" render={({ field }) => (
                                 <FormItem><FormLabel>Activity / Comment</FormLabel><FormControl><Textarea {...field} placeholder="Optional" /></FormControl><FormMessage /></FormItem>
                             )}/>
-                            <Button type="submit" disabled={form.formState.isSubmitting}>
-                                {form.formState.isSubmitting ? "Updating..." : "Update Status"}
-                            </Button>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit" disabled={form.formState.isSubmitting}>
+                                    {form.formState.isSubmitting ? "Updating..." : "Update Status"}
+                                </Button>
+                            </DialogFooter>
                         </form>
                     </Form>
                 </DialogContent>
