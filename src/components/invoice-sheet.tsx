@@ -109,7 +109,7 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                         <p><span className="font-bold">Invoice Date:</span> {new Date(shipment.booking_date).toLocaleDateString()}</p>
                     </div>
                     <div className="text-right">
-                         <p><span className="font-bold">GSTIN:</span> 03AANCH1234F1Z5</p>
+                         <p><span className="font-bold">GSTIN:</span> 03AAHCH9995D1ZA</p>
                     </div>
                 </div>
 
