@@ -98,7 +98,7 @@ export default function Footer() {
         </div>
         
         <div className="mt-12 border-t pt-8 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} HK SPEED COURIERS. All Rights Reserved.</p>
+          <p>&copy; {new Date().getFullYear()} HK SPEED COURIERS PRIVATE LIMITED. All Rights Reserved.</p>
         </div>
       </div>
     </footer>
