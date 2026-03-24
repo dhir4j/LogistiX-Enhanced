@@ -11,15 +11,15 @@ export default function AboutUsPage() {
               <div className="mx-auto bg-primary/10 text-primary rounded-sm p-3 w-fit mb-4">
                 <Building2 className="h-8 w-8" />
               </div>
-              <h1 className="text-3xl font-headline font-bold">About HK SPEED COURIERS</h1>
+              <h1 className="text-3xl font-headline font-bold">About HK SPEED COURIERS PRIVATE LIMITED</h1>
               <p className="text-lg text-muted-foreground mt-2">Your Partner in Professional Logistics</p>
             </div>
             <div className="space-y-12 max-w-4xl mx-auto">
               <div className="relative w-full h-64 rounded-sm overflow-hidden border">
-                  <Image src="/images/about_us.jpg" alt="About HK Speed Couriers" fill className="object-cover" />
+                  <Image src="/images/about_us.jpg" alt="About HK SPEED COURIERS PRIVATE LIMITED" fill className="object-cover" />
               </div>
               <p className="text-muted-foreground leading-relaxed text-lg text-justify">
-                Welcome to HK SPEED COURIERS, where we redefine logistics with a commitment to speed, reliability, and unparalleled customer service. Founded on the principle of bridging distances, we provide seamless and efficient delivery solutions tailored to meet the diverse needs of individuals and businesses.
+                Welcome to HK SPEED COURIERS PRIVATE LIMITED, where we redefine logistics with a commitment to speed, reliability, and unparalleled customer service. Founded on the principle of bridging distances, we provide seamless and efficient delivery solutions tailored to meet the diverse needs of individuals and businesses.
               </p>
 
               <div className="bg-muted p-8 rounded-lg border">
@@ -67,7 +67,7 @@ export default function AboutUsPage() {
               </div>
 
                <p className="text-muted-foreground leading-relaxed text-center pt-4">
-                Thank you for placing your trust in HK SPEED COURIERS. We are honored to be your logistics partner and look forward to serving you.
+                Thank you for placing your trust in HK SPEED COURIERS PRIVATE LIMITED. We are honored to be your logistics partner and look forward to serving you.
               </p>
             </div>
         </div>

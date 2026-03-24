@@ -92,9 +92,9 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                 {/* Header */}
                 <div className="flex justify-between items-center pb-4 border-b border-gray-400">
                     <div className="flex items-center space-x-4">
-                        <Image src="/images/logo/logo.png" alt="HK Speed Couriers Logo" width={80} height={80} />
+                        <Image src="/images/logo/logo.png" alt="HK SPEED COURIERS PRIVATE LIMITED Logo" width={80} height={80} />
                         <div>
-                            <h1 className="text-2xl font-bold">HK SPEED COURIERS</h1>
+                            <h1 className="text-2xl font-bold">HK SPEED COURIERS PRIVATE LIMITED</h1>
                             <p>SCF-148, FIRST FLOOR, URBAN ESTATE, PHASE-1, JALANDHAR, PUNJAB</p>
                             <p>Email: Hkspeedcouriersprivatelimited@gmail.com | Phone: +91-89689-27612</p>
                         </div>

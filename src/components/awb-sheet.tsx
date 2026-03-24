@@ -54,7 +54,7 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         <div className="mb-1 w-full flex justify-center">
                             <Image 
                                 src="/images/logo/logo.png" 
-                                alt="HK Speed Couriers Logo" 
+                                alt="HK SPEED COURIERS PRIVATE LIMITED Logo" 
                                 width={100} 
                                 height={50} 
                                 className="h-auto object-contain" 
@@ -143,7 +143,7 @@ export default function AwbSheet({ shipment }: AwbSheetProps) {
                         <div className="p-1">
                             <div className="font-bold text-base text-center mb-1">3</div>
                             <p className="font-bold mb-1">SHIPPER'S AGREEMENT AND SIGNATURE</p>
-                            <p className="mb-2">Received for HK Speed Couriers</p>
+                            <p className="mb-2">Received for HK SPEED COURIERS PRIVATE LIMITED</p>
                             <div className="flex justify-between">
                                 <span>DATE: {date}</span>
                                 <span>TIME: A.M/P.M</span>

@@ -56,7 +56,7 @@ export default function CustomerDashboardLayout({
             <Image src="/images/logo/logo.png" alt="Logo" width={40} height={40} />
             <div className="flex flex-col">
               <h2 className="text-lg font-semibold">Customer Section</h2>
-              <p className="text-xs text-muted-foreground">HK SPEED COURIERS</p>
+              <p className="text-xs text-muted-foreground">HK SPEED COURIERS PRIVATE LIMITED</p>
             </div>
           </div>
         </SidebarHeader>

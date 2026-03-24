@@ -7,7 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { SessionProvider } from '@/hooks/use-session';
 
 export const metadata: Metadata = {
-  title: 'HK SPEED COURIERS',
+  title: 'HK SPEED COURIERS PRIVATE LIMITED',
   description: 'Reliable and fast courier services.',
 };
 
