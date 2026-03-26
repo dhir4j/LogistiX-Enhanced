@@ -302,15 +302,24 @@ def bulk_update_shipment_status():
         for shipment in shipments_to_update:
             shipment.status = new_status
 
+            # Update booking_date when status is set to Booked
+            if new_status == "Booked" and custom_date:
+                shipment.booking_date = datetime.strptime(f"{custom_date} {custom_time}", "%Y-%m-%d %H:%M")
+
             entry = {
                 "stage": new_status,
                 "date": date_iso,
                 "location": "",  # Location is not provided in bulk update
                 "activity": f"Status updated to {new_status} via bulk action.",
             }
-            
+
             history = shipment.tracking_history or []
-            history.append(entry)
+            # Overwrite existing entry for the same stage instead of duplicating
+            existing_idx = next((i for i, h in enumerate(history) if h.get("stage") == new_status), None)
+            if existing_idx is not None:
+                history[existing_idx] = entry
+            else:
+                history.append(entry)
             shipment.tracking_history = history
             flag_modified(shipment, "tracking_history")
             updated_count += 1
@@ -354,6 +363,11 @@ def update_shipment_status(shipment_id_str):
         return jsonify({"error": "Shipment not found"}), 404
 
     shipment.status = new_status
+
+    # Update booking_date when status is set to Booked
+    if new_status == "Booked" and custom_date:
+        shipment.booking_date = datetime.strptime(f"{custom_date} {custom_time}", "%Y-%m-%d %H:%M")
+
     entry = {
         "stage": new_status,
         "date": date_iso,
@@ -361,7 +375,12 @@ def update_shipment_status(shipment_id_str):
         "activity": activity or f"Status updated to {new_status}",
     }
     history = shipment.tracking_history or []
-    history.append(entry)
+    # Overwrite existing entry for the same stage instead of duplicating
+    existing_idx = next((i for i, h in enumerate(history) if h.get("stage") == new_status), None)
+    if existing_idx is not None:
+        history[existing_idx] = entry
+    else:
+        history.append(entry)
     shipment.tracking_history = history
     flag_modified(shipment, "tracking_history")
     db.session.commit()
@@ -675,15 +694,3 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return jsonify({"message": "Employee deleted successfully"}), 200
-
-    
-
-
-    
-
-
-
-
-    
-
-    
