@@ -4,7 +4,7 @@ from app.models import Shipment, User, PaymentRequest, BalanceCode, SavedAddress
 from app.extensions import db
 from app.schemas import ShipmentCreateSchema, PaymentSubmitSchema, SavedAddressSchema
 from app.utils import generate_shipment_id_str
-from datetime import datetime
+from datetime import datetime, time as dt_time
 from sqlalchemy import func, exc
 from decimal import Decimal
 
@@ -26,10 +26,17 @@ def _create_shipment_record(user, shipment_data, final_total_price):
         else:
             return {"error": "Insufficient balance to book shipment."}, 402
 
-    now_iso = datetime.utcnow().isoformat()
+    pickup_time_str = shipment_data.pop("pickup_time", "00:00")
+    try:
+        h, m = map(int, pickup_time_str.split(":"))
+        pickup_time = dt_time(h, m)
+    except (ValueError, AttributeError):
+        pickup_time = dt_time(0, 0)
+
+    booking_datetime = datetime.combine(shipment_data["pickup_date"], pickup_time)
     tracking_history = [{
         "stage": status,
-        "date": now_iso,
+        "date": booking_datetime.isoformat(),
         "location": shipment_data["sender_address_city"],
         "activity": tracking_activity
     }]
@@ -50,6 +57,7 @@ def _create_shipment_record(user, shipment_data, final_total_price):
         shipment_id_str=generate_shipment_id_str(db.session, Shipment),
         status=status,
         tracking_history=tracking_history,
+        booking_date=booking_datetime,
         price_without_tax=price_without_tax,
         tax_amount_18_percent=tax_amount,
         total_with_tax_18_percent=final_total_price,

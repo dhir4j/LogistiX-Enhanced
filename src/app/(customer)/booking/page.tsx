@@ -70,7 +70,8 @@ export default function CustomerBookingPage() {
             package_width_cm: '', 
             package_height_cm: '',
             package_length_cm: '',
-            pickup_date: new Date(), 
+            pickup_date: new Date(),
+            pickup_time: format(new Date(), 'HH:mm'),
             service_type: undefined,
             goods: [{ description: "", quantity: 1, hsn_code: "", value: 0 }],
         },
@@ -213,6 +214,7 @@ export default function CustomerBookingPage() {
             ...values,
             user_email: session.email,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
+            pickup_time: values.pickup_time,
             final_total_price_with_tax: priceDetails.total_price,
             package_length_cm: values.package_length_cm || 0,
             package_width_cm: values.package_width_cm || 0,
@@ -444,6 +446,7 @@ export default function CustomerBookingPage() {
                                 <FormField name="package_height_cm" control={form.control} render={({ field }) => ( <FormItem><FormLabel>Height (cm)</FormLabel><FormControl><Input type="number" placeholder="Optional" {...field} /></FormControl><FormMessage /></FormItem> )}/>
                             </div>
                             <div className="grid md:grid-cols-2 gap-4 items-end">
+                                <div className="grid grid-cols-2 gap-4">
                                 <FormField name="pickup_date" control={form.control} render={({ field }) => (
                                     <FormItem className="flex flex-col"><FormLabel>Pickup Date</FormLabel>
                                         <Popover><PopoverTrigger asChild>
@@ -460,6 +463,14 @@ export default function CustomerBookingPage() {
                                         </Popover>
                                     <FormMessage /></FormItem>
                                 )}/>
+                                <FormField name="pickup_time" control={form.control} render={({ field }) => (
+                                    <FormItem className="flex flex-col"><FormLabel>Pickup Time</FormLabel>
+                                        <FormControl>
+                                            <Input type="time" {...field} />
+                                        </FormControl>
+                                    <FormMessage /></FormItem>
+                                )}/>
+                                </div>
                                 {shipmentType === 'domestic' && (
                                      <div className="flex items-end gap-2">
                                         <FormField name="service_type" control={form.control} render={({ field }) => (

@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Download, FileText, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Download, FileText, X, CalendarIcon } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/use-session';
@@ -22,6 +22,9 @@ import { Textarea } from '../ui/textarea';
 import { Badge } from '../ui/badge';
 import Link from 'next/link';
 import { Checkbox } from '../ui/checkbox';
+import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
+import { Calendar } from '../ui/calendar';
+import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 interface Shipment {
@@ -45,6 +48,8 @@ interface ShipmentsApiResponse {
 
 const statusUpdateSchema = z.object({
   status: z.string().min(1, "Status is required."),
+  date: z.date({ required_error: "Date is required." }),
+  time: z.string().min(1, "Time is required."),
   location: z.string().optional(),
   activity: z.string().optional(),
 });
@@ -63,6 +68,8 @@ export function AdminOrdersTable() {
     // Bulk update state
     const [selectedRows, setSelectedRows] = useState<Record<number, boolean>>({});
     const [bulkStatus, setBulkStatus] = useState("");
+    const [bulkDate, setBulkDate] = useState<Date>(new Date());
+    const [bulkTime, setBulkTime] = useState(format(new Date(), 'HH:mm'));
     const [isBulkConfirmOpen, setBulkConfirmOpen] = useState(false);
 
 
@@ -120,6 +127,8 @@ export function AdminOrdersTable() {
         setSelectedShipment(shipment);
         form.reset({
             status: shipment.status,
+            date: new Date(),
+            time: format(new Date(), 'HH:mm'),
             location: '',
             activity: '',
         });
@@ -138,7 +147,11 @@ export function AdminOrdersTable() {
                     'Content-Type': 'application/json',
                     'X-User-Email': session.email,
                 },
-                body: JSON.stringify(values),
+                body: JSON.stringify({
+                    ...values,
+                    date: format(values.date, 'yyyy-MM-dd'),
+                    time: values.time,
+                }),
             });
             if (response.ok) {
                 toast({ title: "Success", description: "Shipment status updated." });
@@ -171,7 +184,7 @@ export function AdminOrdersTable() {
                     'Content-Type': 'application/json',
                     'X-User-Email': session.email,
                 },
-                body: JSON.stringify({ shipment_ids: selectedIds, status: bulkStatus }),
+                body: JSON.stringify({ shipment_ids: selectedIds, status: bulkStatus, date: format(bulkDate, 'yyyy-MM-dd'), time: bulkTime }),
             });
             const result = await response.json();
             if (response.ok) {
@@ -186,6 +199,8 @@ export function AdminOrdersTable() {
         } finally {
             setBulkConfirmOpen(false);
             setBulkStatus("");
+            setBulkDate(new Date());
+            setBulkTime(format(new Date(), 'HH:mm'));
         }
     }
 
@@ -332,6 +347,18 @@ export function AdminOrdersTable() {
                                 {statusOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
                             </SelectContent>
                         </Select>
+                        <Popover>
+                            <PopoverTrigger asChild>
+                                <Button variant="outline" className={cn("w-[180px] justify-start text-left font-normal")}>
+                                    {format(bulkDate, "PPP")}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar mode="single" selected={bulkDate} onSelect={(d) => d && setBulkDate(d)} />
+                            </PopoverContent>
+                        </Popover>
+                        <Input type="time" value={bulkTime} onChange={(e) => setBulkTime(e.target.value)} className="w-[130px]" />
                         <AlertDialog open={isBulkConfirmOpen} onOpenChange={setBulkConfirmOpen}>
                             <AlertDialogTrigger asChild>
                                 <Button disabled={!bulkStatus}>Update Status</Button>
@@ -376,6 +403,36 @@ export function AdminOrdersTable() {
                                     <FormMessage />
                                 </FormItem>
                             )}/>
+                            <div className="grid grid-cols-2 gap-4">
+                            <FormField control={form.control} name="date" render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Date</FormLabel>
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <FormControl>
+                                                <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}>
+                                                    {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                </Button>
+                                            </FormControl>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0" align="start">
+                                            <Calendar mode="single" selected={field.value} onSelect={field.onChange} />
+                                        </PopoverContent>
+                                    </Popover>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            <FormField control={form.control} name="time" render={({ field }) => (
+                                <FormItem className="flex flex-col">
+                                    <FormLabel>Time</FormLabel>
+                                    <FormControl>
+                                        <Input type="time" {...field} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            </div>
                             <FormField control={form.control} name="location" render={({ field }) => (
                                 <FormItem><FormLabel>Location</FormLabel><FormControl><Input {...field} placeholder="Optional" /></FormControl><FormMessage /></FormItem>
                             )}/>

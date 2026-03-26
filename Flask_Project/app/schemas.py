@@ -42,6 +42,7 @@ class ShipmentCreateSchema(Schema):
     package_width_cm = fields.Float(required=True)
     package_height_cm = fields.Float(required=True)
     pickup_date = fields.Date(required=True)
+    pickup_time = fields.Str(load_default="00:00")
     service_type = fields.Str(required=True, allow_none=True)
     goods = fields.List(fields.Nested(GoodsSchema), required=True)
 

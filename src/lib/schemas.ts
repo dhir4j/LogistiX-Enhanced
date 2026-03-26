@@ -68,6 +68,7 @@ export const shipmentBookingSchema = z.object({
     package_height_cm: dimensionSchema,
     package_length_cm: dimensionSchema,
     pickup_date: z.date({ required_error: "Pickup date is required" }),
+    pickup_time: z.string().min(1, "Pickup time is required"),
     service_type: z.string().min(1, "Service type is required"),
     goods: z.array(goodsSchema).min(1, "At least one item is required."),
 }).refine(data => !data.save_sender_address || (data.save_sender_address && data.sender_address_nickname && data.sender_address_nickname.length > 1), {

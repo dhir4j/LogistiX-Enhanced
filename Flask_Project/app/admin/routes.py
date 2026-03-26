@@ -59,7 +59,8 @@ def create_invoice_from_payment():
         weight_kg = Decimal(transaction.get("weight", 0))
         price_without_tax = total_price / Decimal("1.18")
         tax_amount = total_price - price_without_tax
-        now_iso = datetime.utcnow().isoformat()
+        invoice_date = datetime.strptime(transaction.get("date"), "%Y-%m-%d") if transaction.get("date") else datetime.utcnow()
+        now_iso = invoice_date.isoformat()
         
         sender_street = f"{sender_data.get('address_line1', '')} {sender_data.get('address_line2', '')}".strip()
         receiver_street = f"{receiver_data.get('address_line1', '')} {receiver_data.get('address_line2', '')}".strip()
@@ -106,7 +107,8 @@ def create_invoice_from_payment():
                 "hsn_code": "996812" # HSN for courier services
             }],
 
-            pickup_date=datetime.strptime(transaction.get("date"), "%Y-%m-%d").date() if transaction.get("date") else datetime.utcnow().date(),
+            pickup_date=invoice_date.date(),
+            booking_date=invoice_date,
             service_type="Reconciled",
             status="Booked",
 
@@ -284,17 +286,25 @@ def bulk_update_shipment_status():
 
     try:
         updated_count = 0
-        now_iso = datetime.utcnow().isoformat()
-        
+        custom_date = data.get("date")
+        custom_time = data.get("time", "00:00")
+        if custom_date:
+            try:
+                date_iso = datetime.strptime(f"{custom_date} {custom_time}", "%Y-%m-%d %H:%M").isoformat()
+            except ValueError:
+                return jsonify({"error": "Invalid date/time format."}), 400
+        else:
+            date_iso = datetime.utcnow().isoformat()
+
         # Query all shipments at once
         shipments_to_update = Shipment.query.filter(Shipment.id.in_(shipment_ids)).all()
 
         for shipment in shipments_to_update:
             shipment.status = new_status
-            
+
             entry = {
                 "stage": new_status,
-                "date": now_iso,
+                "date": date_iso,
                 "location": "",  # Location is not provided in bulk update
                 "activity": f"Status updated to {new_status} via bulk action.",
             }
@@ -324,10 +334,20 @@ def update_shipment_status(shipment_id_str):
     new_status = data.get("status")
     location = data.get("location")
     activity = data.get("activity")
+    custom_date = data.get("date")
+    custom_time = data.get("time", "00:00")
 
     valid_statuses = ['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled']
     if not new_status or new_status not in valid_statuses:
         return jsonify({"error": "Invalid or missing status"}), 400
+
+    if custom_date:
+        try:
+            date_iso = datetime.strptime(f"{custom_date} {custom_time}", "%Y-%m-%d %H:%M").isoformat()
+        except ValueError:
+            return jsonify({"error": "Invalid date/time format."}), 400
+    else:
+        date_iso = datetime.utcnow().isoformat()
 
     shipment = Shipment.query.filter_by(shipment_id_str=shipment_id_str).first()
     if not shipment:
@@ -336,7 +356,7 @@ def update_shipment_status(shipment_id_str):
     shipment.status = new_status
     entry = {
         "stage": new_status,
-        "date": datetime.utcnow().isoformat(),
+        "date": date_iso,
         "location": location or "",
         "activity": activity or f"Status updated to {new_status}",
     }
