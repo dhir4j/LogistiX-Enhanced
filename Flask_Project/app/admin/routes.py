@@ -277,7 +277,26 @@ def bulk_update_shipment_status():
     shipment_ids = data.get("shipment_ids")
     new_status = data.get("status")
 
-    valid_statuses = ['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled']
+    valid_statuses = [
+        'Booked',
+        'Shipment Picked Up',
+        'Processed at Origin',
+        'Arrived at Hub',
+        'Departed from Hub',
+        'Arrived at Export Hub',
+        'Export Processed',
+        'Departed from Airport',
+        'In International Transit',
+        'Arrived at Destination',
+        'Customs Clearance in Progress',
+        'Customs Cleared',
+        'At Local Hub',
+        'Out for Delivery',
+        'Delivered (POD)',
+        'Delivery Failed',
+        'Returned to Sender',
+        'Cancelled'
+    ]
     if not all([shipment_ids, new_status]) or new_status not in valid_statuses:
         return jsonify({"error": "Invalid payload: shipment_ids and a valid status are required."}), 400
     
@@ -346,7 +365,26 @@ def update_shipment_status(shipment_id_str):
     custom_date = data.get("date")
     custom_time = data.get("time", "00:00")
 
-    valid_statuses = ['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled']
+    valid_statuses = [
+        'Booked',
+        'Shipment Picked Up',
+        'Processed at Origin',
+        'Arrived at Hub',
+        'Departed from Hub',
+        'Arrived at Export Hub',
+        'Export Processed',
+        'Departed from Airport',
+        'In International Transit',
+        'Arrived at Destination',
+        'Customs Clearance in Progress',
+        'Customs Cleared',
+        'At Local Hub',
+        'Out for Delivery',
+        'Delivered (POD)',
+        'Delivery Failed',
+        'Returned to Sender',
+        'Cancelled'
+    ]
     if not new_status or new_status not in valid_statuses:
         return jsonify({"error": "Invalid or missing status"}), 400
 
@@ -715,6 +753,13 @@ def update_shipment_amount(shipment_id_str):
     if not shipment:
         return jsonify({"error": "Shipment not found"}), 404
     
-    shipment.total_with_tax_18_percent = Decimal(str(amount))
+    # Calculate price without tax (amount / 1.18)
+    amount_decimal = Decimal(str(amount))
+    price_without_tax = amount_decimal / Decimal('1.18')
+    tax_amount = amount_decimal - price_without_tax
+    
+    shipment.price_without_tax = price_without_tax
+    shipment.tax_amount_18_percent = tax_amount
+    shipment.total_with_tax_18_percent = amount_decimal
     db.session.commit()
     return jsonify({"message": "Shipment amount updated successfully"}), 200
