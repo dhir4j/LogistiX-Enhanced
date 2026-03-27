@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ChevronLeft, ChevronRight, Download, FileText, X, CalendarIcon } from 'lucide-react';
+import { Download, FileText, X, CalendarIcon } from 'lucide-react';
 import { Skeleton } from '../ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { useSession } from '@/hooks/use-session';
@@ -61,10 +61,28 @@ const amountUpdateSchema = z.object({
 type StatusUpdateFormValues = z.infer<typeof statusUpdateSchema>;
 type AmountUpdateFormValues = z.infer<typeof amountUpdateSchema>;
 
-const statusOptions = ['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled'];
+const statusOptions = [
+    'Booked',
+    'Shipment Picked Up',
+    'Processed at Origin',
+    'Arrived at Hub',
+    'Departed from Hub',
+    'Arrived at Export Hub',
+    'Export Processed',
+    'Departed from Airport',
+    'In International Transit',
+    'Arrived at Destination',
+    'Customs Clearance in Progress',
+    'Customs Cleared',
+    'At Local Hub',
+    'Out for Delivery',
+    'Delivered (POD)',
+    'Delivery Failed',
+    'Returned to Sender',
+    'Cancelled'
+];
 
 export function AdminOrdersTable() {
-    const [page, setPage] = useState(1);
     const [search, setSearch] = useState("");
     const [status, setStatus] = useState("all");
     const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
@@ -84,12 +102,12 @@ export function AdminOrdersTable() {
 
     const queryParams = useMemo(() => {
         const params = new URLSearchParams();
-        params.append('page', page.toString());
-        params.append('limit', '10');
+        params.append('page', '1');
+        params.append('limit', '999999');
         if (search) params.append('q', search);
         if (status && status !== 'all') params.append('status', status);
         return params.toString();
-    }, [page, search, status]);
+    }, [search, status]);
 
     const { data, isLoading, error, mutate } = useApi<ShipmentsApiResponse>(`/api/admin/shipments?${queryParams}`);
     
@@ -288,17 +306,13 @@ export function AdminOrdersTable() {
                         className="max-w-sm"
                     />
                     <Select value={status} onValueChange={setStatus}>
-                        <SelectTrigger className="w-[180px]">
+                        <SelectTrigger className="w-[220px]">
                             <SelectValue placeholder="Filter by status" />
                         </SelectTrigger>
                         <SelectContent>
                             <SelectItem value="all">All Booked</SelectItem>
                             <SelectItem value="Pending Payment">Pending Payment</SelectItem>
-                            <SelectItem value="Booked">Booked</SelectItem>
-                            <SelectItem value="In Transit">In Transit</SelectItem>
-                            <SelectItem value="Out for Delivery">Out for Delivery</SelectItem>
-                            <SelectItem value="Delivered">Delivered</SelectItem>
-                            <SelectItem value="Cancelled">Cancelled</SelectItem>
+                            {statusOptions.map(opt => <SelectItem key={opt} value={opt}>{opt}</SelectItem>)}
                         </SelectContent>
                     </Select>
                 </div>
@@ -372,13 +386,7 @@ export function AdminOrdersTable() {
                 </Table>
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
-                <Button variant="outline" size="sm" onClick={() => setPage(p => Math.max(1, p - 1))} disabled={page === 1}>
-                    <ChevronLeft className="h-4 w-4 mr-1" /> Previous
-                </Button>
-                <span className="text-sm">Page {data?.currentPage || 1} of {data?.totalPages || 1}</span>
-                <Button variant="outline" size="sm" onClick={() => setPage(p => p + 1)} disabled={!data || page === data.totalPages}>
-                    Next <ChevronRight className="h-4 w-4 ml-1" />
-                </Button>
+                <span className="text-sm">Total: {data?.totalCount || 0} shipment(s)</span>
             </div>
 
             {/* Bulk Action Bar */}
