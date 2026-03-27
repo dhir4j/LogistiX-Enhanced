@@ -71,7 +71,6 @@ export default function CustomerBookingPage() {
             package_height_cm: '',
             package_length_cm: '',
             pickup_date: new Date(),
-            pickup_time: format(new Date(), 'HH:mm'),
             service_type: undefined,
             goods: [{ description: "", quantity: 1, hsn_code: "", value: 0 }],
         },
@@ -214,7 +213,6 @@ export default function CustomerBookingPage() {
             ...values,
             user_email: session.email,
             pickup_date: format(values.pickup_date, 'yyyy-MM-dd'),
-            pickup_time: values.pickup_time,
             final_total_price_with_tax: priceDetails.total_price,
             package_length_cm: values.package_length_cm || 0,
             package_width_cm: values.package_width_cm || 0,
@@ -461,13 +459,6 @@ export default function CustomerBookingPage() {
                                             <Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))} />
                                         </PopoverContent>
                                         </Popover>
-                                    <FormMessage /></FormItem>
-                                )}/>
-                                <FormField name="pickup_time" control={form.control} render={({ field }) => (
-                                    <FormItem className="flex flex-col"><FormLabel>Pickup Time</FormLabel>
-                                        <FormControl>
-                                            <Input type="time" {...field} />
-                                        </FormControl>
                                     <FormMessage /></FormItem>
                                 )}/>
                                 </div>

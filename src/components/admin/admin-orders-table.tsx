@@ -54,7 +54,12 @@ const statusUpdateSchema = z.object({
   activity: z.string().optional(),
 });
 
+const amountUpdateSchema = z.object({
+  amount: z.number().min(0, "Amount must be greater than or equal to 0"),
+});
+
 type StatusUpdateFormValues = z.infer<typeof statusUpdateSchema>;
+type AmountUpdateFormValues = z.infer<typeof amountUpdateSchema>;
 
 const statusOptions = ['Booked', 'In Transit', 'Out for Delivery', 'Delivered', 'Cancelled'];
 
@@ -64,6 +69,7 @@ export function AdminOrdersTable() {
     const [status, setStatus] = useState("all");
     const [selectedShipment, setSelectedShipment] = useState<Shipment | null>(null);
     const [isUpdateDialogOpen, setUpdateDialogOpen] = useState(false);
+    const [isAmountDialogOpen, setAmountDialogOpen] = useState(false);
     
     // Bulk update state
     const [selectedRows, setSelectedRows] = useState<Record<number, boolean>>({});
@@ -89,6 +95,10 @@ export function AdminOrdersTable() {
     
     const form = useForm<StatusUpdateFormValues>({
         resolver: zodResolver(statusUpdateSchema),
+    });
+
+    const amountForm = useForm<AmountUpdateFormValues>({
+        resolver: zodResolver(amountUpdateSchema),
     });
 
     const selectedIds = useMemo(() => Object.entries(selectedRows).filter(([, isSelected]) => isSelected).map(([id]) => Number(id)), [selectedRows]);
@@ -133,6 +143,42 @@ export function AdminOrdersTable() {
             activity: '',
         });
         setUpdateDialogOpen(true);
+    };
+
+    const handleOpenAmountDialog = (shipment: Shipment) => {
+        setSelectedShipment(shipment);
+        amountForm.reset({
+            amount: shipment.total_with_tax_18_percent,
+        });
+        setAmountDialogOpen(true);
+    };
+
+    const handleAmountUpdate = async (values: AmountUpdateFormValues) => {
+        if (!selectedShipment || !session?.email) {
+            toast({ title: "Error", description: "Authentication error or no shipment selected.", variant: "destructive" });
+            return;
+        }
+        try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/shipments/${selectedShipment.shipment_id_str}/amount`, {
+                method: 'PUT',
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'X-User-Email': session.email,
+                },
+                body: JSON.stringify({ amount: values.amount }),
+            });
+            if (response.ok) {
+                toast({ title: "Success", description: "Shipment amount updated." });
+                mutate();
+                setAmountDialogOpen(false);
+                setSelectedShipment(null);
+            } else {
+                const err = await response.json();
+                toast({ title: "Error", description: err.error || "Failed to update amount.", variant: "destructive"});
+            }
+        } catch (err) {
+            toast({ title: "Error", description: "An unexpected error occurred.", variant: "destructive" });
+        }
     };
 
     const handleSingleStatusUpdate = async (values: StatusUpdateFormValues) => {
@@ -312,6 +358,7 @@ export function AdminOrdersTable() {
                                 <TableCell>₹{s.total_with_tax_18_percent.toFixed(2)}</TableCell>
                                 <TableCell>{s.status}</TableCell>
                                 <TableCell className="text-right space-x-2">
+                                <Button variant="outline" size="sm" onClick={() => handleOpenAmountDialog(s)}>Edit Amount</Button>
                                 <Button variant="outline" size="sm" onClick={() => handleOpenUpdateDialog(s)}>Update</Button>
                                 <Button variant="outline" size="sm" asChild>
                                         <Link href={`/invoice/${s.shipment_id_str}`} target="_blank">
@@ -451,10 +498,36 @@ export function AdminOrdersTable() {
                     </Form>
                 </DialogContent>
             </Dialog>
+
+            <Dialog open={isAmountDialogOpen} onOpenChange={setAmountDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Update Amount: {selectedShipment?.shipment_id_str}</DialogTitle>
+                        <DialogDescription>Update the order amount.</DialogDescription>
+                    </DialogHeader>
+                    <Form {...amountForm}>
+                        <form onSubmit={amountForm.handleSubmit(handleAmountUpdate)} className="space-y-4">
+                            <FormField control={amountForm.control} name="amount" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Amount (₹)</FormLabel>
+                                    <FormControl>
+                                        <Input type="number" step="0.01" {...field} onChange={(e) => field.onChange(parseFloat(e.target.value))} />
+                                    </FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}/>
+                            <DialogFooter>
+                                <DialogClose asChild>
+                                    <Button type="button" variant="outline">Cancel</Button>
+                                </DialogClose>
+                                <Button type="submit" disabled={amountForm.formState.isSubmitting}>
+                                    {amountForm.formState.isSubmitting ? "Updating..." : "Update Amount"}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
-
-    
-
-    

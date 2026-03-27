@@ -121,7 +121,6 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                         <p>{shipment.sender_address_street},</p>
                         <p>{shipment.sender_address_city}, {shipment.sender_address_state} - {shipment.sender_address_pincode}</p>
                         <p>{shipment.sender_address_country}</p>
-                        <p>Phone: {shipment.sender_phone}</p>
                     </div>
                     <div>
                         <h3 className="font-bold mb-2 underline">SHIP TO:</h3>
@@ -129,7 +128,6 @@ export default function InvoiceSheet({ shipment }: InvoiceSheetProps) {
                         <p>{shipment.receiver_address_street},</p>
                         <p>{shipment.receiver_address_city}, {shipment.receiver_address_state} - {shipment.receiver_address_pincode}</p>
                         <p>{shipment.receiver_address_country}</p>
-                        <p>Phone: {shipment.receiver_phone}</p>
                     </div>
                 </div>
 

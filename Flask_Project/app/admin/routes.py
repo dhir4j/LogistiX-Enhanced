@@ -694,3 +694,27 @@ def delete_employee(employee_id):
     db.session.delete(employee)
     db.session.commit()
     return jsonify({"message": "Employee deleted successfully"}), 200
+
+@admin_bp.route("/shipments/<shipment_id_str>/amount", methods=["PUT"])
+@admin_required
+def update_shipment_amount(shipment_id_str):
+    data = request.get_json()
+    amount = data.get("amount")
+    
+    if amount is None:
+        return jsonify({"error": "Amount is required"}), 400
+    
+    try:
+        amount = float(amount)
+        if amount < 0:
+            return jsonify({"error": "Amount must be non-negative"}), 400
+    except (ValueError, TypeError):
+        return jsonify({"error": "Invalid amount format"}), 400
+    
+    shipment = Shipment.query.filter_by(shipment_id_str=shipment_id_str).first()
+    if not shipment:
+        return jsonify({"error": "Shipment not found"}), 404
+    
+    shipment.total_with_tax_18_percent = Decimal(str(amount))
+    db.session.commit()
+    return jsonify({"message": "Shipment amount updated successfully"}), 200
