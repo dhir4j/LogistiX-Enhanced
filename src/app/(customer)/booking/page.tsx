@@ -71,6 +71,7 @@ export default function CustomerBookingPage() {
             package_height_cm: '',
             package_length_cm: '',
             pickup_date: new Date(),
+            pickup_time: "00:00",
             service_type: undefined,
             goods: [{ description: "", quantity: 1, hsn_code: "", value: 0 }],
         },
