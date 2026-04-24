@@ -4,6 +4,9 @@ import uuid
 import os
 from datetime import datetime
 from decimal import Decimal
+from dotenv import load_dotenv
+
+load_dotenv(os.path.join(os.path.dirname(__file__), '..', '..', '.env'))
 
 from flask import Blueprint, request, jsonify, redirect
 from Crypto.Cipher import AES
@@ -117,13 +120,11 @@ def initiate_payment():
 
     order_id = f"LGX-{uuid.uuid4().hex[:12].upper()}"
 
-    # Track this transaction — link to shipment if provided
     txn = WalletTransaction(
         user_id=user.id,
         order_id=order_id,
         amount=amount_decimal,
         status="Pending",
-        # store shipment_id_str in payment_mode field temporarily as identifier
         payment_mode=f"shipment:{shipment_id_str}" if shipment_id_str else None,
     )
     db.session.add(txn)
