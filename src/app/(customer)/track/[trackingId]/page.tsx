@@ -1,28 +1,16 @@
 
 "use client";
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, ArrowLeft, Loader2, Download, FileText, CircleAlert, Landmark, CreditCard, QrCode } from 'lucide-react';
+import { Search, PackageCheck, Truck, Warehouse, CheckCircle2, Loader2, Download, FileText, CircleAlert, CreditCard } from 'lucide-react';
 import { cn } from "@/lib/utils";
 import Link from 'next/link';
-import Image from 'next/image';
 import { useToast } from '@/hooks/use-toast';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import * as z from 'zod';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-
-
-const paymentSchema = z.object({
-  utr: z.string().min(12, { message: "UTR must be 12 digits." }).max(12, { message: "UTR must be 12 digits." }),
-});
-
-type PaymentFormValues = z.infer<typeof paymentSchema>;
+import { useSession } from '@/hooks/use-session';
 
 interface TrackingHistory {
     stage: string;
@@ -66,13 +54,20 @@ export default function TrackingResultPage() {
   const params = useParams();
   const router = useRouter();
   const { toast } = useToast();
-  
+  const { session } = useSession();
+
   const idFromUrl = Array.isArray(params.trackingId) ? params.trackingId[0] : params.trackingId;
   const [trackingId, setTrackingId] = useState(idFromUrl || '');
   const [shipmentDetails, setShipmentDetails] = useState<ShipmentDetails | null>(null);
   const [isLoading, setIsLoading] = useState(!!idFromUrl);
   const [error, setError] = useState<string | null>(null);
-  const [isSubmittingPayment, setIsSubmittingPayment] = useState(false);
+  const [isInitiatingPayment, setIsInitiatingPayment] = useState(false);
+  const [ccParams, setCcParams] = useState<{ enc_request: string; access_code: string; payment_url: string } | null>(null);
+  const formRef = useRef<HTMLFormElement>(null);
+
+  useEffect(() => {
+    if (ccParams && formRef.current) formRef.current.submit();
+  }, [ccParams]);
 
   const fetchShipmentDetails = async (id: string) => {
       if (!id) {
@@ -110,41 +105,35 @@ export default function TrackingResultPage() {
     }
   };
 
-  const form = useForm<PaymentFormValues>({
-    resolver: zodResolver(paymentSchema),
-    defaultValues: { utr: "" },
-  });
-
-  const onPaymentSubmit = async (values: PaymentFormValues) => {
-      if (!shipmentDetails) return;
-      setIsSubmittingPayment(true);
-      try {
-          const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payments`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                  shipment_id_str: shipmentDetails.shipment_id_str,
-                  utr: values.utr,
-                  amount: shipmentDetails.total_with_tax_18_percent,
-              })
-          });
-          const result = await response.json();
-          if (response.ok) {
-              toast({ title: "Success", description: result.message });
-              // Refetch shipment details to get the new payment_status
-              fetchShipmentDetails(shipmentDetails.shipment_id_str);
-          } else {
-              toast({ title: "Error", description: result.error || "Failed to submit payment.", variant: "destructive" });
-          }
-      } catch (err) {
-          toast({ title: "Network Error", description: "Could not connect to server.", variant: "destructive" });
-      } finally {
-          setIsSubmittingPayment(false);
+  const handlePayNow = async () => {
+    if (!shipmentDetails || !session) return;
+    setIsInitiatingPayment(true);
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/payment/initiate`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_email: session.email,
+          amount: shipmentDetails.total_with_tax_18_percent,
+          name: `${session.firstName} ${session.lastName}`,
+          phone: '9999999999',
+          shipment_id_str: shipmentDetails.shipment_id_str,
+        }),
+      });
+      const result = await res.json();
+      if (!res.ok) {
+        toast({ title: "Payment Error", description: result.error, variant: "destructive" });
+        setIsInitiatingPayment(false);
+        return;
       }
-  }
+      setCcParams(result);
+    } catch {
+      toast({ title: "Network Error", description: "Could not initiate payment.", variant: "destructive" });
+      setIsInitiatingPayment(false);
+    }
+  };
 
-  const showPaymentForm = shipmentDetails?.status === 'Pending Payment' && !shipmentDetails.payment_status;
-  const showPaymentPendingReview = shipmentDetails?.status === 'Pending Payment' && shipmentDetails.payment_status === 'Pending';
+  const showPaymentForm = shipmentDetails?.status === 'Pending Payment';
 
 
   return (
@@ -178,65 +167,36 @@ export default function TrackingResultPage() {
             </Card>
         )}
 
+        {/* Hidden CCAvenue auto-submit form */}
+        {ccParams && (
+          <form ref={formRef} method="POST" action={ccParams.payment_url} style={{ display: 'none' }}>
+            <input type="hidden" name="encRequest"  value={ccParams.enc_request} />
+            <input type="hidden" name="access_code" value={ccParams.access_code} />
+          </form>
+        )}
+
         {showPaymentForm && (
             <Card>
                 <CardHeader>
                     <CardTitle>Complete Your Payment</CardTitle>
-                    <CardDescription>Your booking is confirmed. Please complete the payment of <span className="font-bold text-primary">₹{shipmentDetails.total_with_tax_18_percent.toFixed(2)}</span> to proceed.</CardDescription>
+                    <CardDescription>
+                        Your booking is confirmed. Please complete the payment of{' '}
+                        <span className="font-bold text-primary">₹{shipmentDetails!.total_with_tax_18_percent.toFixed(2)}</span>{' '}
+                        to proceed.
+                    </CardDescription>
                 </CardHeader>
-                <CardContent>
-                   <Tabs defaultValue="upi" className="w-full">
-                      <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="upi"><QrCode className="mr-2 h-4 w-4"/>UPI / QR Code</TabsTrigger>
-                        <TabsTrigger value="bank" disabled><Landmark className="mr-2 h-4 w-4"/>Bank Transfer</TabsTrigger>
-                        <TabsTrigger value="card" disabled><CreditCard className="mr-2 h-4 w-4"/>Card</TabsTrigger>
-                      </TabsList>
-                      <TabsContent value="upi" className="mt-4">
-                        <div className="grid md:grid-cols-2 gap-6 items-center">
-                            <div className="flex flex-col items-center justify-center">
-                                <p className="font-semibold mb-2">Scan to Pay</p>
-                                <Image src="/images/logo/qr_code.png" alt="UPI QR Code" width={200} height={200} data-ai-hint="QR code" />
-                                <p className="text-sm text-muted-foreground mt-2 text-center">Scan with any UPI app like Google Pay, PhonePe, or Paytm.</p>
-                            </div>
-                            <div className="space-y-4">
-                                <p className="text-sm text-muted-foreground">After completing the payment, please enter the 12-digit UTR/Transaction ID below to confirm your shipment.</p>
-                                 <Form {...form}>
-                                    <form onSubmit={form.handleSubmit(onPaymentSubmit)} className="space-y-4">
-                                        <FormField
-                                            control={form.control}
-                                            name="utr"
-                                            render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>12-Digit UTR Number</FormLabel>
-                                                <FormControl>
-                                                <Input placeholder="Enter UTR here" {...field} />
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                            )}
-                                        />
-                                        <Button type="submit" className="w-full" disabled={isSubmittingPayment}>
-                                            {isSubmittingPayment ? <Loader2 className="mr-2 h-4 w-4 animate-spin"/> : null}
-                                            Submit & Confirm Payment
-                                        </Button>
-                                    </form>
-                                </Form>
-                            </div>
-                        </div>
-                      </TabsContent>
-                      <TabsContent value="bank">Bank transfer details coming soon.</TabsContent>
-                      <TabsContent value="card">Card payment gateway coming soon.</TabsContent>
-                    </Tabs>
+                <CardContent className="flex flex-col items-center gap-4 py-6">
+                    <CreditCard className="h-12 w-12 text-primary" />
+                    <p className="text-muted-foreground text-sm text-center max-w-sm">
+                        You will be redirected to the secure Kotak payment gateway to complete your payment.
+                    </p>
+                    <Button size="lg" onClick={handlePayNow} disabled={isInitiatingPayment} className="w-full max-w-xs">
+                        {isInitiatingPayment
+                            ? <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Redirecting...</>
+                            : `Pay ₹${shipmentDetails!.total_with_tax_18_percent.toFixed(2)} via Kotak`
+                        }
+                    </Button>
                 </CardContent>
-            </Card>
-        )}
-
-        {showPaymentPendingReview && (
-             <Card>
-                <CardHeader className="text-center">
-                    <CardTitle>Payment Under Review</CardTitle>
-                    <CardDescription>Thank you for submitting your payment details. An administrator will verify it shortly, and your shipment status will be updated to 'Booked'.</CardDescription>
-                </CardHeader>
             </Card>
         )}
 
