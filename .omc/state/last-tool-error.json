@@ -1,0 +1,7 @@
+{
+  "tool_name": "Bash",
+  "tool_input_preview": "{\"command\":\"ls /home/dhir4j/Documents/Dhillon/LogistiX-Enhanced/src/app/(customer)/payments/\",\"description\":\"Check payments dir structure\"}",
+  "error": "Exit code 2\n/bin/bash: eval: line 1: syntax error near unexpected token `('\n/bin/bash: eval: line 1: `ls /home/dhir4j/Documents/Dhillon/LogistiX-Enhanced/src/app/(customer)/payments/'",
+  "timestamp": "2026-04-24T14:39:26.855Z",
+  "retry_count": 1
+}

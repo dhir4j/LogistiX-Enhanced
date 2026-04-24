@@ -1,6 +1,14 @@
+import os
+
 class Config:
-    # Hardcoded configuration variables
     SECRET_KEY = "thisisahighsecret"
+
+    # Kotak / CCAvenue credentials — set these in environment or .env
+    KOTAK_MERCHANT_ID = os.environ.get("KOTAK_MERCHANT_ID", "")
+    KOTAK_ACCESS_CODE = os.environ.get("KOTAK_ACCESS_CODE", "")
+    KOTAK_WORKING_KEY = os.environ.get("KOTAK_WORKING_KEY", "")
+    FRONTEND_URL      = os.environ.get("FRONTEND_URL", "https://www.hkspeedcouriers.com")
+    BACKEND_URL       = os.environ.get("BACKEND_URL", "https://www.server.hkspeedcouriers.com")
     DEBUG_MODE = True  # Corresponds to FLASK_DEBUG=1
 
     # Database connection details

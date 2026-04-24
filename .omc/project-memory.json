@@ -1,0 +1,295 @@
+{
+  "version": "1.0.0",
+  "lastScanned": 1777040577969,
+  "projectRoot": "/home/dhir4j/Documents/Dhillon/LogistiX-Enhanced",
+  "techStack": {
+    "languages": [
+      {
+        "name": "JavaScript/TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "package.json"
+        ]
+      },
+      {
+        "name": "TypeScript",
+        "version": null,
+        "confidence": "high",
+        "markers": [
+          "tsconfig.json"
+        ]
+      }
+    ],
+    "frameworks": [
+      {
+        "name": "next",
+        "version": "15.3.4",
+        "category": "fullstack"
+      },
+      {
+        "name": "react",
+        "version": "18.3.1",
+        "category": "frontend"
+      },
+      {
+        "name": "react-dom",
+        "version": "18.3.1",
+        "category": "frontend"
+      }
+    ],
+    "packageManager": "npm",
+    "runtime": null
+  },
+  "build": {
+    "buildCommand": "npm run build",
+    "testCommand": null,
+    "lintCommand": "npm run lint",
+    "devCommand": "npm run dev",
+    "scripts": {
+      "dev": "next dev --turbopack -p 9002",
+      "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
+      "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
+      "build": "next build",
+      "start": "next start",
+      "lint": "next lint",
+      "typecheck": "tsc --noEmit"
+    }
+  },
+  "conventions": {
+    "namingStyle": null,
+    "importStyle": null,
+    "testPattern": null,
+    "fileOrganization": "type-based"
+  },
+  "structure": {
+    "isMonorepo": false,
+    "workspaces": [],
+    "mainDirectories": [
+      "docs",
+      "public",
+      "src"
+    ],
+    "gitBranches": {
+      "defaultBranch": "master",
+      "branchingStrategy": null
+    }
+  },
+  "customNotes": [],
+  "directoryMap": {
+    "Flask_Project": {
+      "path": "Flask_Project",
+      "purpose": null,
+      "fileCount": 5,
+      "lastAccessed": 1777040577945,
+      "keyFiles": [
+        "add_admin.py",
+        "config.py",
+        "create_tables.py",
+        "requirements.txt",
+        "run.py"
+      ]
+    },
+    "docs": {
+      "path": "docs",
+      "purpose": "Documentation",
+      "fileCount": 2,
+      "lastAccessed": 1777040577946,
+      "keyFiles": [
+        "api_documentation.md",
+        "blueprint.md"
+      ]
+    },
+    "public": {
+      "path": "public",
+      "purpose": "Public files",
+      "fileCount": 0,
+      "lastAccessed": 1777040577956,
+      "keyFiles": []
+    },
+    "src": {
+      "path": "src",
+      "purpose": "Source code",
+      "fileCount": 0,
+      "lastAccessed": 1777040577957,
+      "keyFiles": []
+    },
+    "Flask_Project/Data": {
+      "path": "Flask_Project/Data",
+      "purpose": "Data files",
+      "fileCount": 3,
+      "lastAccessed": 1777040577959,
+      "keyFiles": [
+        "dom_prices.json",
+        "domestic.json",
+        "pricing.json"
+      ]
+    },
+    "Flask_Project/app": {
+      "path": "Flask_Project/app",
+      "purpose": "Application code",
+      "fileCount": 5,
+      "lastAccessed": 1777040577962,
+      "keyFiles": [
+        "__init__.py",
+        "extensions.py",
+        "models.py"
+      ]
+    },
+    "Flask_Project/data": {
+      "path": "Flask_Project/data",
+      "purpose": "Data files",
+      "fileCount": 1,
+      "lastAccessed": 1777040577962,
+      "keyFiles": [
+        "pricing.json"
+      ]
+    },
+    "Flask_Project/docs": {
+      "path": "Flask_Project/docs",
+      "purpose": "Documentation",
+      "fileCount": 1,
+      "lastAccessed": 1777040577963,
+      "keyFiles": [
+        "api_documentation.md"
+      ]
+    },
+    "src/app": {
+      "path": "src/app",
+      "purpose": "Application code",
+      "fileCount": 4,
+      "lastAccessed": 1777040577964,
+      "keyFiles": [
+        "favicon.ico",
+        "globals.css",
+        "layout.tsx"
+      ]
+    },
+    "src/components": {
+      "path": "src/components",
+      "purpose": "UI components",
+      "fileCount": 5,
+      "lastAccessed": 1777040577964,
+      "keyFiles": [
+        "awb-sheet.tsx",
+        "footer.tsx",
+        "header.tsx"
+      ]
+    },
+    "src/lib": {
+      "path": "src/lib",
+      "purpose": "Library code",
+      "fileCount": 2,
+      "lastAccessed": 1777040577965,
+      "keyFiles": [
+        "schemas.ts",
+        "utils.ts"
+      ]
+    }
+  },
+  "hotPaths": [
+    {
+      "path": "Flask_Project/app/__init__.py",
+      "accessCount": 3,
+      "lastAccessed": 1777041918414,
+      "type": "file"
+    },
+    {
+      "path": "hk_KOTAK_API_DOCUMENTATION",
+      "accessCount": 2,
+      "lastAccessed": 1777041288533,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/requirements.txt",
+      "accessCount": 2,
+      "lastAccessed": 1777041805320,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/app/models.py",
+      "accessCount": 2,
+      "lastAccessed": 1777041815285,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/config.py",
+      "accessCount": 2,
+      "lastAccessed": 1777041942961,
+      "type": "file"
+    },
+    {
+      "path": "src/app/(customer)/payments/page.tsx",
+      "accessCount": 2,
+      "lastAccessed": 1777042001324,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/run.py",
+      "accessCount": 2,
+      "lastAccessed": 1777042155130,
+      "type": "file"
+    },
+    {
+      "path": "src/app/(customer)/booking/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1777041316598,
+      "type": "file"
+    },
+    {
+      "path": "src/hooks/use-session.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1777041595126,
+      "type": "file"
+    },
+    {
+      "path": "src/app/(customer)/dashboard/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1777041632838,
+      "type": "file"
+    },
+    {
+      "path": "src/lib/ccavenue.ts",
+      "accessCount": 1,
+      "lastAccessed": 1777041664839,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/app/shipments/routes.py",
+      "accessCount": 1,
+      "lastAccessed": 1777041742299,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/app/payment/routes.py",
+      "accessCount": 1,
+      "lastAccessed": 1777041875212,
+      "type": "file"
+    },
+    {
+      "path": "src/app/payment/response/page.tsx",
+      "accessCount": 1,
+      "lastAccessed": 1777042031253,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/.env",
+      "accessCount": 1,
+      "lastAccessed": 1777042056662,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/create_tables.py",
+      "accessCount": 1,
+      "lastAccessed": 1777042174382,
+      "type": "file"
+    },
+    {
+      "path": "Flask_Project/add_wallet_table.py",
+      "accessCount": 1,
+      "lastAccessed": 1777042183064,
+      "type": "file"
+    }
+  ],
+  "userDirectives": []
+}

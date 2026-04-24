@@ -5,3 +5,4 @@ python-dotenv
 Flask-Cors
 marshmallow
 werkzeug
+pycryptodome

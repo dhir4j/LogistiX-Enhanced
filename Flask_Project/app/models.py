@@ -88,6 +88,22 @@ class BalanceCode(db.Model):
 
     redeemed_by = db.relationship('User', backref='redeemed_codes', lazy=True)
 
+class WalletTransaction(db.Model):
+    __tablename__ = 'wallet_transactions'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id', ondelete='CASCADE'), nullable=False)
+    order_id = db.Column(db.String(64), unique=True, nullable=False, index=True)
+    ccavenue_reference_no = db.Column(db.String(64), nullable=True)
+    amount = db.Column(db.Numeric(10, 2), nullable=False)
+    status = db.Column(db.String(30), default='Pending')  # Pending, Success, Failed
+    payment_mode = db.Column(db.String(50), nullable=True)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+    user = db.relationship('User', backref='wallet_transactions')
+
+
 class SavedAddress(db.Model):
     __tablename__ = 'saved_addresses'
     id = db.Column(db.Integer, primary_key=True)
