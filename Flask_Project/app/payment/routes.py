@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from decimal import Decimal
 from dotenv import load_dotenv
+
 from flask import Blueprint, request, jsonify, redirect
 from Crypto.Cipher import AES
 from Crypto.Util.Padding import pad, unpad
@@ -17,6 +18,7 @@ _ENV_PATH = os.path.join(os.path.dirname(__file__), '..', '..', '.env')
 payment_bp = Blueprint("payment", __name__, url_prefix="/api/payment")
 
 CCAVENUE_URL = "https://secure.ccavenue.com/transaction/transaction.do?command=initiateTransaction"
+
 
 def _creds():
     load_dotenv(_ENV_PATH, override=False)
@@ -93,19 +95,11 @@ def get_balance():
 
 @payment_bp.route("/initiate", methods=["POST"])
 def initiate_payment():
-    """
-    Accepts:
-      - user_email (required)
-      - amount     (required)
-      - name       (optional)
-      - phone      (optional)
-      - shipment_id_str (optional) — if present, payment is for a shipment
-    """
-    data           = request.get_json(force=True)
-    user_email     = data.get("user_email", "").strip()
-    amount         = data.get("amount")
-    name           = data.get("name", "Customer").strip()
-    phone          = data.get("phone", "9999999999").strip()
+    data            = request.get_json(force=True)
+    user_email      = data.get("user_email", "").strip()
+    amount          = data.get("amount")
+    name            = data.get("name", "Customer").strip()
+    phone           = data.get("phone", "9999999999").strip()
     shipment_id_str = data.get("shipment_id_str", "").strip()
 
     if not user_email or not amount:
@@ -122,62 +116,63 @@ def initiate_payment():
     if not user:
         return jsonify({"error": "User not found"}), 404
 
-    c = _creds()
-    order_id = f"LGX-{uuid.uuid4().hex[:12].upper()}"
+    c        = _creds()
+    order_id = "LGX-" + uuid.uuid4().hex[:12].upper()
 
     txn = WalletTransaction(
         user_id=user.id,
         order_id=order_id,
         amount=amount_decimal,
         status="Pending",
-        payment_mode=f"shipment:{shipment_id_str}" if shipment_id_str else None,
+        payment_mode=("shipment:" + shipment_id_str) if shipment_id_str else None,
     )
     db.session.add(txn)
     db.session.commit()
 
-    redirect_url = f"{c['backend_url']}/api/payment/response"
+    redirect_url = c["backend_url"] + "/api/payment/response"
     cancel_url   = (
-        f"{c['frontend_url']}/track/{shipment_id_str}"
+        c["frontend_url"] + "/track/" + shipment_id_str
         if shipment_id_str else
-        f"{c['frontend_url']}/payments"
+        c["frontend_url"] + "/payments"
     )
 
     params = (
-        f"merchant_id={c['merchant_id']}"
-        f"&order_id={order_id}"
-        f"&currency=INR"
-        f"&amount={amount_decimal}"
-        f"&redirect_url={redirect_url}"
-        f"&cancel_url={cancel_url}"
-        f"&language=EN"
-        f"&billing_name={name}"
-        f"&billing_email={user_email}"
-        f"&billing_tel={phone}"
-        f"&merchant_param1={user_email}"
-        f"&merchant_param2={shipment_id_str}"
+        "merchant_id=" + c["merchant_id"] +
+        "&order_id=" + order_id +
+        "&currency=INR" +
+        "&amount=" + str(amount_decimal) +
+        "&redirect_url=" + redirect_url +
+        "&cancel_url=" + cancel_url +
+        "&language=EN" +
+        "&billing_name=" + name +
+        "&billing_email=" + user_email +
+        "&billing_tel=" + phone +
+        "&merchant_param1=" + user_email +
+        "&merchant_param2=" + shipment_id_str
     )
 
-    enc_request = _encrypt(params, c['working_key'])
+    enc_request = _encrypt(params, c["working_key"])
 
     return jsonify({
         "enc_request": enc_request,
-        "access_code": c['access_code'],
+        "access_code": c["access_code"],
         "payment_url": CCAVENUE_URL,
     }), 200
 
 
 @payment_bp.route("/response", methods=["POST"])
 def payment_response():
+    c        = _creds()
     enc_resp = request.form.get("encResp", "")
-    if not enc_resp:
-        return redirect(f"{c['frontend_url']/payment/response?status=failure&reason=no_response")
 
-    c = _creds()
+    if not enc_resp:
+        return redirect(c["frontend_url"] + "/payment/response?status=failure&reason=no_response")
+
     try:
-        decrypted = _decrypt(enc_resp, c['working_key'])
+        decrypted = _decrypt(enc_resp, c["working_key"])
         params    = _parse_kv(decrypted)
     except Exception:
-        return redirect(f"{c['frontend_url']}/payment/response?status=failure&reason=decrypt_error")
+        return redirect(c["frontend_url"] + "/payment/response?status=failure&reason=decrypt_error")
 
     order_id        = params.get("order_id", "")
     order_status    = params.get("order_status", "")
@@ -187,7 +182,7 @@ def payment_response():
 
     txn = WalletTransaction.query.filter_by(order_id=order_id).first()
     if not txn:
-        return redirect(f"{c['frontend_url']/payment/response?status=failure&reason=order_not_found")
+        return redirect(c["frontend_url"] + "/payment/response?status=failure&reason=order_not_found")
 
     txn.ccavenue_reference_no = reference_no
     txn.updated_at            = datetime.utcnow()
@@ -197,7 +192,6 @@ def payment_response():
         txn.payment_mode = payment_mode
 
         if shipment_id_str:
-            # Update the linked shipment status to Booked
             shipment = Shipment.query.filter_by(shipment_id_str=shipment_id_str).first()
             if shipment and shipment.status == "Pending Payment":
                 shipment.status = "Booked"
@@ -208,19 +202,15 @@ def payment_response():
                     "activity": "Payment confirmed via Kotak gateway. Shipment booked."
                 }]
             db.session.commit()
-            return redirect(
-                f"{c['frontend_url']/track/{shipment_id_str}"
-                f"?payment=success"
-            )
+            return redirect(c["frontend_url"] + "/track/" + shipment_id_str + "?payment=success")
         else:
-            # Wallet top-up
             user = User.query.get(txn.user_id)
             if user:
                 user.balance += txn.amount
             db.session.commit()
             return redirect(
-                f"{c['frontend_url']/payment/response"
-                f"?status=success&amount={float(txn.amount)}&order_id={order_id}"
+                c["frontend_url"] + "/payment/response?status=success&amount=" +
+                str(float(txn.amount)) + "&order_id=" + order_id
             )
     else:
         txn.status       = "Failed"
@@ -228,11 +218,5 @@ def payment_response():
         db.session.commit()
 
         if shipment_id_str:
-            return redirect(
-                f"{c['frontend_url']/track/{shipment_id_str}"
-                f"?payment=failure&reason={order_status}"
-            )
-        return redirect(
-            f"{c['frontend_url']/payment/response"
-            f"?status=failure&reason={order_status}&order_id={order_id}"
-        )
+            return redirect(c["frontend_url"] + "/track/" + shipment_id_str + "?payment=failure&reason=" + order_status)
+        return redirect(c["frontend_url"] + "/payment/response?status=failure&reason=" + order_status + "&order_id=" + order_id)
